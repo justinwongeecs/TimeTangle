@@ -158,7 +158,6 @@ extension AddFriendVC: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedUser = friendSearchResults[indexPath.section]
-        
         delegate.selectedUserToAddFriend(for: selectedUser)
     }
 }

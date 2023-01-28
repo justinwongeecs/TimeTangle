@@ -9,7 +9,7 @@ import UIKit
 import FirebaseFirestore
 
 protocol FriendRequestCellDelegate: AnyObject {
-    func presentFriendRequestActionButtonError(with error: TTError)
+    func clickedFriendRequestActionButton(result: Result<Void, TTError>)
 }
 
 class FriendRequestCell: UITableViewCell {
@@ -45,10 +45,11 @@ class FriendRequestCell: UITableViewCell {
     }
     
     func set(for friendRequest: TTFriendRequest) {
+        print("Set friendRequest: \(friendRequest)")
         self.friendRequest = friendRequest
         
         friendRequestTypeLabel.text = friendRequest.requestType.description
-        
+         
         switch friendRequest.requestType {
         case .outgoing:
             usernameLabel.text = friendRequest.recipientUsername
@@ -143,17 +144,24 @@ class FriendRequestCell: UITableViewCell {
             TTConstants.friends: FieldValue.arrayUnion([friendRequest.senderUsername]),
             TTConstants.friendRequests: FieldValue.arrayRemove([friendRequest.dictionary])
         ]
+        
+        var senderFriendRequestDict = friendRequest
+        senderFriendRequestDict.requestType = .outgoing
+        print(senderFriendRequestDict)
+        
         let newSenderData = [
             TTConstants.friends: FieldValue.arrayUnion([friendRequest.recipientUsername]),
-            TTConstants.friendRequests: FieldValue.arrayRemove([friendRequest.dictionary])
+            TTConstants.friendRequests: FieldValue.arrayRemove([senderFriendRequestDict.dictionary])
         ]
         
         //update friendRequests and friends field for both sender and recipient
         for (username, newData) in [(friendRequest.recipientUsername, newRecipientData), (friendRequest.senderUsername, newSenderData)] {
             FirebaseManager.shared.updateUserData(for: username, with: newData) { [weak self] error in
-                guard let error = error else { return }
+                guard let error = error else {  self?.delegate.clickedFriendRequestActionButton(result: .success(()))
+                    return
+                }
                 //present error
-                self?.delegate.presentFriendRequestActionButtonError(with: error)
+                self?.delegate.clickedFriendRequestActionButton(result: .failure(error))
             }
         }
     }
@@ -169,8 +177,11 @@ class FriendRequestCell: UITableViewCell {
         //update friendRequests field for both sender and recipient
         for username in [friendRequest.senderUsername, friendRequest.recipientUsername] {
             FirebaseManager.shared.updateUserData(for: username, with: newRecipientData) { [weak self] error in
-                guard let error = error else { return }
-                self?.delegate.presentFriendRequestActionButtonError(with: error)
+                guard let error = error else {
+                    self?.delegate.clickedFriendRequestActionButton(result: .success(()))
+                    return
+                }
+                self?.delegate.clickedFriendRequestActionButton(result: .failure(error))
             }
         }
     }

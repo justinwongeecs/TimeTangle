@@ -19,16 +19,16 @@ enum FriendsVCSegmentedState {
 class FriendsAndRequestsVC: UIViewController {
     
     var friends: [String] = []
+    //filteredFriends is what's being visibily shown
     var filteredFriends: [String] = []
     var friendRequests: [TTFriendRequest] = []
     
     let friendsSC = UISegmentedControl(items: ["My Friends", "Friend Requests"])
-    let friendsTable = UITableView()
-    let friendRequestsTable = UITableView()
+    let table = UITableView()
     
     var friendsVCSegementedState: FriendsVCSegmentedState = .myFriends {
         didSet {
-            displayCorrectViewInFront()
+            reloadTable()
         }
     }
     
@@ -40,7 +40,6 @@ class FriendsAndRequestsVC: UIViewController {
         configureBackgroundView()
         configureFriendsSC()
         configureFriendsTable()
-        configureFriendRequestsTable()
         NotificationCenter.default.addObserver(self, selector: #selector(fetchUpdatedUser(_:)), name: .updatedUser, object: nil)
     }
     
@@ -54,9 +53,7 @@ class FriendsAndRequestsVC: UIViewController {
             self.friendRequests = friendRequests
             self.friends = friends
             self.filteredFriends = friends
-            self.friendsTable.reloadData()
-            self.friendRequestsTable.reloadData()
-            self.displayCorrectViewInFront()
+            self.reloadTable()
         }
     }
     
@@ -68,8 +65,7 @@ class FriendsAndRequestsVC: UIViewController {
             filteredFriends = friends.filter({ $0.contains(searchWord) })
         }
         DispatchQueue.main.async {
-           
-            self.friendsTable.reloadData()
+            self.reloadTable()
         }
     }
     
@@ -105,36 +101,20 @@ class FriendsAndRequestsVC: UIViewController {
     }
     
     private func configureFriendsTable() {
-        view.addSubview(friendsTable)
-        friendsTable.translatesAutoresizingMaskIntoConstraints = false
-        friendsTable.separatorStyle = .none
-        friendsTable.delegate = self
-        friendsTable.dataSource = self
+        view.addSubview(table)
+        table.translatesAutoresizingMaskIntoConstraints = false
+        table.separatorStyle = .none
+        table.delegate = self
+        table.dataSource = self
         
-        friendsTable.register(ProfileUsernameCell.self, forCellReuseIdentifier: ProfileUsernameCell.reuseID)
-        
-        NSLayoutConstraint.activate([
-            friendsTable.topAnchor.constraint(equalTo: friendsSC.bottomAnchor, constant: 10),
-            friendsTable.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: tableViewsPadding),
-            friendsTable.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -tableViewsPadding),
-            friendsTable.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
-    }
-    
-    private func configureFriendRequestsTable() {
-        view.addSubview(friendRequestsTable)
-        friendRequestsTable.translatesAutoresizingMaskIntoConstraints = false
-        friendRequestsTable.separatorStyle = .none
-        friendRequestsTable.delegate = self
-        friendRequestsTable.dataSource = self
-        
-        friendRequestsTable.register(FriendRequestCell.self, forCellReuseIdentifier: FriendRequestCell.reuseID)
+        table.register(ProfileUsernameCell.self, forCellReuseIdentifier: ProfileUsernameCell.reuseID)
+        table.register(FriendRequestCell.self, forCellReuseIdentifier: FriendRequestCell.reuseID)
         
         NSLayoutConstraint.activate([
-            friendRequestsTable.topAnchor.constraint(equalTo: friendsSC.bottomAnchor, constant: 10),
-            friendRequestsTable.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: tableViewsPadding),
-            friendRequestsTable.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -tableViewsPadding),
-            friendRequestsTable.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            table.topAnchor.constraint(equalTo: friendsSC.bottomAnchor, constant: 10),
+            table.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: tableViewsPadding),
+            table.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -tableViewsPadding),
+            table.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
     
@@ -147,40 +127,28 @@ class FriendsAndRequestsVC: UIViewController {
         }
     }
     
-    private func displayCorrectViewInFront() {
-        //present the correct table view in front
-        switch friendsVCSegementedState {
-        case .myFriends:
-            removeEmptyStateView(in: view)
-            if friends.isEmpty {
-                showEmptyStateView(with: "No Friends :(", in: view, viewsPresentInFront: [friendsSC])
-                friendsTable.isHidden = true
-                friendRequestsTable.isHidden = true
-            } else {
-                friendsTable.isHidden = false
-                friendRequestsTable.isHidden = true
-            }
-        case .friendRequests:
-            removeEmptyStateView(in: view)
-            if friendRequests.isEmpty {
-                showEmptyStateView(with: "No Friend Requests", in: view, viewsPresentInFront: [friendsSC])
-                friendsTable.isHidden = true
-                friendRequestsTable.isHidden = true
-            } else {
-                friendRequestsTable.isHidden = false
-                friendsTable.isHidden = true 
-            }
-        }
+    @objc private func fetchUpdatedUser(_ notification: Notification) {
+        guard let fetchedUser = notification.object as? TTUser else { return }
+        friends = fetchedUser.friends 
+        filteredFriends = fetchedUser.friends
+        friendRequests = fetchedUser.friendRequests
+        reloadTable()
     }
     
-    @objc private func fetchUpdatedUser(_ notification: Notification) {
+    private func reloadTable() {
+        removeEmptyStateView(in: view)
+        switch friendsVCSegementedState {
+        case .myFriends:
+            if friends.isEmpty {
+                showEmptyStateView(with: "No Friends :(", in: view, viewsPresentInFront: [friendsSC])
+            }
+        case .friendRequests:
+            if friendRequests.isEmpty {
+                showEmptyStateView(with: "No Friend Requests", in: view, viewsPresentInFront: [friendsSC])
+            }
+        }
         DispatchQueue.main.async {
-            guard let fetchedUser = notification.object as? TTUser else { return }
-            self.friends = fetchedUser.friends
-            self.friendRequests = fetchedUser.friendRequests
-            self.friendsTable.reloadData()
-            self.friendRequestsTable.reloadData()
-            self.displayCorrectViewInFront()
+            self.table.reloadData()
         }
     }
 }
@@ -194,8 +162,9 @@ extension FriendsAndRequestsVC: UITableViewDelegate, UITableViewDataSource {
     
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard tableView == friendRequestsTable else {
-            let myFriendCell = friendsTable.dequeueReusableCell(withIdentifier: ProfileUsernameCell.reuseID) as! ProfileUsernameCell
+        
+        if friendsVCSegementedState == .myFriends  {
+            let myFriendCell = table.dequeueReusableCell(withIdentifier: ProfileUsernameCell.reuseID) as! ProfileUsernameCell
 
             FirebaseManager.shared.fetchUserDocumentData(with: filteredFriends[indexPath.section]) { result in
                 switch result {
@@ -208,7 +177,7 @@ extension FriendsAndRequestsVC: UITableViewDelegate, UITableViewDataSource {
             return myFriendCell
         }
         
-        let myFriendRequestCell = friendRequestsTable.dequeueReusableCell(withIdentifier: FriendRequestCell.reuseID) as! FriendRequestCell
+        let myFriendRequestCell = table.dequeueReusableCell(withIdentifier: FriendRequestCell.reuseID) as! FriendRequestCell
         let friendRequest = friendRequests[indexPath.row]
         myFriendRequestCell.set(for: friendRequest)
         myFriendRequestCell.delegate = self
@@ -220,12 +189,11 @@ extension FriendsAndRequestsVC: UITableViewDelegate, UITableViewDataSource {
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        if tableView == friendsTable {
+        if friendsVCSegementedState == .myFriends {
             return filteredFriends.count
-        } else if tableView == friendRequestsTable {
+        } else {
             return friendRequests.count
         }
-        return 0
     }
     
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
@@ -235,6 +203,7 @@ extension FriendsAndRequestsVC: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
+//MARK: - AddFriendVCDelegate
 extension FriendsAndRequestsVC: AddFriendVCDelegate {
     
     func selectedUserToAddFriend(for user: TTUser) {
@@ -277,12 +246,23 @@ extension FriendsAndRequestsVC: AddFriendVCDelegate {
             
             self?.presentTTAlert(title: "Update User Error", message: error.rawValue, buttonTitle: "Ok")
         }
+        
+        dismiss(animated: true)
     }
 }
 
+//MARK: - FriendRequestCellDelegate
 extension FriendsAndRequestsVC: FriendRequestCellDelegate {
-    func presentFriendRequestActionButtonError(with error: TTError) {
-        self.presentTTAlert(title: "Friend Request Action Error", message: error.rawValue, buttonTitle: "Ok")
+    func clickedFriendRequestActionButton(result: Result<Void, TTError>) {
+        switch result {
+        case .success(_):
+            print("Friends count: \(friends.count)")
+            DispatchQueue.main.async {
+                self.reloadTable()
+            }
+        case .failure(let error):
+            self.presentTTAlert(title: "Friend Request Action Error", message: error.rawValue, buttonTitle: "Ok")
+        }
     }
 }
 

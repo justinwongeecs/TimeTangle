@@ -57,13 +57,12 @@ class SearchFriendsResultController: UIViewController {
     }
     
     func getSuggestedSearches(withMaxCount maxCount: Int) {
-        guard let friendsWithoutCurrentUser = FirebaseManager.shared.currentUser?.friends.filter({ $0 != FirebaseManager.shared.currentUser?.username ?? ""}), friendsWithoutCurrentUser.count > 0 else { return }
-        
         guard let searchVCRef = searchVCRef as? SearchVC else { return }
+        guard let currentUserFriends = FirebaseManager.shared.currentUser?.friends else { return }
         
         //filter out users in usersQueueForRoomCreation (all ready added to queue)
-        let fullyFilteredFriends = friendsWithoutCurrentUser.filter({ !searchVCRef.usersQueueForRoomCreation.map{$0.username}.contains($0) })
-        
+        let fullyFilteredFriends = currentUserFriends.filter({ !searchVCRef.usersQueueForRoomCreation.map{$0.username}.contains($0) })
+
         self.removeEmptyStateView(in: self.view)
         if fullyFilteredFriends.count == 0 {
             //Display empty state view

@@ -83,6 +83,15 @@ extension UIViewController {
         }
         return nil 
     }
+    
+    //Hide Keyboard
+    func hideKeyboardWhenTappedOutside() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(hideKeyboard))
+        view.addGestureRecognizer(tapGesture)
+    }
+    @objc private func hideKeyboard() {
+        view.endEditing(true)
+    }
 }
 
 //MARK: - Extension

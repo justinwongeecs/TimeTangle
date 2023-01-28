@@ -20,6 +20,7 @@ class CreateAccountVC: UIViewController {
         super.viewDidLoad()
         configureViewController()
         configureNotificationsForKeyboardHandling()
+        hideKeyboardWhenTappedOutside()
     }
     
     private func configureViewController() {

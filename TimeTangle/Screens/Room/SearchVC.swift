@@ -224,6 +224,11 @@ extension SearchVC: UISearchBarDelegate {
         searchController.dismiss(animated: true, completion: nil)
         searchBar.text = ""
     }
+    
+    func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
+        setToSuggestedSearches()
+        return true
+    }
 }
 
 extension SearchVC: UISearchControllerDelegate {
