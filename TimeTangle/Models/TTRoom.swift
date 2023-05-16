@@ -10,13 +10,22 @@ import Foundation
 typealias TTRoomEditType = TTRoomEdit.TTRoomEditType
 typealias TTRoomEditDifference = TTRoomEdit.TTRoomEditDifference
 
-struct TTRoom: Codable {
+struct TTRoom: Codable, Equatable {
     var name: String
     var users: [String]
     var code: String //A 5 letter Code
     var startingDate: Date
     var endingDate: Date
     var histories: [TTRoomEdit]
+    var events: [TTEvent]
+    
+    static func == (lhs: TTRoom, rhs: TTRoom) -> Bool {
+        return lhs.users == rhs.users &&
+        lhs.code == rhs.code &&
+        lhs.startingDate == rhs.startingDate &&
+        lhs.endingDate == rhs.endingDate &&
+        lhs.events == rhs.events
+    }
 }
 
 struct TTRoomEdit: Codable {

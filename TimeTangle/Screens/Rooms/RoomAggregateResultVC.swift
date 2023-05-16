@@ -17,7 +17,9 @@ class RoomAggregateResultVC: DayViewController {
     
     private var room: TTRoom?
     private var allUsersEvents = [TTEvent]()
+    private var openIntervals = [DateInterval]()
     private var usersNotVisible = [String]()
+//    private var openIntervalIndex = 1
     
     weak var roomAggregateResultDelegate: RoomAggregateResultVCDelegate?
     
@@ -35,16 +37,15 @@ class RoomAggregateResultVC: DayViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         move(to: room?.startingDate ?? Date())
-        fetchAllUsersEvents()
+//        fetchAllUsersEvents()
         dayView.autoScrollToFirstEvent = true
     }
     
+    
     func setView(usersNotVisible: [String], room: TTRoom) {
-        print("set view: \(usersNotVisible)")
         self.usersNotVisible = usersNotVisible
         self.room = room
-        fetchAllUsersEvents()
-//        dayView.autoScrollToFirstEvent = true
+//        fetchAllUsersEvents()
     }
     
     private func configureTimelinePagerView() {
@@ -58,29 +59,30 @@ class RoomAggregateResultVC: DayViewController {
     
     //MARK: - Event Data Source
     
-    private func fetchAllUsersEvents() {
-        guard let roomUsers = room?.users else { return }
-        //fetch user's events
-        FirebaseManager.shared.fetchMultipleUsersDocumentData(with: roomUsers) { [weak self] result in
-            switch result {
-            case .success(let users):
-                //setting allUsersEvents to an empty array here fixes the bug where there are duplicate events interesting....
-                //maybe because of the success case so it's in sync?
-                self?.allUsersEvents = []
-                //FIXME: Is this the best place to have the filtering users logic? Because I want to minimize firebase fetch requests
-                let filteredVisibleUsers = users.filter { !(self?.usersNotVisible.contains($0.username) ?? true) }
-                print("usersNotVisible: \(self?.usersNotVisible) filteredVisibleUsers: \(filteredVisibleUsers.map{$0.username})")
-                filteredVisibleUsers.map{$0.events}.forEach{ self?.allUsersEvents.append(contentsOf: $0) }
-                self?.reloadData()
-            case .failure(let error):
-                self?.presentTTAlert(title: "Cannot fetch user", message: error.rawValue, buttonTitle: "Ok")
-            }
-        }
-
-    }
+//    private func fetchAllUsersEvents() {
+//        guard let roomUsers = room?.users else { return }
+//        //fetch user's events
+//        FirebaseManager.shared.fetchMultipleUsersDocumentData(with: roomUsers) { [weak self] result in
+//            switch result {
+//            case .success(let users):
+//                //setting allUsersEvents to an empty array here fixes the bug where there are duplicate events interesting....
+//                //maybe because of the success case so it's in sync?
+//                self?.allUsersEvents = []
+//                //FIXME: Is this the best place to have the filtering users logic? Because I want to minimize firebase fetch requests
+//                let filteredVisibleUsers = users.filter { !(self?.usersNotVisible.contains($0.username) ?? true) }
+//                print("usersNotVisible: \(self?.usersNotVisible) filteredVisibleUsers: \(filteredVisibleUsers.map{$0.username})")
+//                filteredVisibleUsers.map{$0.events}.forEach{ self?.allUsersEvents.append(contentsOf: $0) }
+//                self?.reloadData()
+//            case .failure(let error):
+//                self?.presentTTAlert(title: "Cannot fetch user", message: error.rawValue, buttonTitle: "Ok")
+//            }
+//        }
+//    }
     
     override func eventsForDate(_ date: Date) -> [EventDescriptor] {
+        print("event for date")
         var events = [Event]()
+        openIntervals = [DateInterval]()
         
         let fetchedUserEventsMatchingDate = allUsersEvents.filter({
             Calendar.current.isDate(date, equalTo: $0.startDate, toGranularity: .day)
@@ -124,12 +126,9 @@ class RoomAggregateResultVC: DayViewController {
     
     private func createEventsForOpenIntervals(with occupiedEvents: [TTEvent]) -> [Event]?{
         var openInternalEvents = [Event]()
-        var openIntervals = [DateInterval]()
         guard let room = room else { return nil }
         
         var startingComparisonDate = room.startingDate
-//        print("startingComparisonDate: \(startingComparisonDate)")
-//        print("occupiedEvents: \(occupiedEvents)")
         for occupiedEvent in occupiedEvents {
             //if startingComparisonDate equals the next occupied start date continue to find next starting date that does not conflict
             if startingComparisonDate == occupiedEvent.startDate {
@@ -137,8 +136,7 @@ class RoomAggregateResultVC: DayViewController {
                 startingComparisonDate = occupiedEvent.endDate
                 continue
             }
-//            print("StartingComparisonDate: \(startingComparisonDate)")
-//            print("occupiedEvent: \(occupiedEvent)")
+            
             if startingComparisonDate < occupiedEvent.startDate {
                 openIntervals.append(DateInterval(start: startingComparisonDate, end: occupiedEvent.startDate))
                 startingComparisonDate = occupiedEvent.endDate
@@ -149,15 +147,15 @@ class RoomAggregateResultVC: DayViewController {
         openIntervals.append(DateInterval(start: startingComparisonDate, end: room.endingDate))
         
         //create events based on openIntervals
-        for (index, openInterval) in openIntervals.enumerated() {
+        for openInterval in openIntervals {
             let newEvent = Event()
-            newEvent.text = "Open Interval \(index + 1)"
+            newEvent.text = "Open Interval \(openIntervals.firstIndex(of: openInterval))"
             newEvent.dateInterval = openInterval
             newEvent.color = .systemPurple
             newEvent.lineBreakMode = .byTruncatingTail
             openInternalEvents.append(newEvent)
+//            openIntervalIndex += 1
         }
-        
         return openInternalEvents
     }
     
@@ -176,4 +174,13 @@ class RoomAggregateResultVC: DayViewController {
         eventViewController.allowsEditing = false
         navigationController?.pushViewController(eventViewController, animated: true)
     }
+    
+//    public func moveToFirstOpenInterval() {
+//        print(openIntervals.count)
+//        DispatchQueue.main.async {
+//            if self.openIntervals.count > 0 {
+//                self.move(to: self.openIntervals[0].start)
+//            }
+//        }
+//    }
 }

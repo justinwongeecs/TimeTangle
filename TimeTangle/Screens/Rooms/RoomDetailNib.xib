@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21678"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="Stack View standard spacing" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
-        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="RoomInfoVC" customModule="TimeTangle" customModuleProvider="target">
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="RoomDetailVC" customModule="TimeTangle" customModuleProvider="target">
             <connections>
                 <outlet property="aggregateResultView" destination="98f-uZ-0jI" id="8mU-hV-Hpo"/>
                 <outlet property="endingDatePicker" destination="GOc-Fn-D6v" id="P3i-zT-H1i"/>
@@ -106,31 +106,17 @@
                     </constraints>
                 </stackView>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="98f-uZ-0jI">
-                    <rect key="frame" x="10" y="219.33333333333331" width="373" height="548.66666666666674"/>
+                    <rect key="frame" x="10" y="230" width="373" height="538"/>
                     <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                 </view>
-                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hIS-H1-0OR">
-                    <rect key="frame" x="100" y="748" width="193" height="50"/>
-                    <constraints>
-                        <constraint firstAttribute="height" constant="50" id="0zA-f5-fym"/>
-                    </constraints>
-                    <state key="normal" title="Button"/>
-                    <buttonConfiguration key="configuration" style="tinted" title="View In Detail" cornerStyle="large"/>
-                    <connections>
-                        <action selector="clickedOnViewResultButton:" destination="-1" eventType="touchUpInside" id="SxW-8d-s1i"/>
-                    </connections>
-                </button>
             </subviews>
             <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
             <color key="backgroundColor" systemColor="systemBackgroundColor"/>
             <constraints>
-                <constraint firstItem="hIS-H1-0OR" firstAttribute="bottom" secondItem="vUN-kp-3ea" secondAttribute="bottom" constant="-20" id="1el-9Z-jEb"/>
                 <constraint firstItem="vUN-kp-3ea" firstAttribute="trailing" secondItem="Vcs-8C-CIC" secondAttribute="trailing" constant="10" id="44z-s4-QGG"/>
-                <constraint firstItem="hIS-H1-0OR" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="100" id="EiA-Ac-kQV"/>
                 <constraint firstItem="vUN-kp-3ea" firstAttribute="trailing" secondItem="98f-uZ-0jI" secondAttribute="trailing" constant="10" id="IR9-K0-tV3"/>
-                <constraint firstItem="vUN-kp-3ea" firstAttribute="bottom" secondItem="98f-uZ-0jI" secondAttribute="bottom" constant="50" id="Myb-Ef-Ilz"/>
-                <constraint firstItem="98f-uZ-0jI" firstAttribute="top" secondItem="Vcs-8C-CIC" secondAttribute="bottom" constant="10" id="Uq1-ly-fCd"/>
-                <constraint firstItem="vUN-kp-3ea" firstAttribute="trailing" secondItem="hIS-H1-0OR" secondAttribute="trailing" constant="100" id="cIe-uH-bHh"/>
+                <constraint firstItem="98f-uZ-0jI" firstAttribute="top" secondItem="Vcs-8C-CIC" secondAttribute="bottom" constant="20.666666666666629" id="XQC-Nf-cBA"/>
+                <constraint firstItem="vUN-kp-3ea" firstAttribute="bottom" secondItem="98f-uZ-0jI" secondAttribute="bottom" constant="50" id="b2x-KU-B54"/>
                 <constraint firstItem="Vcs-8C-CIC" firstAttribute="top" secondItem="vUN-kp-3ea" secondAttribute="top" constant="10" id="cXM-hk-I4l"/>
                 <constraint firstItem="Vcs-8C-CIC" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="10" id="klv-lw-qp8"/>
                 <constraint firstItem="98f-uZ-0jI" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="10" id="tzf-wg-Gfg"/>

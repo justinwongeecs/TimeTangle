@@ -45,7 +45,6 @@ class FirebaseManager {
                         self?.currentUser = user
                         self?.goToSearchScreen()
                         self?.listenToCurrentUser()
-                        self?.ekManager.updateUserTTEvents()
                         self?.listenToCurrentUserRooms()
                     case .failure(_):
                         print("failure")
@@ -194,7 +193,6 @@ class FirebaseManager {
         guard let currentUserRoomCodes = currentUser?.roomCodes, currentUserRoomCodes.count > 0 else { return }
         
         currentUserRoomsListener = db.collection(TTConstants.roomsCollection).whereField(TTConstants.roomCode, in: currentUserRoomCodes).addSnapshotListener { [weak self] querySnapshot, error in
-            print("Got Update")
             guard let documents = querySnapshot?.documents else {
                 print("Error fetching doucments")
                 return
@@ -204,7 +202,7 @@ class FirebaseManager {
             
             do {
                 let roomsData = try documents.map { try $0.data(as: TTRoom.self)}
-                print("roomsdata: \(roomsData)")
+//                print("roomsdata: \(roomsData)")
                 self?.notificationCenter.post(name: .updatedCurrentUserRooms, object: roomsData)
                 print("send updated rooms notification ")
             } catch {
@@ -238,7 +236,6 @@ class FirebaseManager {
     
     func updateRoom(for roomCode: String, with fields: [String: Any], completed: @escaping(TTError?) -> Void) {
         db.collection(TTConstants.roomsCollection).document(roomCode).updateData(fields) { error in
-            print("update room")
             //TODO: Manage Firebase errors appropriately
             completed(nil)
             if let _ = error {
@@ -298,8 +295,7 @@ class FirebaseManager {
             "username": username,
             "friends": [],
             "friendRequests": [],
-            "roomCodes": [],
-            "events": []
+            "roomCodes": []
         ]) { err in
             if let _ = err {
                 completed(.failure(.unableToCreateFirestoreAssociatedUser))
@@ -348,16 +344,19 @@ class FirebaseManager {
         let tabbar = UITabBarController()
         UITabBar.appearance().tintColor = .systemGreen
         tabbar.viewControllers = [createSearchNC(), createRoomsNC(), createFriendsNC(), createSettingsNC()]
+        tabbar.tabBar.isTranslucent = true
+        tabbar.tabBar.backgroundImage = UIImage()
+        tabbar.tabBar.shadowImage = UIImage() // add this if you want remove tabBar separator
+        tabbar.tabBar.barTintColor = .clear
+        tabbar.tabBar.backgroundColor = .black // here is your tabBar color
+        tabbar.tabBar.layer.backgroundColor = UIColor.clear.cgColor
         
-        let tabBarAppearance = UITabBarAppearance()
-        tabBarAppearance.configureWithOpaqueBackground()
-        UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
-        
-        //FIXME: Not sure if here's the best place to but this code.
-        //makes navigation bars opaque
-//        let navigationBarAppearance = UINavigationBarAppearance()
-//        navigationBarAppearance.configureWithOpaqueBackground()
-//        UINavigationBar.appearance().scrollEdgeAppearance = navigationBarAppearance
+        let blurEffect = UIBlurEffect(style: .regular) // here you can change blur style
+        let blurView = UIVisualEffectView(effect: blurEffect)
+        blurView.frame = tabbar.view.bounds
+        blurView.autoresizingMask = .flexibleWidth
+        tabbar.tabBar.insertSubview(blurView, at: 0)
+                                              
         return tabbar
     }
     
@@ -382,7 +381,7 @@ class FirebaseManager {
     }
     
     private func createSettingsNC() -> UINavigationController {
-        let settingsVC = SettingsVC(nibName: "SettingsVCNib", bundle: nil)
+        let settingsVC = SettingsVC()
         settingsVC.tabBarItem = UITabBarItem(title: "Settings", image: UIImage(systemName: "gearshape"), tag: 3)
         return UINavigationController(rootViewController: settingsVC)
     }

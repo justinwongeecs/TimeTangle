@@ -7,12 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		E84541AF295F818B00CBB430 /* RoomInfoVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84541AE295F818B00CBB430 /* RoomInfoVC.swift */; };
+		E84541AF295F818B00CBB430 /* RoomDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84541AE295F818B00CBB430 /* RoomDetailVC.swift */; };
 		E84541B2295FADDC00CBB430 /* EventKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84541B1295FADDC00CBB430 /* EventKitManager.swift */; };
 		E84541B5295FC17500CBB430 /* RoomDetailNib.xib in Resources */ = {isa = PBXBuildFile; fileRef = E84541B4295FC17500CBB430 /* RoomDetailNib.xib */; };
 		E873BCD72964D99A0015AE99 /* CalendarKit in Frameworks */ = {isa = PBXBuildFile; productRef = E873BCD62964D99A0015AE99 /* CalendarKit */; };
 		E873BCD92964E4200015AE99 /* RoomAggregateResultVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E873BCD82964E4200015AE99 /* RoomAggregateResultVC.swift */; };
-		E873BCDB29651D490015AE99 /* SettingsVCNib.xib in Resources */ = {isa = PBXBuildFile; fileRef = E873BCDA29651D490015AE99 /* SettingsVCNib.xib */; };
 		E873BCE0296555F10015AE99 /* SettingsEditProfileVCNib.xib in Resources */ = {isa = PBXBuildFile; fileRef = E873BCDF296555F10015AE99 /* SettingsEditProfileVCNib.xib */; };
 		E873BCE2296556080015AE99 /* SettingsEditProfileVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E873BCE1296556080015AE99 /* SettingsEditProfileVC.swift */; };
 		E873BCE4296693C80015AE99 /* TTCloseButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = E873BCE3296693C70015AE99 /* TTCloseButton.swift */; };
@@ -71,11 +70,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		E84541AE295F818B00CBB430 /* RoomInfoVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomInfoVC.swift; sourceTree = "<group>"; };
+		E84541AE295F818B00CBB430 /* RoomDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomDetailVC.swift; sourceTree = "<group>"; };
 		E84541B1295FADDC00CBB430 /* EventKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventKitManager.swift; sourceTree = "<group>"; };
 		E84541B4295FC17500CBB430 /* RoomDetailNib.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RoomDetailNib.xib; sourceTree = "<group>"; };
 		E873BCD82964E4200015AE99 /* RoomAggregateResultVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomAggregateResultVC.swift; sourceTree = "<group>"; };
-		E873BCDA29651D490015AE99 /* SettingsVCNib.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SettingsVCNib.xib; sourceTree = "<group>"; };
 		E873BCDF296555F10015AE99 /* SettingsEditProfileVCNib.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SettingsEditProfileVCNib.xib; sourceTree = "<group>"; };
 		E873BCE1296556080015AE99 /* SettingsEditProfileVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsEditProfileVC.swift; sourceTree = "<group>"; };
 		E873BCE3296693C70015AE99 /* TTCloseButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTCloseButton.swift; sourceTree = "<group>"; };
@@ -171,7 +169,6 @@
 			isa = PBXGroup;
 			children = (
 				E8CEE2DC29581C85000CD7FE /* SettingsVC.swift */,
-				E873BCDA29651D490015AE99 /* SettingsVCNib.xib */,
 				E873BCDF296555F10015AE99 /* SettingsEditProfileVCNib.xib */,
 				E873BCE1296556080015AE99 /* SettingsEditProfileVC.swift */,
 			);
@@ -323,7 +320,7 @@
 		E8D004A72963B04500907A64 /* Rooms */ = {
 			isa = PBXGroup;
 			children = (
-				E84541AE295F818B00CBB430 /* RoomInfoVC.swift */,
+				E84541AE295F818B00CBB430 /* RoomDetailVC.swift */,
 				E84541B4295FC17500CBB430 /* RoomDetailNib.xib */,
 				E8CFC22C295D5E55006C23BE /* RoomsVC.swift */,
 				E8D004A52963B02C00907A64 /* RoomUsersVC.swift */,
@@ -415,7 +412,6 @@
 				E8D004AB2964056400907A64 /* RoomHistoryCell.xib in Resources */,
 				E8CEE2BD2957AAEC000CD7FE /* GoogleService-Info.plist in Resources */,
 				E84541B5295FC17500CBB430 /* RoomDetailNib.xib in Resources */,
-				E873BCDB29651D490015AE99 /* SettingsVCNib.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -453,7 +449,7 @@
 				E893A271295A3718004F7BC5 /* AddFriendVC.swift in Sources */,
 				E8CEE2DD29581C85000CD7FE /* SettingsVC.swift in Sources */,
 				E8CEE2C82957AFF0000CD7FE /* FirebaseManager.swift in Sources */,
-				E84541AF295F818B00CBB430 /* RoomInfoVC.swift in Sources */,
+				E84541AF295F818B00CBB430 /* RoomDetailVC.swift in Sources */,
 				E893A27C295A7564004F7BC5 /* FriendRequestCell.swift in Sources */,
 				E8CEE2B92957A0C7000CD7FE /* TTButton.swift in Sources */,
 				E8CEE2E929590EBE000CD7FE /* TTAvatarImageView.swift in Sources */,

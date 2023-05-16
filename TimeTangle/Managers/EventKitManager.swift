@@ -11,7 +11,7 @@ import FirebaseFirestore
 import CalendarKit
 
 class EventKitManager {
-    
+    static let shared = EventKitManager()
     let store = EKEventStore()
     
 //    init(completed: @escaping(Result<Void, TTError>) -> Void) {
@@ -30,30 +30,26 @@ class EventKitManager {
             //TODO: parse error and give more specific error messages
             guard let _ = error, granted == false else {
                 //listen to calendar event changes
-                NotificationCenter.default.addObserver(self, selector: Selector("storeChanged:"), name: .EKEventStoreChanged, object: self?.store)
+//                NotificationCenter.default.addObserver(self, selector: Selector("storeChanged:"), name: .EKEventStoreChanged, object: self?.store)
                 return
             }
         }
     }
-    
-    @objc private func storeChanged() {
-        updateUserTTEvents()
-    }
+//
+//    @objc private func storeChanged() {
+//        updateUserTTEvents()
+//    }
     
     //Get the user events up to a certain date
-    func getCurrentEKEvents(upto upperDateBound: Date) -> [EKEvent]? {
+    private func getCurrentEKEvents(from startDateBound: Date, to upperDateBound: Date) -> [EKEvent] {
         let calendar = Calendar.current
-        var lastYearFromTodayComponents = DateComponents()
-        lastYearFromTodayComponents.year = -1
-        let lastYearFromTodayDate = Calendar.current.date(byAdding: lastYearFromTodayComponents, to: Date()) ?? Date()
         //start date components (start of today)
-        let startOfTodaysDate = calendar.startOfDay(for: lastYearFromTodayDate)
-        
+        let startOfTodaysDate = calendar.startOfDay(for: startDateBound)
         //create the predicate from the event store's instance methdo
         var predicate: NSPredicate? = nil
         predicate = store.predicateForEvents(withStart: startOfTodaysDate, end: upperDateBound, calendars: nil)
         
-        var foundEvents: [EKEvent]? = nil
+        var foundEvents = [EKEvent]()
         if let predicate = predicate {
             foundEvents = store.events(matching: predicate)
         }
@@ -61,45 +57,15 @@ class EventKitManager {
         return foundEvents
     }
     
-    private func convertEKEventToTTEvent(for event: EKEvent) -> TTEvent {
+    func convertEKEventToTTEvent(for event: EKEvent) -> TTEvent {
         return TTEvent(name: event.title, startDate: event.startDate, endDate: event.endDate, isAllDay: event.isAllDay)
     }
     
-    //should be called in the beginning of app
-    func storeUserEventsToFirestore(with ekEvents: [EKEvent], for username: String) {
-        let ttEvents = ekEvents.filter{ !$0.isAllDay }.map{ convertEKEventToTTEvent(for: $0) }
-        do {
-            //FIXME: Do Error handing better here
-            let encodedTTEvents = try ttEvents.map { try Firestore.Encoder().encode($0) }
-            let updatedData = [
-                "events": encodedTTEvents
-            ]
-            
-            FirebaseManager.shared.updateUserData(for: username, with: updatedData) { error in
-                guard let _ = error else { return }
-            }
-        } catch {
-            print("Store Events Error")
-        }
-    }
-    
-    func updateUserTTEvents() {
-        guard let currentUserUsername = FirebaseManager.shared.currentUser?.username else { return }
+    func getUserTTEvents(from startDateBound: Date, to upperDateBound: Date) -> [TTEvent] {
+        guard let currentUserUsername = FirebaseManager.shared.currentUser?.username else { return [] }
         
-        //FIXME: Find a better way than just fetching a period of a year from now
-        var oneYearFromNowComponents = DateComponents()
-        oneYearFromNowComponents.year = 2
-        
-        //FIXME: Temporary: Eventually save last "used" date in UserDefaults 
-        var lastYearFromTodayComponents = DateComponents()
-        lastYearFromTodayComponents.year = -1
-        let lastYearFromTodayDate = Calendar.current.date(byAdding: lastYearFromTodayComponents, to: Date()) ?? Date()
-        guard let oneYearFromNowDate = Calendar.current.date(byAdding: oneYearFromNowComponents, to: lastYearFromTodayDate) else { return }
-        print("oneyearfromnowdate: \(oneYearFromNowDate)")
-        
-        guard let allEventsUpToOneYearFromNow = getCurrentEKEvents(upto: oneYearFromNowDate) else { return }
-        print("AllEventsUpToOneYear: \(allEventsUpToOneYearFromNow)")
-        storeUserEventsToFirestore(with: allEventsUpToOneYearFromNow, for: currentUserUsername)
+        let ekEvents = getCurrentEKEvents(from: startDateBound, to: upperDateBound)
+        return ekEvents.map { convertEKEventToTTEvent(for: $0) }
     }
     
     func createEKEvent(isAllDay: Bool, title: String, startDate: Date, endDate: Date) -> EKEvent {

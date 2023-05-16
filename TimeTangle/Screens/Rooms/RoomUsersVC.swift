@@ -9,36 +9,31 @@ import UIKit
 
 class RoomUsersVC: UIViewController {
     
-    private var users = [TTUser]()
+    private let room: TTRoom!
+    private var users: [TTUser]!
     private let usersTableView = UITableView()
     private var usersNotVisible = [String]()
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        view.backgroundColor = .systemBackground
-        configureUsersTableView()
-        navigationItem.rightBarButtonItem = editButtonItem
+    init(room: TTRoom, usersNotVisible: [String]) {
+        print("Usersnotvisible: \(usersNotVisible)")
+        self.room = room
+        self.usersNotVisible = usersNotVisible
+        super.init(nibName: nil, bundle: nil)
     }
     
-    func setVC(users: [String], usersNotVisible: [String]) {
-        self.usersNotVisible = usersNotVisible
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        title = "\(room.users.count) \(room.users.count > 1 ? "Members" : "Member")"
+        view.backgroundColor = .systemBackground
+        navigationItem.rightBarButtonItem = editButtonItem
+  
+        configureUsersTableView()
+        getUsers()
         
-        self.users = []
-        for username in users {
-            FirebaseManager.shared.fetchUserDocumentData(with: username) { [weak self] result in
-                switch result {
-                case .success(let user):
-                    self?.users.append(user)
-                    
-                case .failure(let error):
-                    self?.presentTTAlert(title: "Error fetching users", message: error.rawValue, buttonTitle: "Ok")
-                }
-            }
-        }
-        title = "\(users.count) \(users.count > 1 ? "Members" : "Member")"
-        DispatchQueue.main.async {
-            self.usersTableView.reloadData()
-        }
     }
     
     private func configureUsersTableView() {
@@ -56,6 +51,26 @@ class RoomUsersVC: UIViewController {
             usersTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
+    
+    
+    private func getUsers() {
+        self.users = []
+        for username in room.users {
+            FirebaseManager.shared.fetchUserDocumentData(with: username) { [weak self] result in
+                switch result {
+                case .success(let user):
+                    self?.users.append(user)
+                    
+                    DispatchQueue.main.async {
+                        self?.usersTableView.reloadData()
+                    }
+
+                case .failure(let error):
+                    self?.presentTTAlert(title: "Error fetching users", message: error.rawValue, buttonTitle: "Ok")
+                }
+            }
+        }
+    }
 }
 
 extension RoomUsersVC: UITableViewDelegate, UITableViewDataSource {
@@ -70,8 +85,8 @@ extension RoomUsersVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = usersTableView.dequeueReusableCell(withIdentifier: RoomUserCell.reuseID) as! RoomUserCell
         let user = users[indexPath.section]
-        cell.set(for: user)
-        if let previousVC = previousViewController() as? RoomInfoVC {
+        cell.set(for: user, usersNotVisible: usersNotVisible)
+        if let previousVC = previousViewController() as? RoomDetailVC {
             cell.delegate = previousVC.self
         }
         return cell

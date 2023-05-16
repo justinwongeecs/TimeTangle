@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FirebaseFirestore
 
 enum RoomHistorySortOrder {
     case dateAscending
@@ -18,12 +19,23 @@ class RoomHistoryVC: UIViewController {
     var room: TTRoom!
     private let roomHistoryTableView = UITableView()
     private var roomHistorySortOrder: RoomHistorySortOrder = .dateDescending
-
+    
+    init(room: TTRoom) {
+        self.room = room
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         configureRoomHistoryTableView()
         configureBarButtonItems()
+        title = "\(room.name) Edit History"
+        sortFilterTable()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -33,11 +45,12 @@ class RoomHistoryVC: UIViewController {
     
     func setVC(for room: TTRoom) {
         self.room = room
-        title = "\(room.name) Edit History"
-        sortFilterTable()
+        print(room.histories)
+        
     }
     
     private func configureBarButtonItems() {
+        let deleteRoomHistoryButton = UIBarButtonItem(image: UIImage(systemName: "x.circle"), style: .plain, target: self, action: #selector(deleteRoomHistory))
         let sortMenu = UIMenu(title: "", children: [
             UIAction(title: "Date Ascending", image: UIImage(systemName: "arrow.up.circle")) { [weak self] action in
                 self?.roomHistorySortOrder = .dateAscending
@@ -48,15 +61,33 @@ class RoomHistoryVC: UIViewController {
                 self?.roomHistorySortOrder = .dateDescending
                 self?.sortFilterTable()
             }
-//            ,
+
 //            UIAction(title: "Today", image: UIImage(systemName: "clock")) { [weak self] action in
 //                self?.roomHistorySortOrder = .today
 //                self?.sortFilterTable()
 //            }
         ])
+        
         let sortButton = UIBarButtonItem(image: UIImage(systemName: "line.3.horizontal.decrease.circle"), primaryAction: nil, menu: sortMenu)
+        
+        deleteRoomHistoryButton.tintColor = .systemGreen
         sortButton.tintColor = .systemGreen
-        navigationItem.rightBarButtonItem = sortButton
+        navigationItem.rightBarButtonItems = [sortButton, deleteRoomHistoryButton]
+    }
+    
+    @objc private func deleteRoomHistory() {
+        self.room.histories = []
+        self.updateTableView()
+//        let updateFields = [TTConstants.roomHistories: []]
+//        FirebaseManager.shared.updateRoom(for: room.code, with: updateFields) { [weak self] error in
+//            guard error == nil else {
+//                self?.presentTTAlert(title: "Cannot clear room history", message: error!.rawValue, buttonTitle: "Ok")
+//                return
+//            }
+//            self!.room.histories = []
+//            self?.updateTableView()
+//            print("Delete room histories success")
+//        }
     }
     
     private func configureRoomHistoryTableView() {
@@ -82,12 +113,11 @@ class RoomHistoryVC: UIViewController {
         case .dateDescending:
             self.room.histories.sort(by: { $0.createdDate > $1.createdDate })
         }
-        DispatchQueue.main.async {
-            self.reloadTableView()
-        }
+        self.reloadTableView()
     }
     
     private func updateTableView() {
+        self.reloadTableView()
         removeEmptyStateView(in: self.view)
         if room.histories.count > 0 {
             self.view.bringSubviewToFront(roomHistoryTableView)
@@ -97,6 +127,7 @@ class RoomHistoryVC: UIViewController {
     }
     
     private func reloadTableView() {
+        print("reloadTableView")
         DispatchQueue.main.async {
             self.roomHistoryTableView.reloadData()
         }
@@ -105,6 +136,7 @@ class RoomHistoryVC: UIViewController {
 
 extension RoomHistoryVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        
         return room.histories.count
     }
     

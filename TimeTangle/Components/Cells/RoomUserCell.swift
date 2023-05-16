@@ -37,10 +37,11 @@ class RoomUserCell: ProfileUsernameCell {
         } else {
             isUserVisible = true
         }
+        
+        displayCorrectVisibilityButton()
     }
     
     private func configureCell() {
-        displayCorrectVisibilityButton()
         contentView.addSubview(visibilityButton)
         visibilityButton.tintColor = .systemGreen
         visibilityButton.addTarget(self, action: #selector(toggleVisibility), for: .touchUpInside)

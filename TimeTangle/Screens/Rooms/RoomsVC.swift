@@ -23,10 +23,6 @@ class RoomsVC: UIViewController {
         getRoomsFromCurrentUser()
     }
     
-    deinit {
-        NotificationCenter.default.removeObserver(self, name: .updatedUser, object: nil)
-    }
-    
     override func viewWillAppear(_ animated: Bool) {
         navigationController?.navigationBar.prefersLargeTitles = true
     }
@@ -41,7 +37,7 @@ class RoomsVC: UIViewController {
     }
     
     private func configureRefreshControl() {
-//        refreshControl.attributedTitle = NSAttributedString(string: "Pull to refresh")
+        refreshControl.attributedTitle = NSAttributedString(string: "Pull to refresh")
         refreshControl.addTarget(self, action: #selector(refresh(_:)), for: .valueChanged)
         roomsTable.addSubview(refreshControl)
     }
@@ -72,9 +68,9 @@ class RoomsVC: UIViewController {
             guard let fetchedRooms = notification.object as? [TTRoom] else { return }
             self.rooms = fetchedRooms
             self.roomsTable.reloadData()
-            if let pushedVC = self.navigationController?.viewControllers.last as? RoomInfoVC, let selectedVCIndex = self.selectedVCIndex {
-                pushedVC.set(room: self.rooms[selectedVCIndex])
-            }
+//            if let pushedVC = self.navigationController?.viewControllers.last as? RoomInfoVC, let selectedVCIndex = self.selectedVCIndex {
+//                pushedVC.set(room: self.rooms[selectedVCIndex])
+//            }
         }
     }
     
@@ -83,8 +79,9 @@ class RoomsVC: UIViewController {
         fetchRooms(for: currentUser)
         roomsTable.reloadData()
     }
-    
+//
 //    @objc private func fetchUpdatedUser(_ notification: Notification) {
+//        print("updated user")
 //        DispatchQueue.main.async {
 //            guard let fetchedUser = notification.object as? TTUser else { return }
 //            self.fetchRooms(for: fetchedUser)
@@ -149,7 +146,7 @@ extension RoomsVC: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedRoom = rooms[indexPath.section]
-        let roomInfoVC = RoomInfoVC(nibName: "RoomDetailNib", bundle: nil)
+        let roomInfoVC = RoomDetailVC(nibName: "RoomDetailNib", bundle: nil)
         roomInfoVC.set(room: selectedRoom)
         selectedVCIndex = indexPath.section
         
@@ -157,6 +154,7 @@ extension RoomsVC: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
+//MARK: - RoomCell 
 class RoomCell: UITableViewCell {
     
     static let reuseID = "RoomCell"
