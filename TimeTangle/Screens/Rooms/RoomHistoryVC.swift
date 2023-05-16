@@ -45,12 +45,10 @@ class RoomHistoryVC: UIViewController {
     
     func setVC(for room: TTRoom) {
         self.room = room
-        print(room.histories)
-        
     }
     
     private func configureBarButtonItems() {
-        let deleteRoomHistoryButton = UIBarButtonItem(image: UIImage(systemName: "x.circle"), style: .plain, target: self, action: #selector(deleteRoomHistory))
+        let deleteRoomHistoryButton = UIBarButtonItem(image: UIImage(systemName: "clear"), style: .plain, target: self, action: #selector(deleteRoomHistory))
         let sortMenu = UIMenu(title: "", children: [
             UIAction(title: "Date Ascending", image: UIImage(systemName: "arrow.up.circle")) { [weak self] action in
                 self?.roomHistorySortOrder = .dateAscending
@@ -61,33 +59,39 @@ class RoomHistoryVC: UIViewController {
                 self?.roomHistorySortOrder = .dateDescending
                 self?.sortFilterTable()
             }
-
-//            UIAction(title: "Today", image: UIImage(systemName: "clock")) { [weak self] action in
-//                self?.roomHistorySortOrder = .today
-//                self?.sortFilterTable()
-//            }
         ])
         
         let sortButton = UIBarButtonItem(image: UIImage(systemName: "line.3.horizontal.decrease.circle"), primaryAction: nil, menu: sortMenu)
         
-        deleteRoomHistoryButton.tintColor = .systemGreen
+        deleteRoomHistoryButton.tintColor = .systemRed
         sortButton.tintColor = .systemGreen
-        navigationItem.rightBarButtonItems = [sortButton, deleteRoomHistoryButton]
+         
+        guard let currentUser = FirebaseManager.shared.currentUser else { return }
+
+        if room.doesContainsAdmin(for: currentUser.username) && !room.histories.isEmpty {
+            navigationItem.rightBarButtonItems = [sortButton, deleteRoomHistoryButton]
+        } else {
+            navigationItem.rightBarButtonItems = [sortButton]
+        }
     }
     
     @objc private func deleteRoomHistory() {
-        self.room.histories = []
-        self.updateTableView()
-//        let updateFields = [TTConstants.roomHistories: []]
-//        FirebaseManager.shared.updateRoom(for: room.code, with: updateFields) { [weak self] error in
-//            guard error == nil else {
-//                self?.presentTTAlert(title: "Cannot clear room history", message: error!.rawValue, buttonTitle: "Ok")
-//                return
-//            }
-//            self!.room.histories = []
-//            self?.updateTableView()
-//            print("Delete room histories success")
-//        }
+        if let roomDetailVC = previousViewController() as? RoomDetailVC{
+            //FIXME: Very not elegant to set both RoomHistoryVC's and RoomDetailVC's room history to be []
+            room.histories = []
+            roomDetailVC.setRoomHistories(with: [])
+            configureBarButtonItems()
+            DispatchQueue.main.async {
+                self.updateTableView()
+            }
+            let updateFields = [TTConstants.roomHistories: [TTRoomEdit]()]
+            FirebaseManager.shared.updateRoom(for: room.code, with: updateFields) { [weak self] error in
+                guard error == nil else {
+                    self?.presentTTAlert(title: "Cannot clear room history", message: error!.rawValue, buttonTitle: "Ok")
+                    return
+                }
+            }
+        }
     }
     
     private func configureRoomHistoryTableView() {
@@ -127,7 +131,6 @@ class RoomHistoryVC: UIViewController {
     }
     
     private func reloadTableView() {
-        print("reloadTableView")
         DispatchQueue.main.async {
             self.roomHistoryTableView.reloadData()
         }

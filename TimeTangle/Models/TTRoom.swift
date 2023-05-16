@@ -18,6 +18,7 @@ struct TTRoom: Codable, Equatable {
     var endingDate: Date
     var histories: [TTRoomEdit]
     var events: [TTEvent]
+    var admins: [String]
     
     static func == (lhs: TTRoom, rhs: TTRoom) -> Bool {
         return lhs.users == rhs.users &&
@@ -25,6 +26,10 @@ struct TTRoom: Codable, Equatable {
         lhs.startingDate == rhs.startingDate &&
         lhs.endingDate == rhs.endingDate &&
         lhs.events == rhs.events
+    }
+    
+    func doesContainsAdmin(for username: String) -> Bool {
+        return !admins.contains(where: { $0 == username })
     }
 }
 

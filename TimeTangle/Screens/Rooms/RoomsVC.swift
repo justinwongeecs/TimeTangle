@@ -68,9 +68,6 @@ class RoomsVC: UIViewController {
             guard let fetchedRooms = notification.object as? [TTRoom] else { return }
             self.rooms = fetchedRooms
             self.roomsTable.reloadData()
-//            if let pushedVC = self.navigationController?.viewControllers.last as? RoomInfoVC, let selectedVCIndex = self.selectedVCIndex {
-//                pushedVC.set(room: self.rooms[selectedVCIndex])
-//            }
         }
     }
     
@@ -154,7 +151,7 @@ extension RoomsVC: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
-//MARK: - RoomCell 
+//MARK: - RoomCell
 class RoomCell: UITableViewCell {
     
     static let reuseID = "RoomCell"

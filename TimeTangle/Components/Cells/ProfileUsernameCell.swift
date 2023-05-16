@@ -13,7 +13,7 @@ class ProfileUsernameCell: UITableViewCell {
     
     var user: TTUser?
     private let avatarImageView = UIImageView()
-    private let usernameLabel = TTTitleLabel(textAlignment: .left, fontSize: 15)
+    internal let usernameLabel = TTTitleLabel(textAlignment: .left, fontSize: 15)
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -48,7 +48,6 @@ class ProfileUsernameCell: UITableViewCell {
 
             usernameLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
             usernameLabel.leadingAnchor.constraint(equalTo: avatarImageView.trailingAnchor, constant: 10),
-            usernameLabel.trailingAnchor.constraint(equalTo: trailingAnchor),
             usernameLabel.heightAnchor.constraint(equalToConstant: 20),
         ])
     }

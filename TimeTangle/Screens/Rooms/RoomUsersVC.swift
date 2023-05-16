@@ -15,7 +15,6 @@ class RoomUsersVC: UIViewController {
     private var usersNotVisible = [String]()
     
     init(room: TTRoom, usersNotVisible: [String]) {
-        print("Usersnotvisible: \(usersNotVisible)")
         self.room = room
         self.usersNotVisible = usersNotVisible
         super.init(nibName: nil, bundle: nil)
@@ -57,16 +56,18 @@ class RoomUsersVC: UIViewController {
         self.users = []
         for username in room.users {
             FirebaseManager.shared.fetchUserDocumentData(with: username) { [weak self] result in
+                guard let self = self else { return }
                 switch result {
                 case .success(let user):
-                    self?.users.append(user)
-                    
+                    self.users.append(user)
+                    //Sort by those with admin status 
+                    self.users.sort(by: { self.room.doesContainsAdmin(for: $0.username) && !self.room.doesContainsAdmin(for: $1.username)})
                     DispatchQueue.main.async {
-                        self?.usersTableView.reloadData()
+                        self.usersTableView.reloadData()
                     }
 
                 case .failure(let error):
-                    self?.presentTTAlert(title: "Error fetching users", message: error.rawValue, buttonTitle: "Ok")
+                    self.presentTTAlert(title: "Error fetching users", message: error.rawValue, buttonTitle: "Ok")
                 }
             }
         }
@@ -85,7 +86,7 @@ extension RoomUsersVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = usersTableView.dequeueReusableCell(withIdentifier: RoomUserCell.reuseID) as! RoomUserCell
         let user = users[indexPath.section]
-        cell.set(for: user, usersNotVisible: usersNotVisible)
+        cell.set(for: user, usersNotVisible: usersNotVisible, room: room)
         if let previousVC = previousViewController() as? RoomDetailVC {
             cell.delegate = previousVC.self
         }

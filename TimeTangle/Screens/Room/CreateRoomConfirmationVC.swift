@@ -120,10 +120,11 @@ class CreateRoomConfirmationVC: TTModalCardVC {
             return
         }
         
-        guard let roomCode = roomCodeLabel.text else { return }
+        guard let roomCode = roomCodeLabel.text,
+        let currentUser = FirebaseManager.shared.currentUser else { return }
         
         //Create a room instance in Firestore
-        let newRoom = TTRoom(name: textField.text!, users: usersInQueue.map{$0.username}, code: roomCode, startingDate: Date(), endingDate: Date(), histories: [], events: [])
+        let newRoom = TTRoom(name: textField.text!, users: usersInQueue.map{$0.username}, code: roomCode, startingDate: Date(), endingDate: Date(), histories: [], events: [], admins: [currentUser.username])
         FirebaseManager.shared.createRoom(for: newRoom) { [weak self] result in
             switch result {
             case .success(_):

@@ -15,6 +15,7 @@ class RoomUserCell: ProfileUsernameCell {
     static let reuseId = "RoomUserCell"
     
     //Eventually save this setting for the session
+    private var room: TTRoom!
     private var isUserVisible: Bool = true
     private let visibilityButton = UIButton(type: .custom)
     
@@ -22,26 +23,29 @@ class RoomUserCell: ProfileUsernameCell {
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        configureCell()
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        configureCell()
     }
     
-    func set(for user: TTUser, usersNotVisible: [String]) {
+    func set(for user: TTUser, usersNotVisible: [String], room: TTRoom) {
         super.set(for: user)
+        self.room = room
+        
         if usersNotVisible.contains(user.username) {
             isUserVisible = false
         } else {
             isUserVisible = true
         }
         
+        configureVisibilityButton()
         displayCorrectVisibilityButton()
+        configureAdminIndicator()
     }
     
-    private func configureCell() {
+    private func configureVisibilityButton() {
+        //Visibility Button
         contentView.addSubview(visibilityButton)
         visibilityButton.tintColor = .systemGreen
         visibilityButton.addTarget(self, action: #selector(toggleVisibility), for: .touchUpInside)
@@ -52,6 +56,20 @@ class RoomUserCell: ProfileUsernameCell {
             visibilityButton.topAnchor.constraint(equalTo: topAnchor, constant: 10),
             visibilityButton.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -10),
             visibilityButton.heightAnchor.constraint(equalToConstant: 70)
+        ])
+    }
+    
+    private func configureAdminIndicator() {
+        guard let user = user, room.doesContainsAdmin(for: user.username) else { return }
+        //Admin Indicator
+        let adminIndicatorView = UIImageView(image: UIImage(systemName: "person.2.badge.gearshape.fill", withConfiguration: UIImage.SymbolConfiguration(pointSize: 16, weight: .regular, scale: .medium)))
+        adminIndicatorView.tintColor = .systemPurple
+        adminIndicatorView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(adminIndicatorView)
+        
+        NSLayoutConstraint.activate([
+            adminIndicatorView.centerYAnchor.constraint(equalTo: centerYAnchor),
+            adminIndicatorView.leadingAnchor.constraint(equalTo: usernameLabel.trailingAnchor, constant: 10)
         ])
     }
     

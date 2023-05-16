@@ -40,16 +40,24 @@ class RoomDetailVC: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.navigationBar.prefersLargeTitles = false
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
+        //Room already initialized here
         setOriginalRoomState()
+        configureAdminEnability()
     }
     
     private func setOriginalRoomState() {
         //copy of room assigned to originalRoomState since TTRoom is a struct
         originalRoomState = room
+    }
+    
+    private func configureAdminEnability() {
+        guard let currentUser = FirebaseManager.shared.currentUser else { return }
+        if !room.doesContainsAdmin(for: currentUser.username) {
+            startingDatePicker.isEnabled = false
+            startingDatePicker.isUserInteractionEnabled = false
+            endingDatePicker.isEnabled = false
+            endingDatePicker.isUserInteractionEnabled = false
+        }
     }
     
     private func configureNavigationBarItems() {
@@ -255,9 +263,16 @@ class RoomDetailVC: UIViewController {
                 dateFormatter.dateFormat = "MMM d y, h:mm a"
                 dateFormatter.amSymbol = "AM"
                 dateFormatter.pmSymbol = "PM"
-                self.addRoomHistory(of: .changedStartingDate, before: dateFormatter.string(from: previousStartingDate), after: dateFormatter.string(from: self.room.startingDate))
-                self.addRoomHistory(of: .changedEndingDate, before: dateFormatter.string(from: previousEndingDate), after: dateFormatter.string(from: self.room.endingDate))
                 
+                if room.startingDate != previousStartingDate {
+                    self.addRoomHistory(of: .changedStartingDate, before: dateFormatter.string(from: previousStartingDate), after: dateFormatter.string(from: self.room.startingDate))
+                }
+                
+                if room.endingDate != previousEndingDate {
+                    self.addRoomHistory(of: .changedEndingDate, before: dateFormatter.string(from: previousEndingDate), after: dateFormatter.string(from: self.room.endingDate))
+                    
+                }
+        
                 DispatchQueue.main.async {
                     self.updateConfirmRoomChangesView()
                 }
@@ -312,22 +327,27 @@ class RoomDetailVC: UIViewController {
         let editDifference = TTRoomEditDifference(before: before, after: after)
         let newRoomEdit = TTRoomEdit(author: currentUserUsername, createdDate: Date(), editDifference: editDifference, editType: editType)
         room.histories.append(newRoomEdit)
-//        do {
-//            let newRoomHistory = try room.histories.arrayByAppending(newRoomEdit).map{ try Firestore.Encoder().encode($0) }
-//            FirebaseManager.shared.updateRoom(for: room.code, with: [
-//                TTConstants.roomHistories: newRoomHistory
-//            ]) { [weak self] error in
-//                guard let error = error else { return }
-//                self?.presentTTAlert(title: "Cannot add room history", message: error.rawValue, buttonTitle: "Ok")
-//            }
-//        } catch {
-//            //Do error catching here
-//            presentTTAlert(title: "Cannot add room history", message: TTError.unableToAddRoomHistory.rawValue, buttonTitle: "Ok")
-//        }
+        do {
+            let newRoomHistory = try room.histories.arrayByAppending(newRoomEdit).map{ try Firestore.Encoder().encode($0) }
+            FirebaseManager.shared.updateRoom(for: room.code, with: [
+                TTConstants.roomHistories: newRoomHistory
+            ]) { [weak self] error in
+                guard let error = error else { return }
+                self?.presentTTAlert(title: "Cannot add room history", message: error.rawValue, buttonTitle: "Ok")
+            }
+        } catch {
+            //Do error catching here
+            presentTTAlert(title: "Cannot add room history", message: TTError.unableToAddRoomHistory.rawValue, buttonTitle: "Ok")
+        }
     }
     
     private func updateRoomAggregateVC() {
         roomAggregateVC.setView(usersNotVisible: usersThatAreNotVisible, room: room)
+    }
+    
+    //MARK: - Getters and Setters
+    public func setRoomHistories(with histories: [TTRoomEdit]) {
+        room.histories = histories
     }
 }
 
