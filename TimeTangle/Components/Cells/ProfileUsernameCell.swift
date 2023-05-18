@@ -11,10 +11,10 @@ class ProfileUsernameCell: UITableViewCell {
     
     static let reuseID = "AddFriendSearchResultCell"
     
-    var user: TTUser?
-    private let avatarImageView = UIImageView()
+    private var username: String = ""
+    internal let avatarImageView = UIImageView()
     internal let usernameLabel = TTTitleLabel(textAlignment: .left, fontSize: 15)
-    
+        
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         configureCell()
@@ -24,9 +24,9 @@ class ProfileUsernameCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func set(for user: TTUser) {
-        self.user = user
-        usernameLabel.text = user.username
+    func set(for username: String) {
+        self.username = username
+        usernameLabel.text = username
     }
     
     private func configureCell() {
@@ -41,6 +41,7 @@ class ProfileUsernameCell: UITableViewCell {
         backgroundColor = .secondarySystemBackground
         layer.cornerRadius = 10
         selectionStyle = .none
+        clipsToBounds = true 
         
         NSLayoutConstraint.activate([
             avatarImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
@@ -50,5 +51,9 @@ class ProfileUsernameCell: UITableViewCell {
             usernameLabel.leadingAnchor.constraint(equalTo: avatarImageView.trailingAnchor, constant: 10),
             usernameLabel.heightAnchor.constraint(equalToConstant: 20),
         ])
+    }
+    
+    internal func getUsername() -> String {
+        return username 
     }
 }

@@ -28,10 +28,6 @@ class FriendsVC: UIViewController {
         let addFriendButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addFriend))
         addFriendButton.tintColor = .systemGreen
         navigationItem.rightBarButtonItem = addFriendButton
-        
-//        let inboxButton = UIBarButtonItem(image: UIImage(systemName: "tray"), style: .plain, target: self, action: #selector(pushToInboxView))
-//        inboxButton.tintColor = .systemGreen
-//        navigationItem.leftBarButtonItem = inboxButton
     }
 
     
@@ -55,9 +51,9 @@ class FriendsVC: UIViewController {
         
         //Constraints for searchUserField in relationship to searchArea
         NSLayoutConstraint.activate([
-            searchBarField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
-            searchBarField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
-            searchBarField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
+            searchBarField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            searchBarField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 5),
+            searchBarField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -5),
             searchBarField.heightAnchor.constraint(equalToConstant: 50)
         ])
     }
@@ -81,7 +77,6 @@ class FriendsVC: UIViewController {
 //MARK: - Delegates
 extension FriendsVC: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        guard !searchBar.text!.isEmpty else { return }
         friendsAndRequestsVC.filterFriends(with: searchText)
     }
     

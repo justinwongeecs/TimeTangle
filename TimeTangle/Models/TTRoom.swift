@@ -29,7 +29,7 @@ struct TTRoom: Codable, Equatable {
     }
     
     func doesContainsAdmin(for username: String) -> Bool {
-        return !admins.contains(where: { $0 == username })
+        return admins.contains(where: { $0 == username })
     }
 }
 

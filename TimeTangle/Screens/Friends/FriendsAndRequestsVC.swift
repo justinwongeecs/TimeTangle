@@ -18,15 +18,18 @@ enum FriendsVCSegmentedState {
 
 class FriendsAndRequestsVC: UIViewController {
     
+    //TODO: - friends and friendRequests require public access level due to AddFriendVC
     var friends: [String] = []
     //filteredFriends is what's being visibily shown
-    var filteredFriends: [String] = []
+    private var filteredFriends: [String] = []
     var friendRequests: [TTFriendRequest] = []
     
-    let friendsSC = UISegmentedControl(items: ["My Friends", "Friend Requests"])
-    let table = UITableView()
+    private let friendsSC = UISegmentedControl(items: ["My Friends", "Friend Requests"])
+    private let table = UITableView()
+    private var searchFriendsCountLabel: UILabel!
+    private var tableTopConstraint: NSLayoutConstraint!
     
-    var friendsVCSegementedState: FriendsVCSegmentedState = .myFriends {
+    private var friendsVCSegementedState: FriendsVCSegmentedState = .myFriends {
         didSet {
             reloadTable()
         }
@@ -39,12 +42,13 @@ class FriendsAndRequestsVC: UIViewController {
         super.viewDidLoad()
         configureBackgroundView()
         configureFriendsSC()
+        configureSearchFriendsCountLabel()
         configureFriendsTable()
         NotificationCenter.default.addObserver(self, selector: #selector(fetchUpdatedUser(_:)), name: .updatedUser, object: nil)
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         
         guard let friendRequests = FirebaseManager.shared.currentUser?.friendRequests else { return }
         guard let friends = FirebaseManager.shared.currentUser?.friends else { return }
@@ -58,15 +62,23 @@ class FriendsAndRequestsVC: UIViewController {
     }
     
     func filterFriends(with searchWord: String) {
-        print("SearchWordEmpty: \(searchWord.isEmpty)")
+        removeEmptyStateView(in: self.view)
+        
         if searchWord.isEmpty {
             filteredFriends = friends
+            displaySearchCountLabel(isHidden: true)
         } else {
-            filteredFriends = friends.filter({ $0.contains(searchWord) })
+            filteredFriends = friends.filter({ $0.lowercased().contains(searchWord.lowercased()) })
+            
+            if filteredFriends.isEmpty {
+                displaySearchCountLabel(isHidden: true)
+                showEmptyStateView(with: "No Friends Found", in: self.view)
+            } else {
+                displaySearchCountLabel(isHidden: false)
+                updateSearchFriendsCountLabel(with: filteredFriends.count)
+            }
         }
-        DispatchQueue.main.async {
-            self.reloadTable()
-        }
+        table.reloadData()
     }
     
     private func configureBackgroundView() {
@@ -110,8 +122,10 @@ class FriendsAndRequestsVC: UIViewController {
         table.register(ProfileUsernameCell.self, forCellReuseIdentifier: ProfileUsernameCell.reuseID)
         table.register(FriendRequestCell.self, forCellReuseIdentifier: FriendRequestCell.reuseID)
         
+        tableTopConstraint = table.topAnchor.constraint(equalTo: friendsSC.bottomAnchor, constant: 10)
+        tableTopConstraint.isActive = true 
+        
         NSLayoutConstraint.activate([
-            table.topAnchor.constraint(equalTo: friendsSC.bottomAnchor, constant: 10),
             table.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: tableViewsPadding),
             table.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -tableViewsPadding),
             table.bottomAnchor.constraint(equalTo: view.bottomAnchor)
@@ -147,9 +161,53 @@ class FriendsAndRequestsVC: UIViewController {
                 showEmptyStateView(with: "No Friend Requests", in: view, viewsPresentInFront: [friendsSC])
             }
         }
-        DispatchQueue.main.async {
-            self.table.reloadData()
+
+        table.reloadData()
+    }
+    
+    private func configureSearchFriendsCountLabel() {
+        searchFriendsCountLabel = UILabel().withSearchCountStyle()
+        view.addSubview(searchFriendsCountLabel)
+        
+        NSLayoutConstraint.activate([
+            searchFriendsCountLabel.topAnchor.constraint(equalTo: friendsSC.bottomAnchor, constant: 3),
+            searchFriendsCountLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            searchFriendsCountLabel.heightAnchor.constraint(equalToConstant: 20),
+            searchFriendsCountLabel.widthAnchor.constraint(equalToConstant: 100)
+        ])
+    }
+    
+    private func displaySearchCountLabel(isHidden: Bool) {
+        UIView.transition(with: searchFriendsCountLabel, duration: 0.5, options: .transitionCrossDissolve) {
+            self.searchFriendsCountLabel.isHidden = isHidden
         }
+        
+        //update roomsTable top constraint
+        if isHidden {
+            UIView.animate(withDuration: 0.35) { [weak self] in
+                guard let self = self else { return }
+                let newConstraint = self.table.topAnchor.constraint(equalTo: self.friendsSC.bottomAnchor, constant: 10)
+                self.updateTableTopConstraint(for: newConstraint)
+            }
+        } else {
+            UIView.animate(withDuration: 0.35) { [weak self] in
+                guard let self = self else { return }
+                let newConstraint = self.table.topAnchor.constraint(equalTo: self.searchFriendsCountLabel.bottomAnchor, constant: 10)
+                self.updateTableTopConstraint(for: newConstraint)
+            }
+        }
+    }
+    
+    private func updateTableTopConstraint(for constraint: NSLayoutConstraint) {
+        tableTopConstraint.isActive = false
+        tableTopConstraint = constraint
+        tableTopConstraint.isActive = true
+        view.setNeedsLayout()
+        view.layoutIfNeeded()
+    }
+    
+    private func updateSearchFriendsCountLabel(with count: Int) {
+        searchFriendsCountLabel.text = "\(count) Found"
     }
 }
 
@@ -169,7 +227,7 @@ extension FriendsAndRequestsVC: UITableViewDelegate, UITableViewDataSource {
             FirebaseManager.shared.fetchUserDocumentData(with: filteredFriends[indexPath.section]) { result in
                 switch result {
                 case .success(let user):
-                    myFriendCell.set(for: user)
+                    myFriendCell.set(for: user.username)
                 case .failure(_):
                     break
                 }

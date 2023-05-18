@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E8188FC52A149160005AA0BF /* UIView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8188FC42A149160005AA0BF /* UIView+Ext.swift */; };
+		E8188FC72A149EA8005AA0BF /* UIImage+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8188FC62A149EA8005AA0BF /* UIImage+Ext.swift */; };
+		E8188FC92A14C641005AA0BF /* UITableView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8188FC82A14C641005AA0BF /* UITableView+Ext.swift */; };
+		E81D25062A145217003C65C5 /* UILabel+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E81D25052A145217003C65C5 /* UILabel+Ext.swift */; };
 		E84541AF295F818B00CBB430 /* RoomDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84541AE295F818B00CBB430 /* RoomDetailVC.swift */; };
 		E84541B2295FADDC00CBB430 /* EventKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84541B1295FADDC00CBB430 /* EventKitManager.swift */; };
 		E84541B5295FC17500CBB430 /* RoomDetailNib.xib in Resources */ = {isa = PBXBuildFile; fileRef = E84541B4295FC17500CBB430 /* RoomDetailNib.xib */; };
@@ -70,6 +74,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		E8188FC42A149160005AA0BF /* UIView+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Ext.swift"; sourceTree = "<group>"; };
+		E8188FC62A149EA8005AA0BF /* UIImage+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+Ext.swift"; sourceTree = "<group>"; };
+		E8188FC82A14C641005AA0BF /* UITableView+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITableView+Ext.swift"; sourceTree = "<group>"; };
+		E81D25052A145217003C65C5 /* UILabel+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UILabel+Ext.swift"; sourceTree = "<group>"; };
 		E84541AE295F818B00CBB430 /* RoomDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomDetailVC.swift; sourceTree = "<group>"; };
 		E84541B1295FADDC00CBB430 /* EventKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventKitManager.swift; sourceTree = "<group>"; };
 		E84541B4295FC17500CBB430 /* RoomDetailNib.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RoomDetailNib.xib; sourceTree = "<group>"; };
@@ -302,6 +310,10 @@
 			children = (
 				E8CEE2D82957D1FD000CD7FE /* UIViewController+Ext.swift */,
 				E8CFC21A295B8AD7006C23BE /* Notification.Name+Ext.swift */,
+				E81D25052A145217003C65C5 /* UILabel+Ext.swift */,
+				E8188FC42A149160005AA0BF /* UIView+Ext.swift */,
+				E8188FC62A149EA8005AA0BF /* UIImage+Ext.swift */,
+				E8188FC82A14C641005AA0BF /* UITableView+Ext.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -424,14 +436,17 @@
 			files = (
 				E893A273295A3C52004F7BC5 /* ProfileUsernameCell.swift in Sources */,
 				E873BCEB296904F50015AE99 /* RoomUserCell.swift in Sources */,
+				E81D25062A145217003C65C5 /* UILabel+Ext.swift in Sources */,
 				E873BCD92964E4200015AE99 /* RoomAggregateResultVC.swift in Sources */,
 				E8CEE2BB2957A89C000CD7FE /* AddUsersModalVC.swift in Sources */,
 				E8D004A92963B82B00907A64 /* RoomHistoryVC.swift in Sources */,
 				E8CEE2E129582A2E000CD7FE /* TTUser.swift in Sources */,
 				E8CEE2B529579D3A000CD7FE /* SearchVC.swift in Sources */,
 				E893A26F29598E2F004F7BC5 /* TTEmptyStateView.swift in Sources */,
+				E8188FC72A149EA8005AA0BF /* UIImage+Ext.swift in Sources */,
 				E8CFC222295C183D006C23BE /* SearchFriendsResultController.swift in Sources */,
 				E8CFC227295D0836006C23BE /* JoinRoomVC.swift in Sources */,
+				E8188FC52A149160005AA0BF /* UIView+Ext.swift in Sources */,
 				E8CFC224295D065B006C23BE /* JoinRoomCodeTextField.swift in Sources */,
 				E873BCE4296693C80015AE99 /* TTCloseButton.swift in Sources */,
 				E8CEE2D92957D1FD000CD7FE /* UIViewController+Ext.swift in Sources */,
@@ -451,6 +466,7 @@
 				E8CEE2C82957AFF0000CD7FE /* FirebaseManager.swift in Sources */,
 				E84541AF295F818B00CBB430 /* RoomDetailVC.swift in Sources */,
 				E893A27C295A7564004F7BC5 /* FriendRequestCell.swift in Sources */,
+				E8188FC92A14C641005AA0BF /* UITableView+Ext.swift in Sources */,
 				E8CEE2B92957A0C7000CD7FE /* TTButton.swift in Sources */,
 				E8CEE2E929590EBE000CD7FE /* TTAvatarImageView.swift in Sources */,
 				E8CEE2B729579DE3000CD7FE /* TTTextField.swift in Sources */,

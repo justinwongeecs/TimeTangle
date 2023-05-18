@@ -10,15 +10,22 @@ import UIKit
 class RoomsVC: UIViewController {
     
     private var rooms = [TTRoom]()
+    private var filterRooms = [TTRoom]()
     
+    private let roomsSearchBar = UISearchBar()
+    private let searchCountLabel = UILabel().withSearchCountStyle()
     private let roomsTable = UITableView()
     private let refreshControl = UIRefreshControl()
+    
     private var selectedVCIndex: Int?
+    private var roomsTableTopConstraint: NSLayoutConstraint!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         configureViewController()
         configureRefreshControl()
+        configureSearchBar()
+        configureSearchCountLabel()
         configureRoomsTable()
         getRoomsFromCurrentUser()
     }
@@ -34,6 +41,33 @@ class RoomsVC: UIViewController {
 //        NotificationCenter.default.addObserver(self, selector: #selector(fetchUpdatedUser(_:)), name: .updatedUser, object: nil)
         //get updates from current user rooms
         NotificationCenter.default.addObserver(self, selector: #selector(fetchUpdatedCurrentUserRooms(_:)), name: .updatedCurrentUserRooms, object: nil)
+    }
+    
+    private func configureSearchBar() {
+        view.addSubview(roomsSearchBar)
+        roomsSearchBar.placeholder = "Search for a room"
+        roomsSearchBar.delegate = self
+        roomsSearchBar.searchBarStyle = .minimal
+        roomsSearchBar.autocapitalizationType = .none 
+        roomsSearchBar.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            roomsSearchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            roomsSearchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 5),
+            roomsSearchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -5),
+            roomsSearchBar.heightAnchor.constraint(equalToConstant: 50)
+        ])
+    }
+    
+    private func configureSearchCountLabel() {
+        view.addSubview(searchCountLabel)
+    
+        NSLayoutConstraint.activate([
+            searchCountLabel.topAnchor.constraint(equalTo: roomsSearchBar.bottomAnchor, constant: 3),
+            searchCountLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            searchCountLabel.heightAnchor.constraint(equalToConstant: 20),
+            searchCountLabel.widthAnchor.constraint(equalToConstant: 100)
+        ])
     }
     
     private func configureRefreshControl() {
@@ -55,8 +89,10 @@ class RoomsVC: UIViewController {
         roomsTable.dataSource = self
         roomsTable.register(RoomCell.self, forCellReuseIdentifier: RoomCell.reuseID)
         
+        roomsTableTopConstraint = roomsTable.topAnchor.constraint(equalTo: roomsSearchBar.bottomAnchor, constant: 10)
+        roomsTableTopConstraint.isActive = true
+        
         NSLayoutConstraint.activate([
-            roomsTable.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
             roomsTable.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
             roomsTable.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
             roomsTable.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: 10)
@@ -67,6 +103,7 @@ class RoomsVC: UIViewController {
         DispatchQueue.main.async {
             guard let fetchedRooms = notification.object as? [TTRoom] else { return }
             self.rooms = fetchedRooms
+            self.filterRooms = fetchedRooms
             self.roomsTable.reloadData()
         }
     }
@@ -90,12 +127,15 @@ class RoomsVC: UIViewController {
     private func fetchRooms(for user: TTUser) {
         removeEmptyStateView(in: self.view)
         self.rooms = []
+        self.filterRooms = []
+        
         if user.roomCodes.count > 0 {
             for roomCode in user.roomCodes {
                 FirebaseManager.shared.fetchRoom(for: roomCode) { [weak self] result in
                     switch result {
                     case .success(let room):
                         self?.rooms.append(room)
+                        self?.filterRooms.append(room)
                         DispatchQueue.main.async {
                             self?.roomsTable.reloadData()
                         }
@@ -109,15 +149,47 @@ class RoomsVC: UIViewController {
             showEmptyStateView(with: "No Rooms", in: self.view)
         }
     }
+    
+    private func displaySearchCountLabel(isHidden: Bool) {
+        UIView.transition(with: searchCountLabel, duration: 0.5, options: .transitionCrossDissolve) {
+            self.searchCountLabel.isHidden = isHidden
+        }
+        
+        //update roomsTable top constraint
+        if isHidden {
+            UIView.animate(withDuration: 0.35) {
+                let newConstraint = self.roomsTable.topAnchor.constraint(equalTo: self.roomsSearchBar.bottomAnchor, constant: 10)
+                self.updateRoomsTableTopConstraint(for: newConstraint)
+            }
+        } else {
+            UIView.animate(withDuration: 0.35) {
+                let newConstraint = self.roomsTable.topAnchor.constraint(equalTo: self.searchCountLabel.bottomAnchor, constant: 10)
+                self.updateRoomsTableTopConstraint(for: newConstraint)
+            }
+        }
+    }
+    
+    private func updateRoomsTableTopConstraint(for constraint: NSLayoutConstraint) {
+        roomsTableTopConstraint.isActive = false
+        roomsTableTopConstraint = constraint
+        roomsTableTopConstraint.isActive = true
+        view.setNeedsLayout()
+        view.layoutIfNeeded()
+    }
+    
+    private func updateSearchCountLabel(with count: Int) {
+        searchCountLabel.text = "\(count) Found"
+    }
 }
 
+//MARK: - Delegates
 extension RoomsVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 1
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        return rooms.count
+        return filterRooms.count
     }
     
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
@@ -136,18 +208,42 @@ extension RoomsVC: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = roomsTable.dequeueReusableCell(withIdentifier: RoomCell.reuseID) as! RoomCell
-        let room = rooms[indexPath.section]
+        let room = filterRooms[indexPath.section]
         cell.set(for: room)
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedRoom = rooms[indexPath.section]
+        let selectedRoom = filterRooms[indexPath.section]
         let roomInfoVC = RoomDetailVC(nibName: "RoomDetailNib", bundle: nil)
         roomInfoVC.set(room: selectedRoom)
         selectedVCIndex = indexPath.section
         
         navigationController?.pushViewController(roomInfoVC, animated: true)
+    }
+}
+
+extension RoomsVC: UISearchBarDelegate {
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        removeEmptyStateView(in: self.view)
+        
+        guard !searchText.isEmpty else {
+            filterRooms = rooms
+            roomsTable.reloadData()
+            displaySearchCountLabel(isHidden: true)
+            return
+        }
+        
+        filterRooms = rooms.filter{ $0.name.lowercased().contains(searchText.lowercased()) }
+        if filterRooms.isEmpty {
+            displaySearchCountLabel(isHidden: true)
+            //show empty room search view
+            showEmptyStateView(with: "No Rooms Found", in: self.view)
+        } else {
+            updateSearchCountLabel(with: filterRooms.count)
+            displaySearchCountLabel(isHidden: false)
+        }
+        roomsTable.reloadData()
     }
 }
 

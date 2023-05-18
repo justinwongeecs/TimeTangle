@@ -166,8 +166,7 @@ extension SearchVC: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = usersQueueTable.dequeueReusableCell(withIdentifier: ProfileUsernameCell.reuseID) as! ProfileUsernameCell
         let userInQueue = usersQueueForRoomCreation[indexPath.section]
-        print("UserInQueue: \(userInQueue)")
-        cell.set(for: userInQueue)
+        cell.set(for: userInQueue.username)
         return cell
     }
     
@@ -211,12 +210,8 @@ extension SearchVC: UITableViewDataSource, UITableViewDelegate {
 
 extension SearchVC: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        if searchBar.text!.isEmpty {
-            //Text is empty, show suggested searches again
-            setToSuggestedSearches()
-        } else {
-            searchFriendsResultController.showSuggestedSearches = false
-        }
+        searchFriendsResultController.showSuggestedSearches = false
+        searchFriendsResultController.search(with: searchText)
     }
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {

@@ -152,7 +152,7 @@ extension AddFriendVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = friendSearchResultsTable.dequeueReusableCell(withIdentifier: ProfileUsernameCell.reuseID) as! ProfileUsernameCell
         let suggestedUser = friendSearchResults[indexPath.section]
-        cell.set(for: suggestedUser)
+        cell.set(for: suggestedUser.username)
         return cell
     }
     

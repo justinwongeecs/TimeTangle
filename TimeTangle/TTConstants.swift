@@ -33,6 +33,7 @@ struct TTConstants {
     static let roomStartingDate = "startingDate"
     static let roomEndingDate = "endingDate"
     static let roomHistories = "histories"
+    static let roomAdmins = "admins"
     //MARK: - UI
     static let emptyStateViewTag = 100
 }

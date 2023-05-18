@@ -9,6 +9,10 @@ import UIKit
 import CalendarKit
 import FirebaseFirestore
 
+protocol RoomUpdateDelegate: AnyObject {
+    func roomDidUpdate(for room: TTRoom)
+}
+
 class RoomDetailVC: UIViewController {
     
     @IBOutlet weak var usersCountButton: UIButton!
@@ -57,6 +61,11 @@ class RoomDetailVC: UIViewController {
             startingDatePicker.isUserInteractionEnabled = false
             endingDatePicker.isEnabled = false
             endingDatePicker.isUserInteractionEnabled = false
+        } else {
+            startingDatePicker.isEnabled = true
+            startingDatePicker.isUserInteractionEnabled = true
+            endingDatePicker.isEnabled = true
+            endingDatePicker.isUserInteractionEnabled = true
         }
     }
     
@@ -287,6 +296,7 @@ class RoomDetailVC: UIViewController {
     //push new view controller to display list of members view
     @IBAction func clickedUsersCountButton(_ sender: UIButton) {
         roomUsersVC = RoomUsersVC(room: room, usersNotVisible: usersThatAreNotVisible)
+        roomUsersVC.delegate = self 
         navigationController?.pushViewController(roomUsersVC, animated: true)
     }
     
@@ -402,7 +412,6 @@ extension RoomDetailVC: RoomUserCellDelegate {
             usersThatAreNotVisible.append(username)
         }
        updateRoomAggregateVC()
-       print("hello: \(usersThatAreNotVisible)")
     }
 }
 
@@ -415,6 +424,13 @@ extension RoomDetailVC: RoomAggregateResultVCDelegate {
     
     private func convertCalendarKitEventToTTEvent(event: Event) -> TTEvent {
         return TTEvent(name: event.text, startDate: event.dateInterval.start, endDate: event.dateInterval.end, isAllDay: event.isAllDay)
+    }
+}
+
+extension RoomDetailVC: RoomUpdateDelegate {
+    func roomDidUpdate(for room: TTRoom) {
+        self.room = room
+        updateView()
     }
 }
 

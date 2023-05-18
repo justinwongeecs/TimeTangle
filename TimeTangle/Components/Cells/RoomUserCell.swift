@@ -17,6 +17,7 @@ class RoomUserCell: ProfileUsernameCell {
     //Eventually save this setting for the session
     private var room: TTRoom!
     private var isUserVisible: Bool = true
+    private let adminIndicatorView: UIImageView = UIImageView()
     private let visibilityButton = UIButton(type: .custom)
     
     weak var delegate: RoomUserCellDelegate?
@@ -29,11 +30,11 @@ class RoomUserCell: ProfileUsernameCell {
         super.init(coder: coder)
     }
     
-    func set(for user: TTUser, usersNotVisible: [String], room: TTRoom) {
-        super.set(for: user)
+    func set(for username: String, usersNotVisible: [String], room: TTRoom) {
+        super.set(for: username)
         self.room = room
         
-        if usersNotVisible.contains(user.username) {
+        if usersNotVisible.contains(username) {
             isUserVisible = false
         } else {
             isUserVisible = true
@@ -42,6 +43,17 @@ class RoomUserCell: ProfileUsernameCell {
         configureVisibilityButton()
         displayCorrectVisibilityButton()
         configureAdminIndicator()
+    }
+    
+    func updateAdminIndicator() {
+        print("update admin indicator for \(getUsername())")
+        if adminIndicatorView.tintColor == .systemPurple {
+            print("clear")
+            adminIndicatorView.tintColor = .clear
+        } else {
+            print("purple")
+            adminIndicatorView.tintColor = .systemPurple
+        }
     }
     
     private func configureVisibilityButton() {
@@ -60,10 +72,10 @@ class RoomUserCell: ProfileUsernameCell {
     }
     
     private func configureAdminIndicator() {
-        guard let user = user, room.doesContainsAdmin(for: user.username) else { return }
-        //Admin Indicator
-        let adminIndicatorView = UIImageView(image: UIImage(systemName: "person.2.badge.gearshape.fill", withConfiguration: UIImage.SymbolConfiguration(pointSize: 16, weight: .regular, scale: .medium)))
-        adminIndicatorView.tintColor = .systemPurple
+        
+        let imageView = UIImageView(image: UIImage(systemName: "person.2.badge.gearshape.fill", withConfiguration: UIImage.SymbolConfiguration(pointSize: 16, weight: .regular, scale: .medium)))
+        
+        adminIndicatorView.image = imageView.image?.withRenderingMode(.alwaysTemplate)
         adminIndicatorView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(adminIndicatorView)
         
@@ -71,6 +83,12 @@ class RoomUserCell: ProfileUsernameCell {
             adminIndicatorView.centerYAnchor.constraint(equalTo: centerYAnchor),
             adminIndicatorView.leadingAnchor.constraint(equalTo: usernameLabel.trailingAnchor, constant: 10)
         ])
+        
+        if room.doesContainsAdmin(for: getUsername()) {
+            adminIndicatorView.tintColor = .systemPurple
+        } else {
+            adminIndicatorView.tintColor = .clear
+        }
     }
     
     private func displayCorrectVisibilityButton() {
@@ -86,7 +104,8 @@ class RoomUserCell: ProfileUsernameCell {
     @objc private func toggleVisibility() {
         isUserVisible.toggle()
         displayCorrectVisibilityButton()
-        guard let delegate = delegate, let username = user?.username else { return }
-        delegate.changedUserVisibility(for: username)
+        if let delegate = delegate {
+            delegate.changedUserVisibility(for: getUsername())
+        }
     }
 }
