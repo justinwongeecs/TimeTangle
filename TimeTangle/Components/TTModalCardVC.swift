@@ -12,6 +12,8 @@ class TTModalCardVC: UIViewController {
     let outsideMainView = UIView()
     let containerView = UIView()
     
+    var heightConstraint: NSLayoutConstraint!
+    
     weak var delegate: CloseButtonDelegate?
 
     override func viewDidLoad() {
@@ -50,11 +52,13 @@ class TTModalCardVC: UIViewController {
         containerView.layer.borderColor = UIColor.white.cgColor
         containerView.translatesAutoresizingMaskIntoConstraints = false
         
+        heightConstraint =   containerView.heightAnchor.constraint(equalToConstant: 350)
+        heightConstraint.isActive = true
+        
         NSLayoutConstraint.activate([
             containerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 100),
             containerView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
             containerView.widthAnchor.constraint(equalToConstant: 350),
-            containerView.heightAnchor.constraint(equalToConstant: 350)
         ])
         
     }

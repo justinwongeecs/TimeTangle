@@ -21,12 +21,16 @@ class RoomAggregateResultVC: DayViewController {
     private var currentPresentedDate: Date!
     
     private var stepperDayHeaderView = UIView()
+    private var rightStepper = UIButton(type: .custom)
     private var calendarViewButton = UIButton(type: .custom)
+    private var leftStepper = UIButton(type: .custom)
+    
     
     weak var roomAggregateResultDelegate: RoomAggregateResultVCDelegate?
     
     required init(room: TTRoom, usersNotVisible: [String]) {
         self.room = room
+        self.currentPresentedDate = room.startingDate
         self.usersNotVisible = usersNotVisible
         super.init(nibName: nil, bundle: nil)
     }
@@ -74,14 +78,12 @@ class RoomAggregateResultVC: DayViewController {
         let largeConfig = UIImage.SymbolConfiguration(pointSize: 17.0, weight: .bold, scale: .large)
         let tintColor = UIColor.lightGray
         
-        let leftStepper = UIButton(type: .custom)
         leftStepper.setImage(UIImage(systemName: "chevron.left.circle.fill", withConfiguration: largeConfig), for: .normal)
         leftStepper.tintColor = tintColor
         leftStepper.translatesAutoresizingMaskIntoConstraints = false
         leftStepper.addTarget(self, action: #selector(gotoPreviousDate), for: .touchUpInside)
         stepperDayHeaderView.addSubview(leftStepper)
         
-        let rightStepper = UIButton(type: .custom)
         rightStepper.setImage(UIImage(systemName: "chevron.right.circle.fill", withConfiguration: largeConfig), for: .normal)
         rightStepper.tintColor = tintColor
         rightStepper.translatesAutoresizingMaskIntoConstraints = false
@@ -123,16 +125,13 @@ class RoomAggregateResultVC: DayViewController {
     }
     
     @objc private func gotoPreviousDate() {
-        if let yesterdayDate = dayView.calendar.date(byAdding: .day, value: -1, to: currentPresentedDate) {
-            move(to: yesterdayDate)
-        }
+        moveToYesterdayDate()
     }
     
     @objc private func goToNextDate() {
-        if let tomorrowDate = dayView.calendar.date(byAdding: .day, value: 1, to: currentPresentedDate) {
-            move(to: tomorrowDate)
-        }
+        moveToTomorrowDate()
     }
+    
     
     @objc private func presentCalendarModalCardVC() {
         let calendarModalCardVC = CalendarModalCardVC(startingDate: room.startingDate, endingDate: room.endingDate) { [weak self] selectedDate in
@@ -143,8 +142,44 @@ class RoomAggregateResultVC: DayViewController {
         calendarModalCardVC.delegate = self
         calendarModalCardVC.modalPresentationStyle = .overFullScreen
         calendarModalCardVC.modalTransitionStyle = .crossDissolve
+       
         present(calendarModalCardVC, animated: true)
     }
+    
+    private func moveToYesterdayDate() {
+        if let yesterdayDate = dayView.calendar.date(byAdding: .day, value: -1, to: currentPresentedDate) {
+            move(to: yesterdayDate)
+        }
+    }
+    
+    private func moveToTomorrowDate() {
+        if let tomorrowDate = dayView.calendar.date(byAdding: .day, value: 1, to: currentPresentedDate) {
+            move(to: tomorrowDate)
+        }
+    }
+    
+    private func configureStepperButtons() {
+        if let yesterdayDate = dayView.calendar.date(byAdding: .day, value: -1, to: currentPresentedDate) {
+            let result = Calendar.current.compare(yesterdayDate, to: room.startingDate, toGranularity: .day)
+            if result == .orderedSame || result == .orderedDescending{
+                leftStepper.isEnabled = true
+            } else if result == .orderedAscending {
+                //Yesterday date is before room.startingDate
+                leftStepper.isEnabled = false
+            }
+        }
+        
+        if let tomorrowDate = dayView.calendar.date(byAdding: .day, value: 1, to: currentPresentedDate) {
+            let result = Calendar.current.compare(tomorrowDate, to: room.endingDate, toGranularity: .day)
+            if result == .orderedSame || result == .orderedAscending{
+                rightStepper.isEnabled = true
+            } else if result == .orderedDescending {
+                //room date is before room.endingDate
+                rightStepper.isEnabled = false
+            }
+        }
+    }
+    
     
     private func configureTimelinePagerView() {
         NSLayoutConstraint.activate([
@@ -214,7 +249,7 @@ class RoomAggregateResultVC: DayViewController {
         //create events based on openIntervals
         for openInterval in openIntervals {
             let newEvent = Event()
-            newEvent.text = "Open Interval \(openIntervals.firstIndex(of: openInterval))"
+            newEvent.text = "Open Interval"
             newEvent.dateInterval = openInterval
             newEvent.color = .systemPurple
             newEvent.lineBreakMode = .byTruncatingTail
@@ -240,9 +275,9 @@ class RoomAggregateResultVC: DayViewController {
     }
     
     override func dayView(dayView: DayView, willMoveTo date: Date) {
-        print("willmoveto")
         calendarViewButton.setTitle(date.formatted(with: "MMM d y"), for: .normal)
         self.currentPresentedDate = date
+        configureStepperButtons()
     }
 }
 

@@ -7,12 +7,16 @@
 
 import UIKit
 
+//Only Supports Single Date Selection
 class CalendarModalCardVC: TTModalCardVC {
     
     private let calendarView = UICalendarView()
+    private let confirmButton = UIButton(type: .custom)
+    
     private var startingDate: Date!
     private var endingDate: Date!
     private var dateSelectionClosure: (Date) -> Void
+    private var selectedDate: Date?
     
     required init(startingDate: Date, endingDate: Date, dateSelectionClosure: @escaping((Date) -> Void)) {
         self.startingDate = startingDate
@@ -27,10 +31,11 @@ class CalendarModalCardVC: TTModalCardVC {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        configure()
+        configureConfirmButton()
+        configureCalendarView()
     }
     
-    private func configure() {
+    private func configureCalendarView() {
         let calendarViewDateRange = DateInterval(start: startingDate, end: endingDate)
         containerView.addSubview(calendarView)
         calendarView.calendar = Calendar(identifier: .gregorian)
@@ -45,8 +50,47 @@ class CalendarModalCardVC: TTModalCardVC {
             calendarView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: padding),
             calendarView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: padding),
             calendarView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -padding),
-            calendarView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -padding)
+            calendarView.bottomAnchor.constraint(equalTo: confirmButton.topAnchor, constant: -padding)
         ])
+    }
+    
+    private func configureConfirmButton() {
+        containerView.addSubview(confirmButton)
+        confirmButton.backgroundColor = .systemGreen
+        confirmButton.setTitle("Confirm", for: .normal)
+        confirmButton.setTitleColor(.white, for: .normal)
+        confirmButton.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .bold)
+        confirmButton.isHidden = true
+        confirmButton.layer.cornerRadius = 10.0
+        confirmButton.layer.opacity = 0.0
+        confirmButton.addTarget(self, action: #selector(clickedConfirm), for: .touchUpInside)
+        confirmButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            confirmButton.heightAnchor.constraint(equalToConstant: 40),
+            confirmButton.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 70),
+            confirmButton.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -70),
+            confirmButton.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -10)
+        ])
+    }
+    
+    private func presentConfirmButton() {
+        UIView.animate(withDuration: 0.5, delay: 0, options: .beginFromCurrentState) {
+            self.confirmButton.layer.opacity = 1.0
+            self.confirmButton.isHidden = false
+            self.heightConstraint.isActive = false
+            self.heightConstraint = self.containerView.heightAnchor.constraint(equalToConstant: 450)
+            self.heightConstraint.isActive = true
+            self.containerView.layoutIfNeeded()
+            self.containerView.layoutSubviews()
+        }
+    }
+    
+    @objc private func clickedConfirm() {
+        if let selectedDate = selectedDate {
+            dateSelectionClosure(selectedDate)
+            dismissVC()
+        }
     }
 }
 
@@ -54,8 +98,8 @@ class CalendarModalCardVC: TTModalCardVC {
 extension CalendarModalCardVC: UICalendarSelectionSingleDateDelegate {
     func dateSelection(_ selection: UICalendarSelectionSingleDate, didSelectDate dateComponents: DateComponents?) {
         if let dateComponents = dateComponents, let date = Calendar.current.date(from: dateComponents) {
-            dateSelectionClosure(date)
-            dismissVC()
+            presentConfirmButton()
+            self.selectedDate = date
         }
     }
 }
