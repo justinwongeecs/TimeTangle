@@ -15,6 +15,8 @@ class AddUsersModalVC: TTModalCardVC {
     
     private let room: TTRoom!
     
+    private let containerViewHeader = UIStackView()
+    private var headerLabel = TTTitleLabel(textAlignment: .center, fontSize: 18)
     private var mainContentView = UIView()
     private var filteredFriends = [String]()
     private let friendsSearchBar = UISearchBar()
@@ -26,6 +28,7 @@ class AddUsersModalVC: TTModalCardVC {
     override func viewDidLoad() {
         super.viewDidLoad()
         headerLabel.text = "Add Friend To Room"
+        configureContainerViewHeader()
         configureFriendsSearchBar()
         configureMainContentView()
         configureEmptyStateView()
@@ -48,6 +51,30 @@ class AddUsersModalVC: TTModalCardVC {
         let filteredFriendsNotAddedToRoom = friends.filter{ !room.users.contains($0) }
         filteredFriends = filteredFriendsNotAddedToRoom
         reloadMainContentView()
+    }
+    
+    private func configureContainerViewHeader() {
+        containerView.addSubview(containerViewHeader)
+        containerViewHeader.translatesAutoresizingMaskIntoConstraints = false
+        containerViewHeader.layer.cornerRadius = 16
+        containerViewHeader.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        containerViewHeader.backgroundColor = .systemBackground
+        containerViewHeader.axis = .horizontal
+    
+        headerLabel.font = UIFont.boldSystemFont(ofSize: 20)
+        
+        let closeButton = TTCloseButton()
+        closeButton.addTarget(self, action: #selector(dismissVC), for: .touchUpInside)
+        
+        containerViewHeader.addArrangedSubview(headerLabel)
+        containerViewHeader.addArrangedSubview(closeButton)
+        
+        NSLayoutConstraint.activate([
+            containerViewHeader.topAnchor.constraint(equalTo: containerView.topAnchor),
+            containerViewHeader.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 10),
+            containerViewHeader.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -8),
+            containerViewHeader.heightAnchor.constraint(equalToConstant: 50)
+        ])
     }
     
     private func configureFriendsSearchBar() {

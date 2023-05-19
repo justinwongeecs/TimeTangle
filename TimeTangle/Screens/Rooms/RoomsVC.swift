@@ -215,8 +215,7 @@ extension RoomsVC: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedRoom = filterRooms[indexPath.section]
-        let roomInfoVC = RoomDetailVC(nibName: "RoomDetailNib", bundle: nil)
-        roomInfoVC.set(room: selectedRoom)
+        let roomInfoVC = RoomDetailVC(room: selectedRoom, nibName: "RoomDetailNib")
         selectedVCIndex = indexPath.section
         
         navigationController?.pushViewController(roomInfoVC, animated: true)

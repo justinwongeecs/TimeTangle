@@ -10,6 +10,9 @@
 		E8188FC52A149160005AA0BF /* UIView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8188FC42A149160005AA0BF /* UIView+Ext.swift */; };
 		E8188FC72A149EA8005AA0BF /* UIImage+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8188FC62A149EA8005AA0BF /* UIImage+Ext.swift */; };
 		E8188FC92A14C641005AA0BF /* UITableView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8188FC82A14C641005AA0BF /* UITableView+Ext.swift */; };
+		E8188FCF2A15ED92005AA0BF /* SaveOrCancelIsland.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8188FCE2A15ED92005AA0BF /* SaveOrCancelIsland.swift */; };
+		E8188FD12A173D8E005AA0BF /* Date+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8188FD02A173D8D005AA0BF /* Date+Ext.swift */; };
+		E8188FD32A1751D5005AA0BF /* CalendarModalCardVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8188FD22A1751D5005AA0BF /* CalendarModalCardVC.swift */; };
 		E81D25062A145217003C65C5 /* UILabel+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E81D25052A145217003C65C5 /* UILabel+Ext.swift */; };
 		E84541AF295F818B00CBB430 /* RoomDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84541AE295F818B00CBB430 /* RoomDetailVC.swift */; };
 		E84541B2295FADDC00CBB430 /* EventKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84541B1295FADDC00CBB430 /* EventKitManager.swift */; };
@@ -77,6 +80,9 @@
 		E8188FC42A149160005AA0BF /* UIView+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Ext.swift"; sourceTree = "<group>"; };
 		E8188FC62A149EA8005AA0BF /* UIImage+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+Ext.swift"; sourceTree = "<group>"; };
 		E8188FC82A14C641005AA0BF /* UITableView+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITableView+Ext.swift"; sourceTree = "<group>"; };
+		E8188FCE2A15ED92005AA0BF /* SaveOrCancelIsland.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveOrCancelIsland.swift; sourceTree = "<group>"; };
+		E8188FD02A173D8D005AA0BF /* Date+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Ext.swift"; sourceTree = "<group>"; };
+		E8188FD22A1751D5005AA0BF /* CalendarModalCardVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarModalCardVC.swift; sourceTree = "<group>"; };
 		E81D25052A145217003C65C5 /* UILabel+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UILabel+Ext.swift"; sourceTree = "<group>"; };
 		E84541AE295F818B00CBB430 /* RoomDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomDetailVC.swift; sourceTree = "<group>"; };
 		E84541B1295FADDC00CBB430 /* EventKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventKitManager.swift; sourceTree = "<group>"; };
@@ -314,6 +320,7 @@
 				E8188FC42A149160005AA0BF /* UIView+Ext.swift */,
 				E8188FC62A149EA8005AA0BF /* UIImage+Ext.swift */,
 				E8188FC82A14C641005AA0BF /* UITableView+Ext.swift */,
+				E8188FD02A173D8D005AA0BF /* Date+Ext.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -341,6 +348,8 @@
 				E8D004AA2964056400907A64 /* RoomHistoryCell.xib */,
 				E873BCD82964E4200015AE99 /* RoomAggregateResultVC.swift */,
 				E873BCF2297910330015AE99 /* RoomSummaryVC.swift */,
+				E8188FCE2A15ED92005AA0BF /* SaveOrCancelIsland.swift */,
+				E8188FD22A1751D5005AA0BF /* CalendarModalCardVC.swift */,
 			);
 			path = Rooms;
 			sourceTree = "<group>";
@@ -448,6 +457,7 @@
 				E8CFC227295D0836006C23BE /* JoinRoomVC.swift in Sources */,
 				E8188FC52A149160005AA0BF /* UIView+Ext.swift in Sources */,
 				E8CFC224295D065B006C23BE /* JoinRoomCodeTextField.swift in Sources */,
+				E8188FD32A1751D5005AA0BF /* CalendarModalCardVC.swift in Sources */,
 				E873BCE4296693C80015AE99 /* TTCloseButton.swift in Sources */,
 				E8CEE2D92957D1FD000CD7FE /* UIViewController+Ext.swift in Sources */,
 				E8CEE2D32957C7C7000CD7FE /* TTTitledTextField.swift in Sources */,
@@ -460,6 +470,7 @@
 				E8CFC22B295D3981006C23BE /* CreateRoomConfirmationVC.swift in Sources */,
 				E893A27A295A6D40004F7BC5 /* TTConstants.swift in Sources */,
 				E873BCE2296556080015AE99 /* SettingsEditProfileVC.swift in Sources */,
+				E8188FCF2A15ED92005AA0BF /* SaveOrCancelIsland.swift in Sources */,
 				E84541B2295FADDC00CBB430 /* EventKitManager.swift in Sources */,
 				E893A271295A3718004F7BC5 /* AddFriendVC.swift in Sources */,
 				E8CEE2DD29581C85000CD7FE /* SettingsVC.swift in Sources */,
@@ -469,6 +480,7 @@
 				E8188FC92A14C641005AA0BF /* UITableView+Ext.swift in Sources */,
 				E8CEE2B92957A0C7000CD7FE /* TTButton.swift in Sources */,
 				E8CEE2E929590EBE000CD7FE /* TTAvatarImageView.swift in Sources */,
+				E8188FD12A173D8E005AA0BF /* Date+Ext.swift in Sources */,
 				E8CEE2B729579DE3000CD7FE /* TTTextField.swift in Sources */,
 				E8CEE2A12957956E000CD7FE /* AppDelegate.swift in Sources */,
 				E8D004A62963B02C00907A64 /* RoomUsersVC.swift in Sources */,

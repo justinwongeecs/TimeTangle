@@ -15,18 +15,21 @@ class CreateRoomConfirmationVC: TTModalCardVC {
     
     private var usersInQueue = [TTUser]()
     
+    private let containerViewHeader = UIStackView()
+    private var headerLabel = TTTitleLabel(textAlignment: .center, fontSize: 18)
     let roomCodeView = UIView()
     let roomCodeLabel = TTBodyLabel(textAlignment: .center)
     let roomNameTextField = UIStackView()
     let textField = TTTextField()
     let confirmationButton = TTButton(backgroundColor: .systemGreen, title: "Tangle!")
+
     
     weak var createRoomConfirmationDelegate: CreateRoomConfirmationVCDelegate!
 
     override func viewDidLoad() {
         super.viewDidLoad()
         headerLabel.text = "Confirm Room Settings"
-        
+        configureContainerViewHeader()
         configureRoomCodeView()
         configureRoomCodeLabel()
         configureRoomNameTitledText()
@@ -56,6 +59,30 @@ class CreateRoomConfirmationVC: TTModalCardVC {
             roomCodeView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 50),
             roomCodeView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -50),
             roomCodeView.heightAnchor.constraint(equalToConstant: 80)
+        ])
+    }
+    
+    private func configureContainerViewHeader() {
+        containerView.addSubview(containerViewHeader)
+        containerViewHeader.translatesAutoresizingMaskIntoConstraints = false
+        containerViewHeader.layer.cornerRadius = 16
+        containerViewHeader.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        containerViewHeader.backgroundColor = .systemBackground
+        containerViewHeader.axis = .horizontal
+    
+        headerLabel.font = UIFont.boldSystemFont(ofSize: 20)
+        
+        let closeButton = TTCloseButton()
+        closeButton.addTarget(self, action: #selector(dismissVC), for: .touchUpInside)
+        
+        containerViewHeader.addArrangedSubview(headerLabel)
+        containerViewHeader.addArrangedSubview(closeButton)
+        
+        NSLayoutConstraint.activate([
+            containerViewHeader.topAnchor.constraint(equalTo: containerView.topAnchor),
+            containerViewHeader.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 10),
+            containerViewHeader.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -8),
+            containerViewHeader.heightAnchor.constraint(equalToConstant: 50)
         ])
     }
     

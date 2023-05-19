@@ -43,7 +43,7 @@ struct TTEvent: Codable, Equatable {
         return lhs.name == rhs.name &&
         lhs.startDate == rhs.startDate &&
         lhs.endDate == rhs.endDate &&
-        lhs.isAllDay && rhs.isAllDay
+        lhs.isAllDay == rhs.isAllDay
     }
 }
 

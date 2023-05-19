@@ -202,11 +202,10 @@ class FirebaseManager {
             
             do {
                 let roomsData = try documents.map { try $0.data(as: TTRoom.self)}
-//                print("roomsdata: \(roomsData)")
                 self?.notificationCenter.post(name: .updatedCurrentUserRooms, object: roomsData)
                 print("send updated rooms notification ")
             } catch {
-                //Error gett roomsData
+                //Error get roomsData
             }
         }
     }

@@ -9,21 +9,17 @@ import UIKit
 
 class TTModalCardVC: UIViewController {
     
-    let containerViewHeader = UIStackView()
     let outsideMainView = UIView()
     let containerView = UIView()
-    var headerLabel = TTTitleLabel(textAlignment: .center, fontSize: 18)
     
-    weak var delegate: CloseButtonDelegate!
+    weak var delegate: CloseButtonDelegate?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.75)
-        // Do any additional setup after loading the view.
         configureDismissViewController()
         configureOutsideMainView()
         configureContainerView()
-        configureContainerViewHeader()
     }
     
     func configureDismissViewController() {
@@ -47,7 +43,6 @@ class TTModalCardVC: UIViewController {
     
     private func configureContainerView() {
         view.addSubview(containerView)
-//        view.bringSubviewToFront(containerView)
         
         containerView.backgroundColor = .systemBackground
         containerView.layer.cornerRadius = 16
@@ -56,7 +51,6 @@ class TTModalCardVC: UIViewController {
         containerView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            //            containerView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor),
             containerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 100),
             containerView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
             containerView.widthAnchor.constraint(equalToConstant: 350),
@@ -65,31 +59,9 @@ class TTModalCardVC: UIViewController {
         
     }
     
-    private func configureContainerViewHeader() {
-        containerView.addSubview(containerViewHeader)
-        containerViewHeader.translatesAutoresizingMaskIntoConstraints = false
-        containerViewHeader.layer.cornerRadius = 16
-        containerViewHeader.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        containerViewHeader.backgroundColor = .systemBackground
-        containerViewHeader.axis = .horizontal
-    
-        headerLabel.font = UIFont.boldSystemFont(ofSize: 20)
-        
-        let closeButton = TTCloseButton()
-        closeButton.addTarget(self, action: #selector(dismissVC), for: .touchUpInside)
-        
-        containerViewHeader.addArrangedSubview(headerLabel)
-        containerViewHeader.addArrangedSubview(closeButton)
-        
-        NSLayoutConstraint.activate([
-            containerViewHeader.topAnchor.constraint(equalTo: containerView.topAnchor),
-            containerViewHeader.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 10),
-            containerViewHeader.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -8),
-            containerViewHeader.heightAnchor.constraint(equalToConstant: 50)
-        ])
-    }
-    
-    @objc private func dismissVC() {
-        delegate.didDismissPresentedView()
+    @objc internal func dismissVC() {
+        if let delegate = delegate {
+            delegate.didDismissPresentedView()
+        }
     }
 }
