@@ -62,9 +62,9 @@ class SaveOrCancelIsland: UIView {
         
         let blurEffect: UIBlurEffect!
         if traitCollection.userInterfaceStyle == .light {
-            blurEffect = UIBlurEffect(style: .systemMaterialDark)
+            blurEffect = UIBlurEffect(style: .dark)
         } else {
-            blurEffect = UIBlurEffect(style: .systemMaterialLight)
+            blurEffect = UIBlurEffect(style: .light)
         }
      
         let blurView = UIVisualEffectView(effect: blurEffect)

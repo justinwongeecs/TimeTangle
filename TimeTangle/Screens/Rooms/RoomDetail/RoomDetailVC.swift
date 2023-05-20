@@ -24,11 +24,12 @@ class RoomDetailVC: UIViewController {
     private var roomUsersVC: RoomUsersVC!
     private var room: TTRoom!
     private var roomHistoryVC: RoomHistoryVC!
-    private var roomSummaryVC: RoomSummaryVC!
+    private var roomOverviewVC: RoomOverviewVC!
     private var confirmRoomChangesContainerView: UIView!
     private var saveOrCancelIsland: SaveOrCancelIsland!
     
     private var originalRoomState: TTRoom!
+    private var openIntervals = [TTEvent]()
     private var isPresentingRoomChangesView: Bool = false
     
     //filters displaying users
@@ -55,17 +56,21 @@ class RoomDetailVC: UIViewController {
         updateView()
     }
     
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        
-        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-        }
-    }
+//    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+//        super.traitCollectionDidChange(previousTraitCollection)
+//
+//        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+//        }
+//    }
     
     private func setOriginalRoomState(with room: TTRoom) {
         //copy of room assigned to originalRoomState since TTRoom is a struct
         originalRoomState = room
-    }
+//        if let events = roomAggregateVC.createEventsForOpenIntervals(with: originalRoomState.events) {
+//            let ttEvents = events.map { $0.toTTEvent() }
+//            originalRoomState.events.append(contentsOf: ttEvents)
+//        }
+    } 
     
     private func configureAdminEnability() {
         guard let currentUser = FirebaseManager.shared.currentUser else { return }
@@ -142,10 +147,9 @@ class RoomDetailVC: UIViewController {
         let ekManager = EventKitManager()
         let userEventsWithinRoomRange = ekManager.getUserTTEvents(from: room.startingDate, to: room.endingDate)
 
-
         for userEvent in userEventsWithinRoomRange {
-            if !originalRoomState.events.contains(userEvent) {
-                originalRoomState.events.append(userEvent)
+            if !room.events.contains(userEvent) {
+                room.events.append(userEvent)
             }
         }
         updateRoomAggregateVC()
@@ -154,8 +158,8 @@ class RoomDetailVC: UIViewController {
     
     @objc func clickedOnViewResultButton(_ sender: UIButton) {
         //show summary view
-        roomSummaryVC = RoomSummaryVC(room: room, notVisibleMembers: usersThatAreNotVisible)
-        navigationController?.pushViewController(roomSummaryVC, animated: true)
+        roomOverviewVC = RoomOverviewVC(room: room, notVisibleMembers: usersThatAreNotVisible, openIntervals: openIntervals)
+        navigationController?.pushViewController(roomOverviewVC, animated: true)
     }
     
     @objc private func showAddUserModal() {
@@ -256,7 +260,7 @@ class RoomDetailVC: UIViewController {
     
     private func updateRoomAggregateVC() {
         //filter and or add to room.events so that between startDate and endDate
-        room.events = originalRoomState.events.filter { $0.startDate >= startingDatePicker.date && $0.endDate <= endingDatePicker.date }
+        room.events = room.events.filter { $0.startDate >= startingDatePicker.date && $0.endDate <= endingDatePicker.date }
         roomAggregateVC.setView(usersNotVisible: usersThatAreNotVisible, room: room)
     }
     
@@ -270,7 +274,7 @@ class RoomDetailVC: UIViewController {
 
 extension RoomDetailVC: CloseButtonDelegate {
     func didDismissPresentedView() {
-        dismiss(animated: true )
+        dismiss(animated: true)
     }
 }
 
@@ -322,13 +326,7 @@ extension RoomDetailVC: RoomUserCellDelegate {
 
 extension RoomDetailVC: RoomAggregateResultVCDelegate {
     func updatedAggregateResultVC(events: [Event]) {
-        let updatedTTEvents = events.map { convertCalendarKitEventToTTEvent(event: $0) }
-        print(updatedTTEvents)
-        room.events = updatedTTEvents
-    }
-    
-    private func convertCalendarKitEventToTTEvent(event: Event) -> TTEvent {
-        return TTEvent(name: event.text, startDate: event.dateInterval.start, endDate: event.dateInterval.end, isAllDay: event.isAllDay)
+        openIntervals = events.map { $0.toTTEvent() }
     }
 }
 
@@ -342,10 +340,10 @@ extension RoomDetailVC: RoomUpdateDelegate {
 extension RoomDetailVC: SaveOrCancelIslandDelegate {
     func didCancelIsland() {
         room = originalRoomState
+        updateRoomAggregateVC()
     }
     
     func didSaveIsland() {
-        //update room's ending date in Firestore
         let previousStartingDate = originalRoomState.startingDate
         let previousEndingDate = originalRoomState.endingDate
         

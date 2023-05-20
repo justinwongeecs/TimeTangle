@@ -45,9 +45,8 @@ struct TTEvent: Codable, Equatable {
         lhs.endDate == rhs.endDate &&
         lhs.isAllDay == rhs.isAllDay
     }
+    
+    func getDateInterval() -> DateInterval {
+        return DateInterval(start: self.startDate, end: self.endDate)
+    }
 }
-
-//struct TTRoomEvent: Codable {
-//    var ownerUsername: String
-//    var events: [TTEvent]
-//}

@@ -13,6 +13,7 @@
 		E8188FCF2A15ED92005AA0BF /* SaveOrCancelIsland.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8188FCE2A15ED92005AA0BF /* SaveOrCancelIsland.swift */; };
 		E8188FD12A173D8E005AA0BF /* Date+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8188FD02A173D8D005AA0BF /* Date+Ext.swift */; };
 		E8188FD32A1751D5005AA0BF /* CalendarModalCardVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8188FD22A1751D5005AA0BF /* CalendarModalCardVC.swift */; };
+		E8188FDD2A18811A005AA0BF /* Event+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8188FDC2A18811A005AA0BF /* Event+Ext.swift */; };
 		E81D25062A145217003C65C5 /* UILabel+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E81D25052A145217003C65C5 /* UILabel+Ext.swift */; };
 		E84541AF295F818B00CBB430 /* RoomDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84541AE295F818B00CBB430 /* RoomDetailVC.swift */; };
 		E84541B2295FADDC00CBB430 /* EventKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84541B1295FADDC00CBB430 /* EventKitManager.swift */; };
@@ -25,7 +26,7 @@
 		E873BCE72966A0DC0015AE99 /* FirebaseStorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E873BCE62966A0DC0015AE99 /* FirebaseStorageManager.swift */; };
 		E873BCE92968D5860015AE99 /* CreateAccountVCNib.xib in Resources */ = {isa = PBXBuildFile; fileRef = E873BCE82968D5860015AE99 /* CreateAccountVCNib.xib */; };
 		E873BCEB296904F50015AE99 /* RoomUserCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E873BCEA296904F50015AE99 /* RoomUserCell.swift */; };
-		E873BCF3297910330015AE99 /* RoomSummaryVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E873BCF2297910330015AE99 /* RoomSummaryVC.swift */; };
+		E873BCF3297910330015AE99 /* RoomOverviewVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E873BCF2297910330015AE99 /* RoomOverviewVC.swift */; };
 		E893A25F2959611B004F7BC5 /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = E893A25E2959611B004F7BC5 /* FirebaseAppCheck */; };
 		E893A2612959611B004F7BC5 /* FirebaseAppDistribution-Beta in Frameworks */ = {isa = PBXBuildFile; productRef = E893A2602959611B004F7BC5 /* FirebaseAppDistribution-Beta */; };
 		E893A2632959611B004F7BC5 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = E893A2622959611B004F7BC5 /* FirebaseAuth */; };
@@ -83,6 +84,7 @@
 		E8188FCE2A15ED92005AA0BF /* SaveOrCancelIsland.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveOrCancelIsland.swift; sourceTree = "<group>"; };
 		E8188FD02A173D8D005AA0BF /* Date+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Ext.swift"; sourceTree = "<group>"; };
 		E8188FD22A1751D5005AA0BF /* CalendarModalCardVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarModalCardVC.swift; sourceTree = "<group>"; };
+		E8188FDC2A18811A005AA0BF /* Event+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Event+Ext.swift"; sourceTree = "<group>"; };
 		E81D25052A145217003C65C5 /* UILabel+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UILabel+Ext.swift"; sourceTree = "<group>"; };
 		E84541AE295F818B00CBB430 /* RoomDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomDetailVC.swift; sourceTree = "<group>"; };
 		E84541B1295FADDC00CBB430 /* EventKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventKitManager.swift; sourceTree = "<group>"; };
@@ -94,7 +96,7 @@
 		E873BCE62966A0DC0015AE99 /* FirebaseStorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseStorageManager.swift; sourceTree = "<group>"; };
 		E873BCE82968D5860015AE99 /* CreateAccountVCNib.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CreateAccountVCNib.xib; sourceTree = "<group>"; };
 		E873BCEA296904F50015AE99 /* RoomUserCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomUserCell.swift; sourceTree = "<group>"; };
-		E873BCF2297910330015AE99 /* RoomSummaryVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomSummaryVC.swift; sourceTree = "<group>"; };
+		E873BCF2297910330015AE99 /* RoomOverviewVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomOverviewVC.swift; sourceTree = "<group>"; };
 		E893A26C2959859D004F7BC5 /* FriendsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsVC.swift; sourceTree = "<group>"; };
 		E893A26E29598E2F004F7BC5 /* TTEmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTEmptyStateView.swift; sourceTree = "<group>"; };
 		E893A270295A3718004F7BC5 /* AddFriendVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFriendVC.swift; sourceTree = "<group>"; };
@@ -159,6 +161,42 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E8188FD62A185B7C005AA0BF /* RoomDetail */ = {
+			isa = PBXGroup;
+			children = (
+				E84541AE295F818B00CBB430 /* RoomDetailVC.swift */,
+				E84541B4295FC17500CBB430 /* RoomDetailNib.xib */,
+			);
+			path = RoomDetail;
+			sourceTree = "<group>";
+		};
+		E8188FD72A185B8B005AA0BF /* RoomUsers */ = {
+			isa = PBXGroup;
+			children = (
+				E8D004A52963B02C00907A64 /* RoomUsersVC.swift */,
+				E8CEE2BA2957A89C000CD7FE /* AddUsersModalVC.swift */,
+			);
+			path = RoomUsers;
+			sourceTree = "<group>";
+		};
+		E8188FD82A185BA1005AA0BF /* RoomHistory */ = {
+			isa = PBXGroup;
+			children = (
+				E8D004A82963B82B00907A64 /* RoomHistoryVC.swift */,
+				E8D004AA2964056400907A64 /* RoomHistoryCell.xib */,
+			);
+			path = RoomHistory;
+			sourceTree = "<group>";
+		};
+		E8188FD92A185BC0005AA0BF /* RoomAggregateResult */ = {
+			isa = PBXGroup;
+			children = (
+				E873BCD82964E4200015AE99 /* RoomAggregateResultVC.swift */,
+				E8188FD22A1751D5005AA0BF /* CalendarModalCardVC.swift */,
+			);
+			path = RoomAggregateResult;
+			sourceTree = "<group>";
+		};
 		E84541B0295F81A000CBB430 /* Login */ = {
 			isa = PBXGroup;
 			children = (
@@ -321,6 +359,7 @@
 				E8188FC62A149EA8005AA0BF /* UIImage+Ext.swift */,
 				E8188FC82A14C641005AA0BF /* UITableView+Ext.swift */,
 				E8188FD02A173D8D005AA0BF /* Date+Ext.swift */,
+				E8188FDC2A18811A005AA0BF /* Event+Ext.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -339,17 +378,13 @@
 		E8D004A72963B04500907A64 /* Rooms */ = {
 			isa = PBXGroup;
 			children = (
-				E84541AE295F818B00CBB430 /* RoomDetailVC.swift */,
-				E84541B4295FC17500CBB430 /* RoomDetailNib.xib */,
+				E8188FD62A185B7C005AA0BF /* RoomDetail */,
+				E8188FD92A185BC0005AA0BF /* RoomAggregateResult */,
+				E8188FD82A185BA1005AA0BF /* RoomHistory */,
+				E8188FD72A185B8B005AA0BF /* RoomUsers */,
 				E8CFC22C295D5E55006C23BE /* RoomsVC.swift */,
-				E8D004A52963B02C00907A64 /* RoomUsersVC.swift */,
-				E8CEE2BA2957A89C000CD7FE /* AddUsersModalVC.swift */,
-				E8D004A82963B82B00907A64 /* RoomHistoryVC.swift */,
-				E8D004AA2964056400907A64 /* RoomHistoryCell.xib */,
-				E873BCD82964E4200015AE99 /* RoomAggregateResultVC.swift */,
-				E873BCF2297910330015AE99 /* RoomSummaryVC.swift */,
+				E873BCF2297910330015AE99 /* RoomOverviewVC.swift */,
 				E8188FCE2A15ED92005AA0BF /* SaveOrCancelIsland.swift */,
-				E8188FD22A1751D5005AA0BF /* CalendarModalCardVC.swift */,
 			);
 			path = Rooms;
 			sourceTree = "<group>";
@@ -479,13 +514,14 @@
 				E893A27C295A7564004F7BC5 /* FriendRequestCell.swift in Sources */,
 				E8188FC92A14C641005AA0BF /* UITableView+Ext.swift in Sources */,
 				E8CEE2B92957A0C7000CD7FE /* TTButton.swift in Sources */,
+				E8188FDD2A18811A005AA0BF /* Event+Ext.swift in Sources */,
 				E8CEE2E929590EBE000CD7FE /* TTAvatarImageView.swift in Sources */,
 				E8188FD12A173D8E005AA0BF /* Date+Ext.swift in Sources */,
 				E8CEE2B729579DE3000CD7FE /* TTTextField.swift in Sources */,
 				E8CEE2A12957956E000CD7FE /* AppDelegate.swift in Sources */,
 				E8D004A62963B02C00907A64 /* RoomUsersVC.swift in Sources */,
 				E893A26D2959859D004F7BC5 /* FriendsVC.swift in Sources */,
-				E873BCF3297910330015AE99 /* RoomSummaryVC.swift in Sources */,
+				E873BCF3297910330015AE99 /* RoomOverviewVC.swift in Sources */,
 				E8CEE2CC2957B102000CD7FE /* TTTitleLabel.swift in Sources */,
 				E8CEE2CE2957BF22000CD7FE /* CreateAccountVC.swift in Sources */,
 				E8CFC229295D371D006C23BE /* TTModalCardVC.swift in Sources */,

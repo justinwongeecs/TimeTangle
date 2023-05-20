@@ -28,4 +28,8 @@ extension Date {
     func getDayComponent() -> Int {
         return Calendar.current.component(.day, from: self)
     }
+    
+    func compare(with date: Date, toGranularity: Calendar.Component) -> ComparisonResult {
+        return Calendar.current.compare(self, to: date, toGranularity: toGranularity)
+    }
 }

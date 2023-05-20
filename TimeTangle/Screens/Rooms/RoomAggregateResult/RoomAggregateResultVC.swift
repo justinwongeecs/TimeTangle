@@ -16,7 +16,7 @@ protocol RoomAggregateResultVCDelegate: AnyObject {
 class RoomAggregateResultVC: DayViewController {
     
     private var room: TTRoom!
-    private var openIntervals = [DateInterval]()
+    private var openDateIntervals = [DateInterval]()
     private var usersNotVisible = [String]()
     private var currentPresentedDate: Date!
     
@@ -53,14 +53,14 @@ class RoomAggregateResultVC: DayViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        move(to: room?.startingDate ?? Date())
+        move(to: currentPresentedDate)
         dayView.autoScrollToFirstEvent = true
     }
     
     func setView(usersNotVisible: [String], room: TTRoom) {
         self.usersNotVisible = usersNotVisible
         self.room = room
-        print("New Room: \(room)")
+
         dayView.reloadData()
     }
     
@@ -70,10 +70,6 @@ class RoomAggregateResultVC: DayViewController {
         stepperDayHeaderView.isUserInteractionEnabled = true
         stepperDayHeaderView.frame.size = CGSize(width: UIScreen.main.bounds.size.width, height: 40)
         stepperDayHeaderView.translatesAutoresizingMaskIntoConstraints = false
-//        let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .regular))
-//        blurView.frame = stepperDayHeaderView.bounds
-//        blurView.autoresizingMask = .flexibleWidth
-//        stepperDayHeaderView.insertSubview(blurView, at: 0)
         
         let largeConfig = UIImage.SymbolConfiguration(pointSize: 17.0, weight: .bold, scale: .large)
         let tintColor = UIColor.lightGray
@@ -94,24 +90,19 @@ class RoomAggregateResultVC: DayViewController {
         calendarViewButton.layer.cornerRadius = 5.0
         calendarViewButton.backgroundColor = UIColor.lightGray.withAlphaComponent(0.6)
         calendarViewButton.setTitleColor(.white, for: .normal)
-        calendarViewButton.titleLabel?.font = UIFont.systemFont(ofSize: 15)
+        calendarViewButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 15)
         calendarViewButton.translatesAutoresizingMaskIntoConstraints = false
         calendarViewButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
         calendarViewButton.addTarget(self, action: #selector(presentCalendarModalCardVC), for: .touchUpInside)
         stepperDayHeaderView.addSubview(calendarViewButton)
         
         NSLayoutConstraint.activate([
-//            blurView.topAnchor.constraint(equalTo: stepperDayHeaderView.topAnchor),
-//            blurView.leadingAnchor.constraint(equalTo: stepperDayHeaderView.leadingAnchor),
-//            blurView.trailingAnchor.constraint(equalTo: stepperDayHeaderView.trailingAnchor),
-//            blurView.bottomAnchor.constraint(equalTo: stepperDayHeaderView.bottomAnchor),
-//
             leftStepper.leadingAnchor.constraint(equalTo: stepperDayHeaderView.leadingAnchor, constant: 10),
             leftStepper.centerYAnchor.constraint(equalTo: stepperDayHeaderView.centerYAnchor),
             
             calendarViewButton.centerYAnchor.constraint(equalTo: stepperDayHeaderView.centerYAnchor),
             calendarViewButton.centerXAnchor.constraint(equalTo: stepperDayHeaderView.centerXAnchor),
-            calendarViewButton.widthAnchor.constraint(equalToConstant: 100),
+            calendarViewButton.widthAnchor.constraint(equalToConstant: 150),
             calendarViewButton.heightAnchor.constraint(equalToConstant: 30),
             
             rightStepper.trailingAnchor.constraint(equalTo: stepperDayHeaderView.trailingAnchor, constant: -10),
@@ -195,7 +186,7 @@ class RoomAggregateResultVC: DayViewController {
         guard let room = room else { return [] }
         
         var events = [Event]()
-        openIntervals = [DateInterval]()
+        openDateIntervals = [DateInterval]()
 
         for ttEvent in room.events {
             let newEvent = Event()
@@ -207,9 +198,8 @@ class RoomAggregateResultVC: DayViewController {
             events.append(newEvent)
         }
         
-        if let openIntervalEvents = createEventsForOpenIntervals(with: room.events) {
-            events.append(contentsOf: openIntervalEvents)
-        }
+        let openIntervalEvents = createEventsForOpenIntervals(with: room.events)
+        events.append(contentsOf: openIntervalEvents)
         
         //show empty state view if there are not events
         if events.isEmpty {
@@ -219,15 +209,15 @@ class RoomAggregateResultVC: DayViewController {
         }
         
         if let delegate = roomAggregateResultDelegate {
-            delegate.updatedAggregateResultVC(events: events)
+            delegate.updatedAggregateResultVC(events: openIntervalEvents)
         }
         
         return events
     }
     
-    private func createEventsForOpenIntervals(with occupiedEvents: [TTEvent]) -> [Event]?{
+    func createEventsForOpenIntervals(with occupiedEvents: [TTEvent]) -> [Event] {
         var openInternalEvents = [Event]()
-        guard let room = room else { return nil }
+        guard let room = room else { return [Event]() }
         
         var startingComparisonDate = room.startingDate
         for occupiedEvent in occupiedEvents {
@@ -238,16 +228,16 @@ class RoomAggregateResultVC: DayViewController {
             }
             
             if startingComparisonDate < occupiedEvent.startDate {
-                openIntervals.append(DateInterval(start: startingComparisonDate, end: occupiedEvent.startDate))
+                openDateIntervals.append(DateInterval(start: startingComparisonDate, end: occupiedEvent.startDate))
                 startingComparisonDate = occupiedEvent.endDate
             }
         }
         
         //add last open interval if there is one ending at room's end date
-        openIntervals.append(DateInterval(start: startingComparisonDate, end: room.endingDate))
+        openDateIntervals.append(DateInterval(start: startingComparisonDate, end: room.endingDate))
         
         //create events based on openIntervals
-        for openInterval in openIntervals {
+        for openInterval in openDateIntervals {
             let newEvent = Event()
             newEvent.text = "Open Interval"
             newEvent.dateInterval = openInterval
