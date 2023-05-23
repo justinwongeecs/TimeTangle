@@ -17,15 +17,15 @@ enum TTError: String, Error {
     case unableToUpdateUserProfile = "Unable to update user profile."
     
     case unableToFetchUsers = "DATABASE ERROR: Unable to fetch users. Please try again."
-    case unableToDecodeUsers = "DATABASE ERROR: Unable to decode users"
+    case unableToDecodeUsers = "DATABASE ERROR: Unable to decode users."
     case cannotAddCurrentUser = "Cannot add user."
     
     case unableToUpdateUser = "Unable to update user fields."
+    case unableToUpdateUserEmail = "Unable to update user email."
     
     case unableToCreateRoom = "Unable to create room. Please try again."
     case unableToFetchRoom = "Unable to fetch room. Please try again."
     case unableToUpdateRoom = "Unable to update room. Please try again."
-    
     case unableToAddRoomHistory = "Unable to add room history."
     
     //MARK: - Firebase Storage

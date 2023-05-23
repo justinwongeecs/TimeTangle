@@ -125,12 +125,18 @@ class RoomAggregateResultVC: DayViewController {
     
     
     @objc private func presentCalendarModalCardVC() {
-        let calendarModalCardVC = CalendarModalCardVC(startingDate: room.startingDate, endingDate: room.endingDate) { [weak self] selectedDate in
+        let calendarModalCardVC =
+        CalendarModalCardVC(startingDate: room.startingDate,
+                            endingDate: room.endingDate,
+                            closeButtonClosure: { [weak self] in
+            self?.dismiss(animated: true)
+            
+        })
+        { [weak self] selectedDate in
             DispatchQueue.main.async {
                 self?.move(to: selectedDate)
             }
         }
-        calendarModalCardVC.delegate = self
         calendarModalCardVC.modalPresentationStyle = .overFullScreen
         calendarModalCardVC.modalTransitionStyle = .crossDissolve
        
@@ -268,13 +274,5 @@ class RoomAggregateResultVC: DayViewController {
         calendarViewButton.setTitle(date.formatted(with: "MMM d y"), for: .normal)
         self.currentPresentedDate = date
         configureStepperButtons()
-    }
-}
-
-//MARK: - Delegates
-
-extension RoomAggregateResultVC: CloseButtonDelegate {
-    func didDismissPresentedView() {
-        dismiss(animated: true)
     }
 }

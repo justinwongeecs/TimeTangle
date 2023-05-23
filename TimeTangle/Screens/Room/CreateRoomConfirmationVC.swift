@@ -36,9 +36,9 @@ class CreateRoomConfirmationVC: TTModalCardVC {
         configureConfirmationButton()
     }
     
-    init(users: [TTUser]) {
-        super.init(nibName: nil, bundle: nil)
+    init(users: [TTUser], closeButtonClosure: @escaping () -> Void) {
         self.usersInQueue = users
+        super.init(closeButtonClosure: closeButtonClosure)
     }
     
     required init?(coder: NSCoder) {

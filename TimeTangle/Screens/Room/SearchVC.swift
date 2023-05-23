@@ -40,10 +40,11 @@ class SearchVC: UIViewController {
     }
     
     @objc private func joinRoom() {
-        let joinRoomVC = JoinRoomVC()
+        let joinRoomVC = JoinRoomVC() { [weak self] in
+            self?.dismiss(animated: true)
+        }
         joinRoomVC.modalPresentationStyle = .overFullScreen
         joinRoomVC.modalTransitionStyle = .crossDissolve
-        joinRoomVC.delegate = self
         self.present(joinRoomVC, animated: true)
     }
     
@@ -124,10 +125,11 @@ class SearchVC: UIViewController {
     @objc private func createRoom() {
         //make sure that we have more than self
         
-        let createRoomConfirmationVC = CreateRoomConfirmationVC(users: usersQueueForRoomCreation)
+        let createRoomConfirmationVC = CreateRoomConfirmationVC(users: usersQueueForRoomCreation) { [weak self] in
+            self?.dismiss(animated: true)
+        }
         createRoomConfirmationVC.modalPresentationStyle = .overFullScreen
         createRoomConfirmationVC.modalTransitionStyle = .crossDissolve
-        createRoomConfirmationVC.delegate = self
         createRoomConfirmationVC.createRoomConfirmationDelegate = self
         self.present(createRoomConfirmationVC, animated: true)
     }
@@ -234,12 +236,6 @@ extension SearchVC: UISearchControllerDelegate {
     }
 }
 
-//extension SearchVC: UISearchResultsUpdating {
-//    func updateSearchResults(for searchController: UISearchController) {
-//
-//    }
-//}
-
 extension SearchVC: SearchFriendsResultControllerDelegate {
     func didSelectSuggestedSearch(for user: TTUser) {
         searchController.showsSearchResultsController = false
@@ -251,11 +247,7 @@ extension SearchVC: SearchFriendsResultControllerDelegate {
     }
 }
 
-extension SearchVC: CloseButtonDelegate, CreateRoomConfirmationVCDelegate {
-    func didDismissPresentedView() {
-        dismiss(animated: true)
-    }
-    
+extension SearchVC: CreateRoomConfirmationVCDelegate {
     func didSuccessfullyCreateRoom() {
         dismiss(animated: true)
     }

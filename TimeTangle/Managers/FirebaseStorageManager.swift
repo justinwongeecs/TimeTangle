@@ -14,19 +14,18 @@ class FirebaseStorageManager {
     
     func uploadProfilePicture(for image: UIImage, completion: @escaping(Result<URL, TTError>) -> Void) {
         guard let imageData: Data = image.jpegData(compressionQuality: 0.5) else { return }
-        let metaData = StorageMetadata()
-        metaData.contentType = "image/png"
         
         guard let currentUserUsername = FirebaseManager.shared.currentUser?.username else { return }
         let profileImageRef = storageRef.child("profileImages/\(currentUserUsername).png")
-        let uploadTask = profileImageRef.putData(imageData, metadata: metaData) { metaData, error in
-            guard let metaData = metaData else {
-                completion(.failure(TTError.unableToGetImageMetadata))
-                return
-            } //error occurred
+        let uploadTask = profileImageRef.putData(imageData, metadata: nil) { metaData, error in
+//            guard let metaData = metaData else {
+//                completion(.failure(TTError.unableToGetImageMetadata))
+//                return
+//            } //error occurred
             //access download url
             profileImageRef.downloadURL { url, error in
                 guard let downloadURL = url else {
+                    print(error)
                     completion(.failure(TTError.unableToGetDownloadURL))
                     return
                 } // error occurred

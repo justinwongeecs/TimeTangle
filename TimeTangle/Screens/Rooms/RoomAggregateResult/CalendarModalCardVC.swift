@@ -18,11 +18,14 @@ class CalendarModalCardVC: TTModalCardVC {
     private var dateSelectionClosure: (Date) -> Void
     private var selectedDate: Date?
     
-    required init(startingDate: Date, endingDate: Date, dateSelectionClosure: @escaping((Date) -> Void)) {
+    required init(startingDate: Date,
+                  endingDate: Date,
+                  closeButtonClosure: @escaping () -> Void,
+                  dateSelectionClosure: @escaping((Date) -> Void)) {
         self.startingDate = startingDate
         self.endingDate = endingDate
         self.dateSelectionClosure = dateSelectionClosure
-        super.init(nibName: nil, bundle: nil)
+        super.init(closeButtonClosure: closeButtonClosure)
     }
     
     required init?(coder: NSCoder) {

@@ -37,9 +37,9 @@ class AddUsersModalVC: TTModalCardVC {
         fetchAndSetFriends()
     }
     
-    init(room: TTRoom) {
+    init(room: TTRoom, closeButtonClosure: @escaping () -> Void) {
         self.room = room
-        super.init(nibName: nil, bundle: nil)
+        super.init(closeButtonClosure: closeButtonClosure)
     }
     
     required init?(coder: NSCoder) {

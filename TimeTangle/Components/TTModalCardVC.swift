@@ -13,9 +13,17 @@ class TTModalCardVC: UIViewController {
     let containerView = UIView()
     
     var heightConstraint: NSLayoutConstraint!
+    var closeButtonClosure: () -> Void
     
-    weak var delegate: CloseButtonDelegate?
-
+    init(closeButtonClosure: @escaping () -> Void) {
+        self.closeButtonClosure = closeButtonClosure
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.75)
@@ -64,8 +72,6 @@ class TTModalCardVC: UIViewController {
     }
     
     @objc internal func dismissVC() {
-        if let delegate = delegate {
-            delegate.didDismissPresentedView()
-        }
+        closeButtonClosure()
     }
 }

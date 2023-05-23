@@ -5,7 +5,7 @@
 //  Created by Justin Wong on 12/24/22.
 //
 
-import Foundation
+import UIKit
 import FirebaseFirestoreSwift
 
 struct TTUser: Codable, Equatable {
@@ -22,31 +22,6 @@ struct TTUser: Codable, Equatable {
     var friends: [String]
     var friendRequests: [TTFriendRequest]
     var roomCodes: [String]
-}
-
-struct TTEvent: Codable, Equatable {
-    var name: String
-    var startDate: Date
-    var endDate: Date
-    var isAllDay: Bool
-    
-    var dictionary: [String: Any] {
-        return [
-            "name": name,
-            "startDate": startDate,
-            "endDate": endDate,
-            "isAllDay": isAllDay
-        ]
-    }
-    
-    static func == (lhs: TTEvent, rhs: TTEvent) -> Bool {
-        return lhs.name == rhs.name &&
-        lhs.startDate == rhs.startDate &&
-        lhs.endDate == rhs.endDate &&
-        lhs.isAllDay == rhs.isAllDay
-    }
-    
-    func getDateInterval() -> DateInterval {
-        return DateInterval(start: self.startDate, end: self.endDate)
-    }
+    var profilePictureURL: String?
+    var profilePictureData: Data?
 }

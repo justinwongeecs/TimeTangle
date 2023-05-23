@@ -20,6 +20,7 @@ struct TTConstants {
     static let lastname = "lastname"
     static let username = "username"
     static let roomCodes = "roomCodes"
+    static let profilePictureURL = "profilePictureURL"
     
     //TTFriendRequest
     static let recipientUsername = "recipientUsername"

@@ -163,10 +163,12 @@ class RoomDetailVC: UIViewController {
     }
     
     @objc private func showAddUserModal() {
-        let destVC = AddUsersModalVC(room: room)
+        let destVC = AddUsersModalVC(room: room) { [weak self] in
+            guard let self = self else { return }
+            self.dismiss(animated: true)
+        }
         destVC.modalPresentationStyle = .overFullScreen
         destVC.modalTransitionStyle = .crossDissolve
-        destVC.delegate = self
         destVC.addUsersModalVCDelegate = self
         self.present(destVC, animated: true)
     }
@@ -271,12 +273,6 @@ class RoomDetailVC: UIViewController {
 }
 
 //MARK: - Delegates
-
-extension RoomDetailVC: CloseButtonDelegate {
-    func didDismissPresentedView() {
-        dismiss(animated: true)
-    }
-}
 
 extension RoomDetailVC: AddUsersModalVCDelegate {
     func didSelectUserToBeAdded(for username: String) {

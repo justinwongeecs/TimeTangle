@@ -32,7 +32,7 @@ class FirebaseManager {
             }
         }
     }
-
+    
     func listenToAuthChanges() {
         handle = Auth.auth().addStateDidChangeListener { [weak self] (auth, user) in
             print("auth changed")
@@ -61,15 +61,30 @@ class FirebaseManager {
     private var currentUserListener: ListenerRegistration?
     
     private func listenToCurrentUser() {
-        guard let currentUserUsername = currentUser?.username else { return }
+        guard let username = currentUser?.username else { return }
         
-        currentUserListener = db.collection(TTConstants.usersCollection).document(currentUserUsername).addSnapshotListener { [weak self] docSnapshot, error in
+        currentUserListener = db.collection(TTConstants.usersCollection).document(username).addSnapshotListener { [weak self] docSnapshot, error in
             guard let document = docSnapshot else { return }
             do {
                 print("change to user")
                 let currentUserData = try document.data(as: TTUser.self)
                 self?.currentUser = currentUserData
-                self?.broadcastUpdatedUser()
+                if let profilePictureURL = self?.currentUser?.profilePictureURL, let url = URL(string: profilePictureURL) {
+                    FirebaseStorageManager().fetchImage(for: url) { result in
+                        switch result {
+                        case .success(let image):
+                            if let imageData = image.pngData() {
+                                self?.currentUser?.profilePictureData = imageData
+                            }
+                            self?.broadcastUpdatedUser()
+                        case .failure(_):
+                            //Send Notfication or something 
+                            print("Do something")
+                        }
+                    }
+                } else {
+                    self?.broadcastUpdatedUser()
+                }
             } catch {
                 print("Can't listen to current user")
             }
@@ -123,11 +138,11 @@ class FirebaseManager {
     }
     
     func fetchUserDocumentData(with docId: String, completed: @escaping(Result<TTUser, TTError>) -> Void) {
-
+        
         let docRef = db.collection("users").document(docId)
         
         //docRef.getDocument(as: TTUser.self) gives ambiguous context error for some reason
-
+        
         docRef.getDocument { document, error in
             guard let _ = error else {
                 if let doc = document {
@@ -139,7 +154,7 @@ class FirebaseManager {
                         print("fetch error - -")
                         completed(.failure(.unableToFetchUsers))
                     }
-                   
+                    
                 }
                 print("doc error - ")
                 return
@@ -169,12 +184,20 @@ class FirebaseManager {
     
     func updateUserData(for username: String, with fields: [String: Any], completed: @escaping(TTError?) -> Void) {
         
-        //TODO: Figure out a way to not update all fields every time
-        db.collection(TTConstants.usersCollection).document(username).updateData(fields) { error in
-            //TODO: Manage Firebase errors appropriately
-            if let _ = error {
-                //Error updating document
+        db.collection(TTConstants.usersCollection).document(username).updateData(fields) { [weak self] error in
+            guard error == nil else {
                 completed(TTError.unableToUpdateUser)
+                return
+            }
+            
+            self?.fetchUserDocumentData(with: username) { [weak self] result in
+                switch result {
+                case .success(let user):
+                    self?.currentUser = user
+                    completed(nil)
+                case .failure(_):
+                    completed(TTError.unableToUpdateUser)
+                }
             }
         }
     }
@@ -184,6 +207,15 @@ class FirebaseManager {
         changeRequest?.displayName = displayName
         changeRequest?.commitChanges { error in
             guard error == nil else { return }
+        }
+    }
+    
+    func updateUserEmail(with newEmail: String, completion: @escaping(TTError?) -> Void) {
+        Auth.auth().currentUser?.updateEmail(to: newEmail) { error in
+            guard error == nil else {
+                completion(TTError.unableToUpdateUserEmail)
+                return 
+            }
         }
     }
     
@@ -252,9 +284,9 @@ class FirebaseManager {
             completed(.failure(.textFieldsCannotBeEmpty))
             return
         }
-
+        
         Auth.auth().createUser(withEmail: email, password: password) { [weak self] authResult, error in
-
+            
             guard let newUser = authResult?.user, error == nil, let self = self else {
                 print("failure")
                 completed(.failure(.unableToCreateUser))
@@ -263,7 +295,7 @@ class FirebaseManager {
             
             //update displayname (separate from data in firestore as it's part of the authentication)
             self.updateUserProfile(displayName: username)
-
+            
             self.createUserDocument(firstName: firstName, lastName: lastName, email: email, username: username, uid: newUser.uid) { result in
                 switch result {
                 case .success(_):
@@ -311,7 +343,7 @@ class FirebaseManager {
             completed(.failure(.textFieldsCannotBeEmpty))
             return
         }
-
+        
         Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
             guard let _ = error else {
                 completed(.success(()))
@@ -331,6 +363,13 @@ class FirebaseManager {
         } catch {
             completed(.failure(.unableToSignOutUser))
         }
+    }
+    
+    func getCurrentUserEmail() -> String? {
+        if let currentAuthUser = Auth.auth().currentUser {
+            return currentAuthUser.email
+        }
+        return nil
     }
     
     func goToTabBarController() {

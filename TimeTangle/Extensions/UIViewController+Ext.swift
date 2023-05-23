@@ -53,8 +53,7 @@ extension UIViewController {
         emptyStateView.tag = TTConstants.emptyStateViewTag
         view.addSubview(emptyStateView)
         view.bringSubviewToFront(emptyStateView)
-        
-//        view.subviews.filter{ !(viewsPresentInFront?.contains($0) ?? true) }.forEach{ $0.isHidden.toggle() }
+    
         viewsPresentInFront?.forEach{ view.bringSubviewToFront($0) }
     }
     

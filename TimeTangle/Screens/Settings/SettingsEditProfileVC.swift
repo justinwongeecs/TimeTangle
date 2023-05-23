@@ -15,7 +15,16 @@ class SettingsEditProfileVC: UIViewController {
     private var profilePictureSelection = [String: PHPickerResult]()
     
     private let firebaseStorageManager = FirebaseStorageManager()
-    weak var closeButtonDelegate: CloseButtonDelegate!
+    private var closeButtonClosure: () -> Void
+    
+    init(closeButtonClosure: @escaping () -> Void) {
+        self.closeButtonClosure = closeButtonClosure
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -55,7 +64,7 @@ class SettingsEditProfileVC: UIViewController {
     }
 
     @objc private func dismissVC() {
-        closeButtonDelegate.didDismissPresentedView()
+        closeButtonClosure()
     }
 }
 
@@ -75,7 +84,6 @@ extension SettingsEditProfileVC: PHPickerViewControllerDelegate {
     
     private func getUIImageFromIdentifier(with identifier: String, result: PHPickerResult, completed: @escaping(Result<UIImage, TTError>) -> Void) {
         let itemProvider = result.itemProvider
-//        let progress: Progress?
         if itemProvider.canLoadObject(ofClass: UIImage.self) {
             itemProvider.loadObject(ofClass: UIImage.self) { image, error in
                 guard let image = image as? UIImage, error == nil else {

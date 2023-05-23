@@ -7,9 +7,9 @@
 
 import UIKit
 
-protocol CloseButtonDelegate: AnyObject {
-    func didDismissPresentedView()
-}
+//protocol CloseButtonDelegate: AnyObject {
+//    func didDismissPresentedView()
+//}
 
 class TTCloseButton: UIButton {
     

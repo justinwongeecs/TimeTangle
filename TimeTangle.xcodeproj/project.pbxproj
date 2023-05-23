@@ -18,6 +18,13 @@
 		E84541AF295F818B00CBB430 /* RoomDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84541AE295F818B00CBB430 /* RoomDetailVC.swift */; };
 		E84541B2295FADDC00CBB430 /* EventKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84541B1295FADDC00CBB430 /* EventKitManager.swift */; };
 		E84541B5295FC17500CBB430 /* RoomDetailNib.xib in Resources */ = {isa = PBXBuildFile; fileRef = E84541B4295FC17500CBB430 /* RoomDetailNib.xib */; };
+		E865A79E2A196BA600F105AA /* SettingIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A79D2A196BA600F105AA /* SettingIconView.swift */; };
+		E865A7A22A196BFB00F105AA /* SettingsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A7A12A196BFB00F105AA /* SettingsCell.swift */; };
+		E865A7A52A1AD2A000F105AA /* SettingsProfileEditVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A7A42A1AD2A000F105AA /* SettingsProfileEditVC.swift */; };
+		E865A7A72A1BF87A00F105AA /* SettingsButtonCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A7A62A1BF87A00F105AA /* SettingsButtonCell.swift */; };
+		E865A7A92A1C108A00F105AA /* TTEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A7A82A1C108A00F105AA /* TTEvent.swift */; };
+		E865A7AB2A1C7F4F00F105AA /* SettingsProfileHeaderCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A7AA2A1C7F4F00F105AA /* SettingsProfileHeaderCell.swift */; };
+		E865A7AD2A1C80C800F105AA /* TTProfileImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A7AC2A1C80C800F105AA /* TTProfileImageView.swift */; };
 		E873BCD72964D99A0015AE99 /* CalendarKit in Frameworks */ = {isa = PBXBuildFile; productRef = E873BCD62964D99A0015AE99 /* CalendarKit */; };
 		E873BCD92964E4200015AE99 /* RoomAggregateResultVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E873BCD82964E4200015AE99 /* RoomAggregateResultVC.swift */; };
 		E873BCE0296555F10015AE99 /* SettingsEditProfileVCNib.xib in Resources */ = {isa = PBXBuildFile; fileRef = E873BCDF296555F10015AE99 /* SettingsEditProfileVCNib.xib */; };
@@ -89,6 +96,13 @@
 		E84541AE295F818B00CBB430 /* RoomDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomDetailVC.swift; sourceTree = "<group>"; };
 		E84541B1295FADDC00CBB430 /* EventKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventKitManager.swift; sourceTree = "<group>"; };
 		E84541B4295FC17500CBB430 /* RoomDetailNib.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RoomDetailNib.xib; sourceTree = "<group>"; };
+		E865A79D2A196BA600F105AA /* SettingIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingIconView.swift; sourceTree = "<group>"; };
+		E865A7A12A196BFB00F105AA /* SettingsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsCell.swift; sourceTree = "<group>"; };
+		E865A7A42A1AD2A000F105AA /* SettingsProfileEditVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsProfileEditVC.swift; sourceTree = "<group>"; };
+		E865A7A62A1BF87A00F105AA /* SettingsButtonCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsButtonCell.swift; sourceTree = "<group>"; };
+		E865A7A82A1C108A00F105AA /* TTEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTEvent.swift; sourceTree = "<group>"; };
+		E865A7AA2A1C7F4F00F105AA /* SettingsProfileHeaderCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsProfileHeaderCell.swift; sourceTree = "<group>"; };
+		E865A7AC2A1C80C800F105AA /* TTProfileImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTProfileImageView.swift; sourceTree = "<group>"; };
 		E873BCD82964E4200015AE99 /* RoomAggregateResultVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomAggregateResultVC.swift; sourceTree = "<group>"; };
 		E873BCDF296555F10015AE99 /* SettingsEditProfileVCNib.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SettingsEditProfileVCNib.xib; sourceTree = "<group>"; };
 		E873BCE1296556080015AE99 /* SettingsEditProfileVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsEditProfileVC.swift; sourceTree = "<group>"; };
@@ -217,10 +231,23 @@
 			path = Managers;
 			sourceTree = "<group>";
 		};
-		E873BCDE296555D10015AE99 /* Settings */ = {
+		E865A7A32A196C0200F105AA /* SettingsVC */ = {
 			isa = PBXGroup;
 			children = (
 				E8CEE2DC29581C85000CD7FE /* SettingsVC.swift */,
+				E865A79D2A196BA600F105AA /* SettingIconView.swift */,
+				E865A7A12A196BFB00F105AA /* SettingsCell.swift */,
+				E865A7A42A1AD2A000F105AA /* SettingsProfileEditVC.swift */,
+				E865A7A62A1BF87A00F105AA /* SettingsButtonCell.swift */,
+				E865A7AA2A1C7F4F00F105AA /* SettingsProfileHeaderCell.swift */,
+			);
+			path = SettingsVC;
+			sourceTree = "<group>";
+		};
+		E873BCDE296555D10015AE99 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				E865A7A32A196C0200F105AA /* SettingsVC */,
 				E873BCDF296555F10015AE99 /* SettingsEditProfileVCNib.xib */,
 				E873BCE1296556080015AE99 /* SettingsEditProfileVC.swift */,
 			);
@@ -311,6 +338,7 @@
 				E8CEE2E829590EBE000CD7FE /* TTAvatarImageView.swift */,
 				E893A26E29598E2F004F7BC5 /* TTEmptyStateView.swift */,
 				E8CFC228295D371D006C23BE /* TTModalCardVC.swift */,
+				E865A7AC2A1C80C800F105AA /* TTProfileImageView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -322,6 +350,7 @@
 				E8CEE2E029582A2E000CD7FE /* TTUser.swift */,
 				E893A274295A5DB1004F7BC5 /* TTFriendRequest.swift */,
 				E893A27D295A8793004F7BC5 /* TTRoom.swift */,
+				E865A7A82A1C108A00F105AA /* TTEvent.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -478,12 +507,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E865A7A72A1BF87A00F105AA /* SettingsButtonCell.swift in Sources */,
+				E865A79E2A196BA600F105AA /* SettingIconView.swift in Sources */,
 				E893A273295A3C52004F7BC5 /* ProfileUsernameCell.swift in Sources */,
 				E873BCEB296904F50015AE99 /* RoomUserCell.swift in Sources */,
 				E81D25062A145217003C65C5 /* UILabel+Ext.swift in Sources */,
 				E873BCD92964E4200015AE99 /* RoomAggregateResultVC.swift in Sources */,
 				E8CEE2BB2957A89C000CD7FE /* AddUsersModalVC.swift in Sources */,
 				E8D004A92963B82B00907A64 /* RoomHistoryVC.swift in Sources */,
+				E865A7A52A1AD2A000F105AA /* SettingsProfileEditVC.swift in Sources */,
 				E8CEE2E129582A2E000CD7FE /* TTUser.swift in Sources */,
 				E8CEE2B529579D3A000CD7FE /* SearchVC.swift in Sources */,
 				E893A26F29598E2F004F7BC5 /* TTEmptyStateView.swift in Sources */,
@@ -497,14 +529,17 @@
 				E8CEE2D92957D1FD000CD7FE /* UIViewController+Ext.swift in Sources */,
 				E8CEE2D32957C7C7000CD7FE /* TTTitledTextField.swift in Sources */,
 				E8CEE2CA2957B03C000CD7FE /* LoginVC.swift in Sources */,
+				E865A7AD2A1C80C800F105AA /* TTProfileImageView.swift in Sources */,
 				E893A275295A5DB1004F7BC5 /* TTFriendRequest.swift in Sources */,
 				E8CFC22D295D5E55006C23BE /* RoomsVC.swift in Sources */,
 				E893A27E295A8793004F7BC5 /* TTRoom.swift in Sources */,
+				E865A7AB2A1C7F4F00F105AA /* SettingsProfileHeaderCell.swift in Sources */,
 				E8CEE2E629590DF6000CD7FE /* UserQueueForRoomCell.swift in Sources */,
 				E8CFC21B295B8AD7006C23BE /* Notification.Name+Ext.swift in Sources */,
 				E8CFC22B295D3981006C23BE /* CreateRoomConfirmationVC.swift in Sources */,
 				E893A27A295A6D40004F7BC5 /* TTConstants.swift in Sources */,
 				E873BCE2296556080015AE99 /* SettingsEditProfileVC.swift in Sources */,
+				E865A7A92A1C108A00F105AA /* TTEvent.swift in Sources */,
 				E8188FCF2A15ED92005AA0BF /* SaveOrCancelIsland.swift in Sources */,
 				E84541B2295FADDC00CBB430 /* EventKitManager.swift in Sources */,
 				E893A271295A3718004F7BC5 /* AddFriendVC.swift in Sources */,
@@ -531,6 +566,7 @@
 				E873BCE72966A0DC0015AE99 /* FirebaseStorageManager.swift in Sources */,
 				E8CEE2DB2957D71E000CD7FE /* TTError.swift in Sources */,
 				E8CEE2D72957D1B2000CD7FE /* TTBodyLabel.swift in Sources */,
+				E865A7A22A196BFB00F105AA /* SettingsCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
