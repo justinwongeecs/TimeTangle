@@ -55,13 +55,13 @@ class SettingsVC: UIViewController {
             Setting(icon: SettingIcon(backgroundColor: .lightGray, foregroundColor: .white, iconName: "lock.fill"),
                     title: "Privacy",
                     actionType: .disclosure, viewController: UIViewController()),
-            Setting(icon: SettingIcon(backgroundColor: .purple, foregroundColor: .white, iconName: "bubbles.and.sparkles.fill"),
+            Setting(icon: SettingIcon(backgroundColor: .systemPurple, foregroundColor: .white, iconName: "bubbles.and.sparkles.fill"),
                     title: "Subscription",
                     actionType: .disclosure, viewController: UIViewController()),
-            Setting(icon: SettingIcon(backgroundColor: .blue, foregroundColor: .white, iconName: "questionmark.circle.fill"),
+            Setting(icon: SettingIcon(backgroundColor: .systemBlue, foregroundColor: .white, iconName: "questionmark.circle.fill"),
                     title: "Help",
                     actionType: .disclosure, viewController: UIViewController()),
-            Setting(icon: SettingIcon(backgroundColor: .green, foregroundColor: .white, iconName: "info.circle.fill"),
+            Setting(icon: SettingIcon(backgroundColor: .systemGreen, foregroundColor: .white, iconName: "info.circle.fill"),
                     title: "About",
                     actionType: .disclosure, viewController: UIViewController())
         ])
@@ -69,8 +69,6 @@ class SettingsVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
- 
-        NotificationCenter.default.addObserver(self, selector: #selector(fetchUpdatedUser(_:)), name: .updatedUser, object: nil)
         
         title = "Settings"
         configureSettingsTableView()
@@ -79,6 +77,7 @@ class SettingsVC: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.navigationBar.prefersLargeTitles = true
+        updateTable()
     }
     
     private func configureSettingsTableView() {
@@ -97,10 +96,11 @@ class SettingsVC: UIViewController {
         ])
     }
     
-    @objc private func fetchUpdatedUser(_ notification: Notification) {
-//        guard let updatedUser = notification.object as? TTUser else { return }
+    private func updateTable() {
+        print("updateTable")
         DispatchQueue.main.async {
-            self.settingsTableView.reloadRows(at: [IndexPath(row: 0, section: 0)], with: .automatic)
+//            self.settingsTableView.reloadRows(at: [IndexPath(row: 0, section: 0)], with: .automatic)
+            self.settingsTableView.reloadSections(IndexSet(integer: 0), with: .automatic)
         }
     }
 }
@@ -118,7 +118,9 @@ extension SettingsVC: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if indexPath.section == 0 {
+            print("render settings profile header cell")
             let profileHeaderCell = settingsTableView.dequeueReusableCell(withIdentifier: SettingsProfileHeaderCell.reuseID) as! SettingsProfileHeaderCell
+            profileHeaderCell.updateCell()
             return profileHeaderCell
         } else {
             let section = settingSections[indexPath.section]

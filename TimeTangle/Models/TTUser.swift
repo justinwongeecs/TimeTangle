@@ -24,4 +24,8 @@ struct TTUser: Codable, Equatable {
     var roomCodes: [String]
     var profilePictureURL: String?
     var profilePictureData: Data?
+    
+    func getFullName() -> String {
+        return "\(firstname)\(lastname)"
+    }
 }

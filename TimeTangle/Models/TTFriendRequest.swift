@@ -10,6 +10,7 @@ import Foundation
 typealias TTFriendRequestType = TTFriendRequest.TTFriendRequestType
 
 struct TTFriendRequest: Codable {
+    var profilePictureData: Data?
     var senderUsername: String
     var recipientUsername: String
     var requestType: TTFriendRequestType
@@ -18,7 +19,8 @@ struct TTFriendRequest: Codable {
         return [
             "senderUsername": senderUsername,
             "recipientUsername": recipientUsername,
-            "requestType": requestType.description
+            "requestType": requestType.description,
+            "profilePictureData": convertProfilePictureDataToString()
         ]
     }
     
@@ -54,6 +56,13 @@ struct TTFriendRequest: Codable {
                 return .outgoing
             }
         }
+    }
+    
+    private func convertProfilePictureDataToString() -> String {
+        if let profilePictureData = profilePictureData, let dataString = String(data: profilePictureData, encoding: .utf8) {
+            return dataString
+        }
+        return ""
     }
 }
 

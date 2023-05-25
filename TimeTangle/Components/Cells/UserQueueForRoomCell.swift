@@ -15,7 +15,7 @@ class UserQueueForRoomCell: UITableViewCell {
     
     static let reuseID = "UserQueueForRoomCell"
     
-    let avatarImageView = TTAvatarImageView(frame: .zero)
+    let avatarImageView = TTProfileImageView(widthHeight: 40)
     let usernameLabel = TTTitleLabel(textAlignment: .left, fontSize: 20)
     let deleteButton = TTButton(frame: .zero)
     
@@ -32,7 +32,7 @@ class UserQueueForRoomCell: UITableViewCell {
     }
     
     func setCell(for user: TTUser) {
-        print("set cell")
+        avatarImageView.setImageForUser(for: user)
         usernameLabel.text = user.username
     }
     

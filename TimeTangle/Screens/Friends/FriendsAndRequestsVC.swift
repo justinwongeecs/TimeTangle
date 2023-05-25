@@ -19,10 +19,10 @@ enum FriendsVCSegmentedState {
 class FriendsAndRequestsVC: UIViewController {
     
     //TODO: - friends and friendRequests require public access level due to AddFriendVC
-    var friends: [String] = []
-    //filteredFriends is what's being visibily shown
-    private var filteredFriends: [String] = []
+    var friends = [TTUser]()
+    private var filteredFriends = [TTUser]()
     var friendRequests: [TTFriendRequest] = []
+    private var searchWord = ""
     
     private let friendsSC = UISegmentedControl(items: ["My Friends", "Friend Requests"])
     private let table = UITableView()
@@ -44,31 +44,42 @@ class FriendsAndRequestsVC: UIViewController {
         configureFriendsSC()
         configureSearchFriendsCountLabel()
         configureFriendsTable()
+    
+        fetchFriends()
+        
         NotificationCenter.default.addObserver(self, selector: #selector(fetchUpdatedUser(_:)), name: .updatedUser, object: nil)
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
+    @objc private func fetchUpdatedUser(_ notification: Notification) {
+       fetchFriends()
+    }
+    
+    private func fetchFriends() {
+        guard let currentUser = FirebaseManager.shared.currentUser else { return }
         
-        guard let friendRequests = FirebaseManager.shared.currentUser?.friendRequests else { return }
-        guard let friends = FirebaseManager.shared.currentUser?.friends else { return }
- 
-        DispatchQueue.main.async {
-            self.friendRequests = friendRequests
-            self.friends = friends
-            self.filteredFriends = friends
-            self.reloadTable()
+        FirebaseManager.shared.fetchMultipleUsersDocumentData(with: currentUser.friends) { [weak self] result in
+            switch result {
+            case .success(let users):
+                self?.friends = users
+                self?.filteredFriends = users
+                self?.filterFriends(with: self?.searchWord ?? "")
+                self?.friendRequests = currentUser.friendRequests
+                self?.reloadTable()
+            case .failure(let error):
+                self?.presentTTAlert(title: "Fetch Error", message: error.rawValue, buttonTitle: "OK")
+            }
         }
     }
     
     func filterFriends(with searchWord: String) {
+        self.searchWord = searchWord
         removeEmptyStateView(in: self.view)
         
         if searchWord.isEmpty {
             filteredFriends = friends
             displaySearchCountLabel(isHidden: true)
         } else {
-            filteredFriends = friends.filter({ $0.lowercased().contains(searchWord.lowercased()) })
+            filteredFriends = friends.filter({ $0.username.lowercased().contains(searchWord.lowercased()) })
             
             if filteredFriends.isEmpty {
                 displaySearchCountLabel(isHidden: true)
@@ -141,14 +152,6 @@ class FriendsAndRequestsVC: UIViewController {
         }
     }
     
-    @objc private func fetchUpdatedUser(_ notification: Notification) {
-        guard let fetchedUser = notification.object as? TTUser else { return }
-        friends = fetchedUser.friends 
-        filteredFriends = fetchedUser.friends
-        friendRequests = fetchedUser.friendRequests
-        reloadTable()
-    }
-    
     private func reloadTable() {
         removeEmptyStateView(in: view)
         switch friendsVCSegementedState {
@@ -170,7 +173,7 @@ class FriendsAndRequestsVC: UIViewController {
         view.addSubview(searchFriendsCountLabel)
         
         NSLayoutConstraint.activate([
-            searchFriendsCountLabel.topAnchor.constraint(equalTo: friendsSC.bottomAnchor, constant: 3),
+            searchFriendsCountLabel.topAnchor.constraint(equalTo: friendsSC.bottomAnchor, constant: 10),
             searchFriendsCountLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             searchFriendsCountLabel.heightAnchor.constraint(equalToConstant: 20),
             searchFriendsCountLabel.widthAnchor.constraint(equalToConstant: 100)
@@ -222,16 +225,9 @@ extension FriendsAndRequestsVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         if friendsVCSegementedState == .myFriends  {
+            let friend = filteredFriends[indexPath.section]
             let myFriendCell = table.dequeueReusableCell(withIdentifier: ProfileUsernameCell.reuseID) as! ProfileUsernameCell
-
-            FirebaseManager.shared.fetchUserDocumentData(with: filteredFriends[indexPath.section]) { result in
-                switch result {
-                case .success(let user):
-                    myFriendCell.set(for: user.username)
-                case .failure(_):
-                    break
-                }
-            }
+            myFriendCell.set(for: friend)
             return myFriendCell
         }
         
@@ -244,6 +240,10 @@ extension FriendsAndRequestsVC: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
         return 5.0
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 50.0
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -266,7 +266,7 @@ extension FriendsAndRequestsVC: AddFriendVCDelegate {
     
     func selectedUserToAddFriend(for user: TTUser) {
         //catch if friend has already been added
-        guard friends.filter({ $0 == user.username }).count == 0 else {
+        guard friends.filter({ $0 == user }).count == 0 else {
             presentTTAlert(title: "Cannot Friend Request", message: TTError.friendAlreadyAdded.rawValue, buttonTitle: "Ok")
             return
         }
@@ -280,8 +280,8 @@ extension FriendsAndRequestsVC: AddFriendVCDelegate {
         guard let currentUser = FirebaseManager.shared.currentUser else { return }
         
         //update user on Firebase
-        let senderFriendRequest = TTFriendRequest(senderUsername: currentUser.username, recipientUsername: user.username, requestType: .outgoing)
-        let recipientFriendRequest = TTFriendRequest(senderUsername: currentUser.username, recipientUsername: user.username, requestType: .receiving)
+        let senderFriendRequest = TTFriendRequest(profilePictureData: currentUser.profilePictureData, senderUsername: currentUser.username, recipientUsername: user.username, requestType: .outgoing)
+        let recipientFriendRequest = TTFriendRequest(profilePictureData: currentUser.profilePictureData, senderUsername: currentUser.username, recipientUsername: user.username, requestType: .receiving)
         
         let senderUpdateData = [
             TTConstants.friendRequests: currentUser.friendRequests.arrayByAppending(senderFriendRequest).map{ $0.dictionary }

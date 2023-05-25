@@ -10,9 +10,7 @@ import PhotosUI
 
 class SettingsProfileEditVC: UIViewController {
 
-    private var profileImageOuterView = UIView()
-    private var profileImageView: UIImageView!
-    private let profileImageActivityIndicator = UIActivityIndicatorView(style: .medium)
+    private var profileAvatarView: TTProfileImageView!
     private let editProfileImageViewButton = UIButton()
     private var profileInfoTableView = UITableView(frame: .zero, style: .insetGrouped)
     
@@ -39,81 +37,33 @@ class SettingsProfileEditVC: UIViewController {
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         
+        guard profileAvatarView != nil else { return }
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
             if traitCollection.userInterfaceStyle == .dark {
-                profileImageOuterView.layer.shadowColor = UIColor.white.cgColor
+                profileAvatarView.setShadowColor(to: UIColor.white.cgColor)
             } else {
-                profileImageOuterView.layer.shadowColor = UIColor.black.cgColor
+                profileAvatarView.setShadowColor(to: UIColor.black.cgColor)
             }
         }
     }
     
     private func configureProfileImageView() {
-        profileImageOuterView = UIView(frame: CGRect(x: 0, y: 0, width: profileImageWidthHeight, height: profileImageWidthHeight))
-        profileImageOuterView.clipsToBounds = false
-        profileImageOuterView.layer.shadowColor = UIColor.black.cgColor
-        profileImageOuterView.layer.shadowOpacity = 1
-        profileImageOuterView.layer.shadowOffset = CGSize.zero
-        profileImageOuterView.layer.shadowRadius = 13
-        profileImageOuterView.translatesAutoresizingMaskIntoConstraints = false
-    
-        profileImageView = UIImageView(frame: profileImageOuterView.bounds)
- 
-        profileImageOuterView.layer.shadowPath = UIBezierPath(roundedRect: profileImageOuterView.bounds, cornerRadius: profileImageView.frame.size.width / 2).cgPath
-        profileImageOuterView.addSubview(profileImageView)
+        guard let currentUser = FirebaseManager.shared.currentUser,
+              let imageData = currentUser.profilePictureData,
+              let image = UIImage(data: imageData) else { return }
         
-        profileImageActivityIndicator.color = .lightGray
-        profileImageActivityIndicator.center = CGPoint(x: profileImageView.bounds.width / 2, y: profileImageView.bounds.height / 2)
-        profileImageActivityIndicator.hidesWhenStopped = true
-        profileImageView.addSubview(profileImageActivityIndicator)
-        
-        profileImageView.translatesAutoresizingMaskIntoConstraints = false
-        setProfileImage()
-        profileImageView.layer.borderWidth = 5.0
-        profileImageView.layer.masksToBounds = false
-        profileImageView.layer.borderColor = UIColor.lightGray.cgColor
-        profileImageView.contentMode = .scaleAspectFill
-        profileImageView.layer.cornerRadius = profileImageView.frame.size.width / 2
-        profileImageView.clipsToBounds = true
-        view.addSubview(profileImageOuterView)
+        profileAvatarView = TTProfileImageView(image: image, widthHeight: profileImageWidthHeight)
+        profileAvatarView.translatesAutoresizingMaskIntoConstraints = false 
+        profileAvatarView.showBorder = true
+        profileAvatarView.showShadow = true
+        view.addSubview(profileAvatarView)
         
         NSLayoutConstraint.activate([
-            profileImageOuterView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            profileImageOuterView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            profileImageOuterView.widthAnchor.constraint(equalToConstant: profileImageWidthHeight),
-            profileImageOuterView.heightAnchor.constraint(equalToConstant: profileImageWidthHeight),
-            
-            profileImageView.topAnchor.constraint(equalTo: profileImageOuterView.safeAreaLayoutGuide.topAnchor),
-            profileImageView.leadingAnchor.constraint(equalTo: profileImageOuterView.leadingAnchor),
-            profileImageView.trailingAnchor.constraint(equalTo: profileImageOuterView.trailingAnchor),
-            profileImageView.bottomAnchor.constraint(equalTo: profileImageOuterView.bottomAnchor)
+            profileAvatarView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            profileAvatarView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            profileAvatarView.widthAnchor.constraint(equalToConstant: profileImageWidthHeight),
+            profileAvatarView.heightAnchor.constraint(equalToConstant: profileImageWidthHeight)
         ])
-    }
-    
-    private func setProfileImage() {
-        print("Set Profile Image")
-        profileImageActivityIndicator.startAnimating()
-        let defaultImage = UIImage(systemName: "person.crop.circle", withConfiguration: UIImage.SymbolConfiguration(pointSize: 100, weight: .regular))?.withTintColor(.lightGray, renderingMode: .alwaysOriginal) ?? UIImage()
-        
-        guard let currentUser = FirebaseManager.shared.currentUser else { return }
-        
-        if let profileImageURl = currentUser.profilePictureURL, let url = URL(string: profileImageURl) {
-            FirebaseStorageManager().fetchImage(for: url) { [weak self] result in
-                self?.profileImageActivityIndicator.stopAnimating()
-                switch result {
-                case .success(let image):
-                    DispatchQueue.main.async {
-                        self?.profileImageView.image = image
-                    }
-                 
-                case .failure(let error):
-                    self?.presentTTAlert(title: "Fetch Error", message: error.rawValue, buttonTitle: "OK")
-                    DispatchQueue.main.async {
-                        self?.profileImageView.image = defaultImage
-                    }
-                }
-            }
-        }
     }
     
     private func configureEditProfileImageViewButton() {
@@ -128,7 +78,7 @@ class SettingsProfileEditVC: UIViewController {
         view.addSubview(editProfileImageViewButton)
         
         NSLayoutConstraint.activate([
-            editProfileImageViewButton.topAnchor.constraint(equalTo: profileImageView.bottomAnchor, constant: 20),
+            editProfileImageViewButton.topAnchor.constraint(equalTo: profileAvatarView.bottomAnchor, constant: 20),
             editProfileImageViewButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             editProfileImageViewButton.widthAnchor.constraint(equalToConstant: 130),
             editProfileImageViewButton.heightAnchor.constraint(equalToConstant: 30)
@@ -157,7 +107,7 @@ class SettingsProfileEditVC: UIViewController {
         settingSections.append(
             SettingSection(title: "Name", settings: [
                 Setting(title: "\(currentUser.firstname.capitalized)\(currentUser.lastname.capitalized)", actionType: .none),
-                Setting(title: "Change Name", titleColor: UIColor.blue, actionType: .button) { [weak self] in
+                Setting(title: "Change Name", titleColor: .systemBlue, actionType: .button) { [weak self] in
                     self?.showChangeNameAlertController()
                 }
         ]))
@@ -165,7 +115,7 @@ class SettingsProfileEditVC: UIViewController {
         settingSections.append(
             SettingSection(title: "Username", settings: [
                 Setting(title: "\(currentUser.username)", actionType: .none),
-                Setting(title: "Change Username", titleColor: UIColor.blue, actionType: .button) { [weak self] in
+                Setting(title: "Change Username", titleColor: .systemBlue, actionType: .button) { [weak self] in
                     self?.showChangeUsernameAlertController()
                 }
             ])
@@ -174,7 +124,7 @@ class SettingsProfileEditVC: UIViewController {
         if let email = FirebaseManager.shared.getCurrentUserEmail() {
             settingSections.append(SettingSection(title: "Email", settings: [
                 Setting(title: "\(email)", actionType: .none),
-                Setting(title: "Change Email", titleColor: UIColor.blue, actionType: .button) { [weak self] in
+                Setting(title: "Change Email", titleColor: .systemBlue, actionType: .button) { [weak self] in
                     self?.showChangeEmailAlertController()
                 }
             ]))
@@ -182,14 +132,14 @@ class SettingsProfileEditVC: UIViewController {
         
         settingSections.append(
             SettingSection(title: "", settings: [
-                Setting(title: "Remove Account", titleColor: UIColor.red, actionType: .button) {
+                Setting(title: "Remove Account", titleColor: .systemRed, actionType: .button) {
                     print("remove account")
                 }
             ])
         )
         settingSections.append(
             SettingSection(title: "", settings: [
-                Setting(title: "Log Out", titleColor: UIColor.red, actionType: .button) {
+                Setting(title: "Log Out", titleColor: .systemRed, actionType: .button) {
                     print("log out")
                 }
             ])
@@ -362,17 +312,15 @@ extension SettingsProfileEditVC: UITableViewDelegate, UITableViewDataSource {
 extension SettingsProfileEditVC: PHPickerViewControllerDelegate {
     func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
         dismiss(animated: true)
-        profileImageActivityIndicator.startAnimating()
+        profileAvatarView.startAnimatingProgressIndicator()
         guard let selectedResult = results.first else { return }
         getUIImageFromIdentifier(with: selectedResult.assetIdentifier!, result: selectedResult) { [weak self] result in
-            self?.profileImageActivityIndicator.stopAnimating()
             switch result {
             case .success(let image):
-                DispatchQueue.main.async {
-                    self?.profileImageView.image = image
-                }
+                self?.uploadProfileImageDataToFirestore(for: image)
                 self?.uploadProfileURLToFirestore(for: image)
             case .failure(let error):
+                self?.profileAvatarView.stopAnimatingProgressIndicator()
                 self?.presentTTAlert(title: "Fetch Image Error", message: error.rawValue, buttonTitle: "Ok")
             }
         }
@@ -381,9 +329,8 @@ extension SettingsProfileEditVC: PHPickerViewControllerDelegate {
     private func getUIImageFromIdentifier(with identifier: String, result: PHPickerResult, completed: @escaping(Result<UIImage, TTError>) -> Void) {
         let itemProvider = result.itemProvider
         if itemProvider.canLoadObject(ofClass: UIImage.self) {
-            itemProvider.loadObject(ofClass: UIImage.self) { [weak self] image, error in
+            itemProvider.loadObject(ofClass: UIImage.self) { image, error in
                 guard let image = image as? UIImage, error == nil else {
-                    self?.profileImageActivityIndicator.stopAnimating()
                     completed(.failure(TTError.unableToFetchProfileImageFromUser))
                     return
                 }
@@ -397,6 +344,7 @@ extension SettingsProfileEditVC: PHPickerViewControllerDelegate {
     private func uploadProfileURLToFirestore(for image: UIImage) {
         let firebaseStorageManager = FirebaseStorageManager()
         firebaseStorageManager.uploadProfilePicture(for: image) { [weak self] result in
+            self?.profileAvatarView.stopAnimatingProgressIndicator()
             switch result {
             case .success(let url):
                 guard let currentUser = FirebaseManager.shared.currentUser else { return }
@@ -405,11 +353,37 @@ extension SettingsProfileEditVC: PHPickerViewControllerDelegate {
                 ]) { error in
                     guard error == nil else { return }
                 }
+                
+                DispatchQueue.main.async {
+                    self?.profileAvatarView.setImage(to: image)
+                }
                 break
             case .failure(let error):
-                self?.profileImageActivityIndicator.stopAnimating()
                 self?.presentTTAlert(title: "Fetch Image Error", message: error.rawValue, buttonTitle: "Ok")
             }
         }
     }
+    
+    private func uploadProfileImageDataToFirestore(for image: UIImage) {
+        guard let currentUser = FirebaseManager.shared.currentUser else { return }
+        
+        var compressionQuality = 1.0
+        var compressedImageByteCount = image.jpegData(compressionQuality: compressionQuality)?.count ?? 0
+        
+        while (compressedImageByteCount > TTConstants.firestoreMaximumImageDataBytes) {
+            compressedImageByteCount = image.jpegData(compressionQuality: compressionQuality)?.count ?? 0
+            compressionQuality -= 0.1
+        }
+        
+        guard let compressedImageData = image.jpegData(compressionQuality: compressionQuality) else { return }
+
+        FirebaseManager.shared.updateUserData(for: currentUser.username, with: [
+            TTConstants.profilePictureData: compressedImageData
+        ]) { [weak self] error in
+            guard let error = error else { return }
+            print(error.rawValue)
+            self?.profileAvatarView.stopAnimatingProgressIndicator()
+        }
+    }
+    
 }

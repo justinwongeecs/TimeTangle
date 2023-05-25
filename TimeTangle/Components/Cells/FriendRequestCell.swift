@@ -16,7 +16,7 @@ class FriendRequestCell: UITableViewCell {
 
     static let reuseID = "FriendRequestCell"
     
-    let avatarImageView = TTAvatarImageView(frame: .zero)
+    let avatarImageView = TTProfileImageView(widthHeight: 40)
     let usernameLabel = TTTitleLabel(textAlignment: .left, fontSize: 20)
     let friendRequestTypeLabel = TTBodyLabel(textAlignment: .right)
     
@@ -45,9 +45,11 @@ class FriendRequestCell: UITableViewCell {
     }
     
     func set(for friendRequest: TTFriendRequest) {
-        print("Set friendRequest: \(friendRequest)")
         self.friendRequest = friendRequest
         
+        if let profileImageData = friendRequest.profilePictureData, let image = UIImage(data: profileImageData) {
+            avatarImageView.setImage(to: image)
+        }
         friendRequestTypeLabel.text = friendRequest.requestType.description
          
         switch friendRequest.requestType {

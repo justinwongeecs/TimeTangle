@@ -37,8 +37,7 @@ class RoomsVC: UIViewController {
     private func configureViewController() {
         view.backgroundColor = .systemBackground
         navigationController?.navigationBar.prefersLargeTitles = true
-        //get updates from current user
-//        NotificationCenter.default.addObserver(self, selector: #selector(fetchUpdatedUser(_:)), name: .updatedUser, object: nil)
+
         //get updates from current user rooms
         NotificationCenter.default.addObserver(self, selector: #selector(fetchUpdatedCurrentUserRooms(_:)), name: .updatedCurrentUserRooms, object: nil)
     }
@@ -112,16 +111,7 @@ class RoomsVC: UIViewController {
         guard let currentUser = FirebaseManager.shared.currentUser else { return }
         fetchRooms(for: currentUser)
         roomsTable.reloadData()
-    }
-//
-//    @objc private func fetchUpdatedUser(_ notification: Notification) {
-//        print("updated user")
-//        DispatchQueue.main.async {
-//            guard let fetchedUser = notification.object as? TTUser else { return }
-//            self.fetchRooms(for: fetchedUser)
-//            self.roomsTable.reloadData()
-//        }
-//    }
+    } 
     
     //FIXME: - Not sure if it best practice to fetch for every single room for user because we only have the room codes for the user
     private func fetchRooms(for user: TTUser) {

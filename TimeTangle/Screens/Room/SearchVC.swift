@@ -9,13 +9,16 @@ import UIKit
 
 class SearchVC: UIViewController {
     
-    var usersQueueForRoomCreation: [TTUser] = []
+    private var allFriends = [TTUser]()
+    private var usersQueueForRoomCreation = [TTUser]()
     
-    var searchController: UISearchController!
-    var searchFriendsResultController: SearchFriendsResultController!
-    let usersQueueCountLabel = TTTitleLabel(textAlignment: .center, fontSize: 15)
-    let usersQueueTable = UITableView()
-    let createRoomButton = TTButton(backgroundColor: .systemGreen, title: "Create Room")
+    private var searchController: UISearchController!
+    private var searchFriendsResultController: SearchFriendsResultController!
+    
+    private let usersQueueCountLabel = TTTitleLabel(textAlignment: .center, fontSize: 15)
+    private let usersQueueTable = UITableView()
+    private let activityIndicator = UIActivityIndicatorView(style: .medium)
+    private let createRoomButton = TTButton(backgroundColor: .systemGreen, title: "Create Room")
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,8 +27,10 @@ class SearchVC: UIViewController {
         configureUsersQueueCountLabel()
         configureCreateRoomButton()
         configureTableView()
+        configureActivityIndicator()
         createDismissKeyboardTapGesture()
-        addCurrentUser()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(fetchUpdatedUser), name: .updatedUser, object: nil)
     }
     
     private func configureViewController() {
@@ -48,6 +53,25 @@ class SearchVC: UIViewController {
         self.present(joinRoomVC, animated: true)
     }
     
+    @objc private func fetchUpdatedUser() {
+        print("SearchVC fetchupdateduser")
+        guard let currentUser = FirebaseManager.shared.currentUser else { return }
+        activityIndicator.startAnimating()
+        FirebaseManager.shared.fetchMultipleUsersDocumentData(with: currentUser.friends) { [weak self] result in
+            guard let self = self else { return }
+            self.activityIndicator.stopAnimating()
+            switch result {
+            case .success(let allFriends):
+                self.allFriends = allFriends
+                let usersQueueUsernames = self.usersQueueForRoomCreation.map{ $0.username }
+                self.usersQueueForRoomCreation = allFriends.filter { usersQueueUsernames.contains($0.username) }
+                self.addCurrentUser()
+                self.refreshTableView()
+            case .failure(let error):
+                self.presentTTAlert(title: "Fetch Error", message: error.rawValue, buttonTitle: "OK")
+            }
+        }
+    }
     
     private func configureSearchController() {
         searchFriendsResultController = SearchFriendsResultController()
@@ -80,7 +104,7 @@ class SearchVC: UIViewController {
         usersQueueCountLabel.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            usersQueueCountLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
+            usersQueueCountLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             usersQueueCountLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             usersQueueCountLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             usersQueueCountLabel.heightAnchor.constraint(equalToConstant: 15)
@@ -104,9 +128,24 @@ class SearchVC: UIViewController {
         
         NSLayoutConstraint.activate([
             usersQueueTable.topAnchor.constraint(equalTo: usersQueueCountLabel.bottomAnchor, constant: 10),
-            usersQueueTable.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            usersQueueTable.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            usersQueueTable.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
+            usersQueueTable.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
             usersQueueTable.bottomAnchor.constraint(equalTo: createRoomButton.topAnchor, constant: -10)
+        ])
+    }
+    
+    private func configureActivityIndicator() {
+        activityIndicator.color = .lightGray
+        activityIndicator.center = CGPoint(x: usersQueueTable.bounds.width / 2, y: activityIndicator.bounds.height / 2)
+        activityIndicator.hidesWhenStopped = true
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+        usersQueueTable.addSubview(activityIndicator)
+        
+        NSLayoutConstraint.activate([
+            activityIndicator.centerXAnchor.constraint(equalTo: usersQueueTable.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: usersQueueTable.centerYAnchor),
+            activityIndicator.widthAnchor.constraint(equalToConstant: 20),
+            activityIndicator.heightAnchor.constraint(equalToConstant: 20)
         ])
     }
     
@@ -123,8 +162,6 @@ class SearchVC: UIViewController {
     }
     
     @objc private func createRoom() {
-        //make sure that we have more than self
-        
         let createRoomConfirmationVC = CreateRoomConfirmationVC(users: usersQueueForRoomCreation) { [weak self] in
             self?.dismiss(animated: true)
         }
@@ -136,7 +173,9 @@ class SearchVC: UIViewController {
     
     private func addCurrentUser() {
         if let currentUserUsername = FirebaseManager.shared.currentUser?.username  {
+            activityIndicator.startAnimating()
             FirebaseManager.shared.fetchUserDocumentData(with: currentUserUsername) { [weak self] result in
+                self?.activityIndicator.stopAnimating()
                 switch result {
                 case .success(let user):
                     self?.usersQueueForRoomCreation.append(user)
@@ -156,10 +195,8 @@ class SearchVC: UIViewController {
         }
     }
     
-    private func setToSuggestedSearches() {
-        if searchController.searchBar.searchTextField.tokens.isEmpty {
-            searchFriendsResultController.showSuggestedSearches = true
-        }
+    func getUsersQueueForRoomCreation() -> [TTUser] {
+        return usersQueueForRoomCreation
     }
 }
 
@@ -168,7 +205,7 @@ extension SearchVC: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = usersQueueTable.dequeueReusableCell(withIdentifier: ProfileUsernameCell.reuseID) as! ProfileUsernameCell
         let userInQueue = usersQueueForRoomCreation[indexPath.section]
-        cell.set(for: userInQueue.username)
+        cell.set(for: userInQueue)
         return cell
     }
     
@@ -194,6 +231,10 @@ extension SearchVC: UITableViewDataSource, UITableViewDelegate {
         return 7.0
     }
     
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 50.0
+    }
+    
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         guard editingStyle == .delete else { return }
         
@@ -212,7 +253,6 @@ extension SearchVC: UITableViewDataSource, UITableViewDelegate {
 
 extension SearchVC: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        searchFriendsResultController.showSuggestedSearches = false
         searchFriendsResultController.search(with: searchText)
     }
     
@@ -221,18 +261,12 @@ extension SearchVC: UISearchBarDelegate {
         searchController.dismiss(animated: true, completion: nil)
         searchBar.text = ""
     }
-    
-    func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
-        setToSuggestedSearches()
-        return true
-    }
 }
 
 extension SearchVC: UISearchControllerDelegate {
     func presentSearchController(_ searchController: UISearchController) {
         searchController.showsSearchResultsController = true
-        setToSuggestedSearches()
-        searchFriendsResultController.getSuggestedSearches(withMaxCount: 3)
+        searchFriendsResultController.setAllFriends(with: allFriends)
     }
 }
 

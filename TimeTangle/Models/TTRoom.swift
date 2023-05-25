@@ -13,6 +13,7 @@ typealias TTRoomEditDifference = TTRoomEdit.TTRoomEditDifference
 struct TTRoom: Codable, Equatable {
     var name: String
     var users: [String]
+//    var ttUsers: [TTUser]?
     var code: String //A 5 letter Code
     var startingDate: Date
     var endingDate: Date
@@ -31,6 +32,10 @@ struct TTRoom: Codable, Equatable {
     func doesContainsAdmin(for username: String) -> Bool {
         return admins.contains(where: { $0 == username })
     }
+    
+//    func getTTUsers() -> [TTUser] {
+//        return ttUsers ?? []
+//    }
 }
 
 struct TTRoomEdit: Codable {

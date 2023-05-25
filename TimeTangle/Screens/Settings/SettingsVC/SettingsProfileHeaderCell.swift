@@ -10,6 +10,8 @@ import UIKit
 class SettingsProfileHeaderCell: UITableViewCell {
     
     static let reuseID = "SettingsProfileHeaderCell"
+    private let profileImageView = TTProfileImageView(widthHeight: 80)
+    private var nameLabel = UILabel()
     private var profileHeaderStackView = UIStackView()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -21,8 +23,16 @@ class SettingsProfileHeaderCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    func updateCell() {
+        guard let currentUser = FirebaseManager.shared.currentUser else { return }
+        
+        profileImageView.setImageForUser(for: currentUser)
+        nameLabel.text = currentUser.getFullName()
+    }
+    
     private func configureCell() {
         guard let currentUser = FirebaseManager.shared.currentUser else { return }
+        backgroundColor = .lightGray.withAlphaComponent(0.35)
         
         selectionStyle = .none
         accessoryType = .disclosureIndicator
@@ -30,17 +40,12 @@ class SettingsProfileHeaderCell: UITableViewCell {
         profileHeaderStackView.axis = .horizontal
         profileHeaderStackView.alignment = .center
         profileHeaderStackView.distribution = .fillProportionally
+        profileHeaderStackView.spacing = 20
         profileHeaderStackView.translatesAutoresizingMaskIntoConstraints = false
-        profileHeaderStackView.backgroundColor = .lightGray.withAlphaComponent(0.35)
-        profileHeaderStackView.layer.cornerRadius = 10.0
+        profileHeaderStackView.layer.cornerRadius = 10
         addSubview(profileHeaderStackView)
         
-        let profileImageView = UIImageView()
-        let config = UIImage.SymbolConfiguration(pointSize: 50)
-        let profileImage = UIImage(systemName: "person.crop.circle", withConfiguration: config)
-        profileImageView.tintColor = .white
-        profileImageView.image = profileImage
-        profileImageView.contentMode = .scaleAspectFit
+        profileImageView.showBorder = true
         profileImageView.translatesAutoresizingMaskIntoConstraints = false
         profileHeaderStackView.addArrangedSubview(profileImageView)
         
@@ -49,10 +54,10 @@ class SettingsProfileHeaderCell: UITableViewCell {
         userInfoStackView.axis = .vertical
         userInfoStackView.distribution = .fill
         userInfoStackView.translatesAutoresizingMaskIntoConstraints = false
+        userInfoStackView.spacing = 5
         profileHeaderStackView.addArrangedSubview(userInfoStackView)
         
-        let nameLabel = UILabel()
-        nameLabel.text = currentUser.firstname + " " + currentUser.lastname
+        nameLabel.text = "\(currentUser.firstname)\(currentUser.lastname)"
         nameLabel.font = UIFont.systemFont(ofSize: 20, weight: .bold)
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
         userInfoStackView.addArrangedSubview(nameLabel)
@@ -73,7 +78,7 @@ class SettingsProfileHeaderCell: UITableViewCell {
         
         NSLayoutConstraint.activate([
             profileHeaderStackView.topAnchor.constraint(equalTo: topAnchor),
-            profileHeaderStackView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            profileHeaderStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
             profileHeaderStackView.trailingAnchor.constraint(equalTo: trailingAnchor),
             profileHeaderStackView.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])

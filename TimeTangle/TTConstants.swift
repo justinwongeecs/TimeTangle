@@ -21,6 +21,7 @@ struct TTConstants {
     static let username = "username"
     static let roomCodes = "roomCodes"
     static let profilePictureURL = "profilePictureURL"
+    static let profilePictureData = "profilePictureData"
     
     //TTFriendRequest
     static let recipientUsername = "recipientUsername"
@@ -38,4 +39,6 @@ struct TTConstants {
     static let roomEvents = "events"
     //MARK: - UI
     static let emptyStateViewTag = 100
+    
+    static let firestoreMaximumImageDataBytes = 1048487
 }

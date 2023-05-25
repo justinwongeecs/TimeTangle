@@ -71,7 +71,6 @@
 		E8CEE2DD29581C85000CD7FE /* SettingsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CEE2DC29581C85000CD7FE /* SettingsVC.swift */; };
 		E8CEE2E129582A2E000CD7FE /* TTUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CEE2E029582A2E000CD7FE /* TTUser.swift */; };
 		E8CEE2E629590DF6000CD7FE /* UserQueueForRoomCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CEE2E529590DF5000CD7FE /* UserQueueForRoomCell.swift */; };
-		E8CEE2E929590EBE000CD7FE /* TTAvatarImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CEE2E829590EBE000CD7FE /* TTAvatarImageView.swift */; };
 		E8CFC21B295B8AD7006C23BE /* Notification.Name+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CFC21A295B8AD7006C23BE /* Notification.Name+Ext.swift */; };
 		E8CFC222295C183D006C23BE /* SearchFriendsResultController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CFC221295C183D006C23BE /* SearchFriendsResultController.swift */; };
 		E8CFC224295D065B006C23BE /* JoinRoomCodeTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CFC223295D065B006C23BE /* JoinRoomCodeTextField.swift */; };
@@ -143,7 +142,6 @@
 		E8CEE2DC29581C85000CD7FE /* SettingsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsVC.swift; sourceTree = "<group>"; };
 		E8CEE2E029582A2E000CD7FE /* TTUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTUser.swift; sourceTree = "<group>"; };
 		E8CEE2E529590DF5000CD7FE /* UserQueueForRoomCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserQueueForRoomCell.swift; sourceTree = "<group>"; };
-		E8CEE2E829590EBE000CD7FE /* TTAvatarImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTAvatarImageView.swift; sourceTree = "<group>"; };
 		E8CFC21A295B8AD7006C23BE /* Notification.Name+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Notification.Name+Ext.swift"; sourceTree = "<group>"; };
 		E8CFC221295C183D006C23BE /* SearchFriendsResultController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchFriendsResultController.swift; sourceTree = "<group>"; };
 		E8CFC223295D065B006C23BE /* JoinRoomCodeTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinRoomCodeTextField.swift; sourceTree = "<group>"; };
@@ -335,7 +333,6 @@
 				E8CEE2EA29590EC2000CD7FE /* Text */,
 				E8CEE2E729590DFB000CD7FE /* Cells */,
 				E8CEE2D42957D17E000CD7FE /* TTAlertVC.swift */,
-				E8CEE2E829590EBE000CD7FE /* TTAvatarImageView.swift */,
 				E893A26E29598E2F004F7BC5 /* TTEmptyStateView.swift */,
 				E8CFC228295D371D006C23BE /* TTModalCardVC.swift */,
 				E865A7AC2A1C80C800F105AA /* TTProfileImageView.swift */,
@@ -550,7 +547,6 @@
 				E8188FC92A14C641005AA0BF /* UITableView+Ext.swift in Sources */,
 				E8CEE2B92957A0C7000CD7FE /* TTButton.swift in Sources */,
 				E8188FDD2A18811A005AA0BF /* Event+Ext.swift in Sources */,
-				E8CEE2E929590EBE000CD7FE /* TTAvatarImageView.swift in Sources */,
 				E8188FD12A173D8E005AA0BF /* Date+Ext.swift in Sources */,
 				E8CEE2B729579DE3000CD7FE /* TTTextField.swift in Sources */,
 				E8CEE2A12957956E000CD7FE /* AppDelegate.swift in Sources */,

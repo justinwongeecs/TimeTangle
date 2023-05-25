@@ -19,19 +19,7 @@ class FirebaseManager {
     private let sceneWindow = (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.window
     private let notificationCenter = NotificationCenter.default
     
-    var currentUser: TTUser? {
-        willSet {
-            guard let newCurrentUser = newValue  else { return }
-            if newCurrentUser.roomCodes.count > 0 {
-                listenToCurrentUserRooms()
-            } else {
-                //stop listening to current user rooms
-                if let currentUserRoomsListener = currentUserRoomsListener {
-                    currentUserRoomsListener.remove()
-                }
-            }
-        }
-    }
+    var currentUser: TTUser?
     
     func listenToAuthChanges() {
         handle = Auth.auth().addStateDidChangeListener { [weak self] (auth, user) in
@@ -66,25 +54,9 @@ class FirebaseManager {
         currentUserListener = db.collection(TTConstants.usersCollection).document(username).addSnapshotListener { [weak self] docSnapshot, error in
             guard let document = docSnapshot else { return }
             do {
-                print("change to user")
                 let currentUserData = try document.data(as: TTUser.self)
                 self?.currentUser = currentUserData
-                if let profilePictureURL = self?.currentUser?.profilePictureURL, let url = URL(string: profilePictureURL) {
-                    FirebaseStorageManager().fetchImage(for: url) { result in
-                        switch result {
-                        case .success(let image):
-                            if let imageData = image.pngData() {
-                                self?.currentUser?.profilePictureData = imageData
-                            }
-                            self?.broadcastUpdatedUser()
-                        case .failure(_):
-                            //Send Notfication or something 
-                            print("Do something")
-                        }
-                    }
-                } else {
-                    self?.broadcastUpdatedUser()
-                }
+                self?.broadcastUpdatedUser()
             } catch {
                 print("Can't listen to current user")
             }
@@ -223,15 +195,15 @@ class FirebaseManager {
     
     func listenToCurrentUserRooms() {
         guard let currentUserRoomCodes = currentUser?.roomCodes, currentUserRoomCodes.count > 0 else { return }
-        
+
         currentUserRoomsListener = db.collection(TTConstants.roomsCollection).whereField(TTConstants.roomCode, in: currentUserRoomCodes).addSnapshotListener { [weak self] querySnapshot, error in
             guard let documents = querySnapshot?.documents else {
                 print("Error fetching doucments")
                 return
             }
-            
+
             print("Room documents: \(documents.map{ $0["code"]})")
-            
+
             do {
                 let roomsData = try documents.map { try $0.data(as: TTRoom.self)}
                 self?.notificationCenter.post(name: .updatedCurrentUserRooms, object: roomsData)

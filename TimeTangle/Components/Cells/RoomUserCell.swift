@@ -30,11 +30,11 @@ class RoomUserCell: ProfileUsernameCell {
         super.init(coder: coder)
     }
     
-    func set(for username: String, usersNotVisible: [String], room: TTRoom) {
-        super.set(for: username)
+    func set(for user: TTUser, usersNotVisible: [String], room: TTRoom) {
+        super.set(for: user)
         self.room = room
         
-        if usersNotVisible.contains(username) {
+        if usersNotVisible.contains(user.username) {
             isUserVisible = false
         } else {
             isUserVisible = true

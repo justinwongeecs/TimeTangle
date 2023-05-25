@@ -12,7 +12,8 @@ import FirebaseFirestore
 class RoomUsersVC: UIViewController {
     
     private var room: TTRoom!
-    private var users: [TTUser]!
+    private var ttUsers = [TTUser]()
+    private let activityIndicator = UIActivityIndicatorView(style: .medium)
     private let usersTableView = UITableView()
     private var usersNotVisible = [String]()
     
@@ -32,7 +33,43 @@ class RoomUsersVC: UIViewController {
         super.viewDidLoad()
         updateVCTitle()
         view.backgroundColor = .systemBackground
+        configureActivityIndicator()
         configureUsersTableView()
+        fetchRoomTTUsers()
+    }
+    
+    //Is this the best place to put this?
+    private func fetchRoomTTUsers() {
+        activityIndicator.startAnimating()
+        FirebaseManager.shared.fetchMultipleUsersDocumentData(with: room.users) { [weak self] result in
+            self?.activityIndicator.stopAnimating()
+            switch result {
+            case .success(let ttUsers):
+                self?.ttUsers = ttUsers
+            case .failure(let error):
+                self?.ttUsers = []
+                self?.presentTTAlert(title: "Fetch Error", message: error.rawValue, buttonTitle: "OK")
+            }
+            DispatchQueue.main.async {
+                self?.usersTableView.reloadData()
+                self?.updateVCTitle()
+            }
+        }
+    }
+    
+    private func configureActivityIndicator() {
+        activityIndicator.color = .lightGray
+        activityIndicator.center = CGPoint(x: usersTableView.bounds.width / 2, y: usersTableView.bounds.height / 2)
+        activityIndicator.hidesWhenStopped = true
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false 
+        usersTableView.addSubview(activityIndicator)
+        
+        NSLayoutConstraint.activate([
+            activityIndicator.centerYAnchor.constraint(equalTo: usersTableView.centerYAnchor),
+            activityIndicator.centerXAnchor.constraint(equalTo: usersTableView.centerXAnchor),
+            activityIndicator.widthAnchor.constraint(equalToConstant: 20),
+            activityIndicator.heightAnchor.constraint(equalToConstant: 20)
+        ])
     }
     
     private func configureUsersTableView() {
@@ -53,21 +90,21 @@ class RoomUsersVC: UIViewController {
     
     private func sortUsersByAdminAndName() {
         //Need to create a copy to avoid "simultaneous access error" 
-        var users = room.users
+        var users = ttUsers
         users.sort(by: {
-            self.room.doesContainsAdmin(for: $0) && !self.room.doesContainsAdmin(for: $1)
+            self.room.doesContainsAdmin(for: $0.username) && !self.room.doesContainsAdmin(for: $1.username)
         })
-        room.users = users
+        ttUsers = users
     }
     
     private func updateVCTitle() {
-        title = "\(room.users.count) \(room.users.count > 1 ? "Members" : "Member")"
+        title = "\(ttUsers.count) \(ttUsers.count > 1 ? "Members" : "Member")"
     }
 }
 
 extension RoomUsersVC: UITableViewDelegate, UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
-        return room.users.count
+        return ttUsers.count
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -76,8 +113,8 @@ extension RoomUsersVC: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = usersTableView.dequeueReusableCell(withIdentifier: RoomUserCell.reuseID) as! RoomUserCell
-        let username = room.users[indexPath.section]
-        cell.set(for: username, usersNotVisible: usersNotVisible, room: room)
+        let user = ttUsers[indexPath.section]
+        cell.set(for: user, usersNotVisible: usersNotVisible, room: room)
         if let previousVC = previousViewController() as? RoomDetailVC {
             cell.delegate = previousVC.self
         }

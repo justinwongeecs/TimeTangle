@@ -129,7 +129,8 @@ extension AddFriendVC: UITextFieldDelegate {
             switch result {
             case .success(let allUsers):
                 var usersToBeRemoved: [String] = []
-                usersToBeRemoved.append(contentsOf: friendsAndRequestsVCRef.friends.map{ $0 })
+                //TODO: Check 
+                usersToBeRemoved.append(contentsOf: friendsAndRequestsVCRef.friends.map{ $0.username })
                 usersToBeRemoved.append(contentsOf: friendsAndRequestsVCRef.friendRequests.map{$0.recipientUsername})
                 usersToBeRemoved.append(currentUser.username)
                 
@@ -152,7 +153,7 @@ extension AddFriendVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = friendSearchResultsTable.dequeueReusableCell(withIdentifier: ProfileUsernameCell.reuseID) as! ProfileUsernameCell
         let suggestedUser = friendSearchResults[indexPath.section]
-        cell.set(for: suggestedUser.username)
+        cell.set(for: suggestedUser)
         return cell
     }
     

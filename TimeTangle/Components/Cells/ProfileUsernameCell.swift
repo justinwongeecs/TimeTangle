@@ -11,8 +11,10 @@ class ProfileUsernameCell: UITableViewCell {
     
     static let reuseID = "AddFriendSearchResultCell"
     
-    private var username: String = ""
-    internal let avatarImageView = UIImageView()
+    private var user: TTUser?
+    
+    private var hStackView = UIStackView()
+    internal var avatarImageView = TTProfileImageView(widthHeight: 40)
     internal let usernameLabel = TTTitleLabel(textAlignment: .left, fontSize: 15)
         
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -24,36 +26,42 @@ class ProfileUsernameCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func set(for username: String) {
-        self.username = username
-        usernameLabel.text = username
+    func set(for user: TTUser) {
+        self.user = user
+        usernameLabel.text = user.username
+    
+        if let imageData = user.profilePictureData, let image = UIImage(data: imageData) {
+            print("ProfileUsernameCellImageData: \(imageData)")
+            avatarImageView.setImage(to: image)
+        }
     }
     
     private func configureCell() {
-        addSubview(avatarImageView)
-        addSubview(usernameLabel)
-        
-        let avatarImage = UIImage(systemName: "person.crop.circle")?.withTintColor(.lightGray, renderingMode: .alwaysOriginal)
-        avatarImageView.image = avatarImage
-        avatarImageView.image?.withTintColor(.secondaryLabel)
-        avatarImageView.frame = CGRect(x: 10, y: 10, width: 40, height: 40)
-        
         backgroundColor = .secondarySystemBackground
         layer.cornerRadius = 10
         selectionStyle = .none
-        clipsToBounds = true 
+        clipsToBounds = true
+        
+        hStackView.axis = .horizontal
+        hStackView.alignment = .center
+        hStackView.distribution = .fillProportionally
+        hStackView.translatesAutoresizingMaskIntoConstraints = false
+        hStackView.spacing = 10
+        addSubview(hStackView)
+        
+        avatarImageView.translatesAutoresizingMaskIntoConstraints = false
+        hStackView.addArrangedSubview(avatarImageView)
+        hStackView.addArrangedSubview(usernameLabel)
         
         NSLayoutConstraint.activate([
-            avatarImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
-            avatarImageView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
-
-            usernameLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
-            usernameLabel.leadingAnchor.constraint(equalTo: avatarImageView.trailingAnchor, constant: 10),
-            usernameLabel.heightAnchor.constraint(equalToConstant: 20),
+            hStackView.topAnchor.constraint(equalTo: topAnchor),
+            hStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10),
+            hStackView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            hStackView.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
     }
     
     internal func getUsername() -> String {
-        return username 
+        return user?.username ?? ""
     }
 }

@@ -66,11 +66,7 @@ class RoomDetailVC: UIViewController {
     private func setOriginalRoomState(with room: TTRoom) {
         //copy of room assigned to originalRoomState since TTRoom is a struct
         originalRoomState = room
-//        if let events = roomAggregateVC.createEventsForOpenIntervals(with: originalRoomState.events) {
-//            let ttEvents = events.map { $0.toTTEvent() }
-//            originalRoomState.events.append(contentsOf: ttEvents)
-//        }
-    } 
+    }
     
     private func configureAdminEnability() {
         guard let currentUser = FirebaseManager.shared.currentUser else { return }
