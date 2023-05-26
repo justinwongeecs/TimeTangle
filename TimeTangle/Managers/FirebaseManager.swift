@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SwiftUI
 import FirebaseAuth
 import FirebaseFirestore
 import FirebaseFirestoreSwift
@@ -391,7 +392,7 @@ class FirebaseManager {
     }
     
     private func createSettingsNC() -> UINavigationController {
-        let settingsVC = SettingsVC()
+        let settingsVC = TTHostingController(rootView: SettingsView())
         settingsVC.tabBarItem = UITabBarItem(title: "Settings", image: UIImage(systemName: "gearshape"), tag: 3)
         return UINavigationController(rootViewController: settingsVC)
     }

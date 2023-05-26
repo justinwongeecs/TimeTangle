@@ -18,17 +18,21 @@
 		E84541AF295F818B00CBB430 /* RoomDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84541AE295F818B00CBB430 /* RoomDetailVC.swift */; };
 		E84541B2295FADDC00CBB430 /* EventKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84541B1295FADDC00CBB430 /* EventKitManager.swift */; };
 		E84541B5295FC17500CBB430 /* RoomDetailNib.xib in Resources */ = {isa = PBXBuildFile; fileRef = E84541B4295FC17500CBB430 /* RoomDetailNib.xib */; };
-		E865A79E2A196BA600F105AA /* SettingIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A79D2A196BA600F105AA /* SettingIconView.swift */; };
-		E865A7A22A196BFB00F105AA /* SettingsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A7A12A196BFB00F105AA /* SettingsCell.swift */; };
-		E865A7A52A1AD2A000F105AA /* SettingsProfileEditVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A7A42A1AD2A000F105AA /* SettingsProfileEditVC.swift */; };
-		E865A7A72A1BF87A00F105AA /* SettingsButtonCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A7A62A1BF87A00F105AA /* SettingsButtonCell.swift */; };
 		E865A7A92A1C108A00F105AA /* TTEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A7A82A1C108A00F105AA /* TTEvent.swift */; };
-		E865A7AB2A1C7F4F00F105AA /* SettingsProfileHeaderCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A7AA2A1C7F4F00F105AA /* SettingsProfileHeaderCell.swift */; };
 		E865A7AD2A1C80C800F105AA /* TTProfileImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A7AC2A1C80C800F105AA /* TTProfileImageView.swift */; };
+		E865A7E52A1F432A00F105AA /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A7E42A1F432900F105AA /* SettingsManager.swift */; };
+		E865A7F22A1FF25400F105AA /* Setting in Frameworks */ = {isa = PBXBuildFile; productRef = E865A7F12A1FF25400F105AA /* Setting */; };
+		E865A7F42A1FF30100F105AA /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A7F32A1FF30100F105AA /* SettingsView.swift */; };
+		E865A7F62A1FFE8100F105AA /* TTHostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A7F52A1FFE8100F105AA /* TTHostingController.swift */; };
+		E865A7F82A2007A700F105AA /* SettingsMyProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A7F72A2007A700F105AA /* SettingsMyProfileView.swift */; };
+		E865A7FA2A2029A400F105AA /* TTSwiftUIProfileImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A7F92A2029A400F105AA /* TTSwiftUIProfileImageView.swift */; };
+		E865A7FC2A202A8700F105AA /* SettingsGeneralView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A7FB2A202A8700F105AA /* SettingsGeneralView.swift */; };
+		E865A7FE2A20718500F105AA /* Wiggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A7FD2A20718500F105AA /* Wiggle.swift */; };
+		E865A8002A2072BA00F105AA /* SubscriptionProPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A7FF2A2072BA00F105AA /* SubscriptionProPlanView.swift */; };
+		E865A8022A207A7600F105AA /* SubscriptionFreePlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A8012A207A7600F105AA /* SubscriptionFreePlanView.swift */; };
+		E865A8042A207D7A00F105AA /* View+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A8032A207D7A00F105AA /* View+Ext.swift */; };
 		E873BCD72964D99A0015AE99 /* CalendarKit in Frameworks */ = {isa = PBXBuildFile; productRef = E873BCD62964D99A0015AE99 /* CalendarKit */; };
 		E873BCD92964E4200015AE99 /* RoomAggregateResultVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E873BCD82964E4200015AE99 /* RoomAggregateResultVC.swift */; };
-		E873BCE0296555F10015AE99 /* SettingsEditProfileVCNib.xib in Resources */ = {isa = PBXBuildFile; fileRef = E873BCDF296555F10015AE99 /* SettingsEditProfileVCNib.xib */; };
-		E873BCE2296556080015AE99 /* SettingsEditProfileVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E873BCE1296556080015AE99 /* SettingsEditProfileVC.swift */; };
 		E873BCE4296693C80015AE99 /* TTCloseButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = E873BCE3296693C70015AE99 /* TTCloseButton.swift */; };
 		E873BCE72966A0DC0015AE99 /* FirebaseStorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E873BCE62966A0DC0015AE99 /* FirebaseStorageManager.swift */; };
 		E873BCE92968D5860015AE99 /* CreateAccountVCNib.xib in Resources */ = {isa = PBXBuildFile; fileRef = E873BCE82968D5860015AE99 /* CreateAccountVCNib.xib */; };
@@ -68,7 +72,6 @@
 		E8CEE2D72957D1B2000CD7FE /* TTBodyLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CEE2D62957D1B2000CD7FE /* TTBodyLabel.swift */; };
 		E8CEE2D92957D1FD000CD7FE /* UIViewController+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CEE2D82957D1FD000CD7FE /* UIViewController+Ext.swift */; };
 		E8CEE2DB2957D71E000CD7FE /* TTError.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CEE2DA2957D71E000CD7FE /* TTError.swift */; };
-		E8CEE2DD29581C85000CD7FE /* SettingsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CEE2DC29581C85000CD7FE /* SettingsVC.swift */; };
 		E8CEE2E129582A2E000CD7FE /* TTUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CEE2E029582A2E000CD7FE /* TTUser.swift */; };
 		E8CEE2E629590DF6000CD7FE /* UserQueueForRoomCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CEE2E529590DF5000CD7FE /* UserQueueForRoomCell.swift */; };
 		E8CFC21B295B8AD7006C23BE /* Notification.Name+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CFC21A295B8AD7006C23BE /* Notification.Name+Ext.swift */; };
@@ -95,16 +98,19 @@
 		E84541AE295F818B00CBB430 /* RoomDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomDetailVC.swift; sourceTree = "<group>"; };
 		E84541B1295FADDC00CBB430 /* EventKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventKitManager.swift; sourceTree = "<group>"; };
 		E84541B4295FC17500CBB430 /* RoomDetailNib.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RoomDetailNib.xib; sourceTree = "<group>"; };
-		E865A79D2A196BA600F105AA /* SettingIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingIconView.swift; sourceTree = "<group>"; };
-		E865A7A12A196BFB00F105AA /* SettingsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsCell.swift; sourceTree = "<group>"; };
-		E865A7A42A1AD2A000F105AA /* SettingsProfileEditVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsProfileEditVC.swift; sourceTree = "<group>"; };
-		E865A7A62A1BF87A00F105AA /* SettingsButtonCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsButtonCell.swift; sourceTree = "<group>"; };
 		E865A7A82A1C108A00F105AA /* TTEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTEvent.swift; sourceTree = "<group>"; };
-		E865A7AA2A1C7F4F00F105AA /* SettingsProfileHeaderCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsProfileHeaderCell.swift; sourceTree = "<group>"; };
 		E865A7AC2A1C80C800F105AA /* TTProfileImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTProfileImageView.swift; sourceTree = "<group>"; };
+		E865A7E42A1F432900F105AA /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
+		E865A7F32A1FF30100F105AA /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		E865A7F52A1FFE8100F105AA /* TTHostingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTHostingController.swift; sourceTree = "<group>"; };
+		E865A7F72A2007A700F105AA /* SettingsMyProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsMyProfileView.swift; sourceTree = "<group>"; };
+		E865A7F92A2029A400F105AA /* TTSwiftUIProfileImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTSwiftUIProfileImageView.swift; sourceTree = "<group>"; };
+		E865A7FB2A202A8700F105AA /* SettingsGeneralView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsGeneralView.swift; sourceTree = "<group>"; };
+		E865A7FD2A20718500F105AA /* Wiggle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wiggle.swift; sourceTree = "<group>"; };
+		E865A7FF2A2072BA00F105AA /* SubscriptionProPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionProPlanView.swift; sourceTree = "<group>"; };
+		E865A8012A207A7600F105AA /* SubscriptionFreePlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionFreePlanView.swift; sourceTree = "<group>"; };
+		E865A8032A207D7A00F105AA /* View+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Ext.swift"; sourceTree = "<group>"; };
 		E873BCD82964E4200015AE99 /* RoomAggregateResultVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomAggregateResultVC.swift; sourceTree = "<group>"; };
-		E873BCDF296555F10015AE99 /* SettingsEditProfileVCNib.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SettingsEditProfileVCNib.xib; sourceTree = "<group>"; };
-		E873BCE1296556080015AE99 /* SettingsEditProfileVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsEditProfileVC.swift; sourceTree = "<group>"; };
 		E873BCE3296693C70015AE99 /* TTCloseButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTCloseButton.swift; sourceTree = "<group>"; };
 		E873BCE62966A0DC0015AE99 /* FirebaseStorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseStorageManager.swift; sourceTree = "<group>"; };
 		E873BCE82968D5860015AE99 /* CreateAccountVCNib.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CreateAccountVCNib.xib; sourceTree = "<group>"; };
@@ -139,7 +145,6 @@
 		E8CEE2D62957D1B2000CD7FE /* TTBodyLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTBodyLabel.swift; sourceTree = "<group>"; };
 		E8CEE2D82957D1FD000CD7FE /* UIViewController+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+Ext.swift"; sourceTree = "<group>"; };
 		E8CEE2DA2957D71E000CD7FE /* TTError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTError.swift; sourceTree = "<group>"; };
-		E8CEE2DC29581C85000CD7FE /* SettingsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsVC.swift; sourceTree = "<group>"; };
 		E8CEE2E029582A2E000CD7FE /* TTUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTUser.swift; sourceTree = "<group>"; };
 		E8CEE2E529590DF5000CD7FE /* UserQueueForRoomCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserQueueForRoomCell.swift; sourceTree = "<group>"; };
 		E8CFC21A295B8AD7006C23BE /* Notification.Name+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Notification.Name+Ext.swift"; sourceTree = "<group>"; };
@@ -165,6 +170,7 @@
 				E893A2672959611B004F7BC5 /* FirebaseFirestore in Frameworks */,
 				E893A26B2959611B004F7BC5 /* FirebaseStorage in Frameworks */,
 				E873BCD72964D99A0015AE99 /* CalendarKit in Frameworks */,
+				E865A7F22A1FF25400F105AA /* Setting in Frameworks */,
 				E893A2612959611B004F7BC5 /* FirebaseAppDistribution-Beta in Frameworks */,
 				E893A2692959611B004F7BC5 /* FirebaseFirestoreSwift in Frameworks */,
 			);
@@ -229,25 +235,16 @@
 			path = Managers;
 			sourceTree = "<group>";
 		};
-		E865A7A32A196C0200F105AA /* SettingsVC */ = {
-			isa = PBXGroup;
-			children = (
-				E8CEE2DC29581C85000CD7FE /* SettingsVC.swift */,
-				E865A79D2A196BA600F105AA /* SettingIconView.swift */,
-				E865A7A12A196BFB00F105AA /* SettingsCell.swift */,
-				E865A7A42A1AD2A000F105AA /* SettingsProfileEditVC.swift */,
-				E865A7A62A1BF87A00F105AA /* SettingsButtonCell.swift */,
-				E865A7AA2A1C7F4F00F105AA /* SettingsProfileHeaderCell.swift */,
-			);
-			path = SettingsVC;
-			sourceTree = "<group>";
-		};
 		E873BCDE296555D10015AE99 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
-				E865A7A32A196C0200F105AA /* SettingsVC */,
-				E873BCDF296555F10015AE99 /* SettingsEditProfileVCNib.xib */,
-				E873BCE1296556080015AE99 /* SettingsEditProfileVC.swift */,
+				E865A7F32A1FF30100F105AA /* SettingsView.swift */,
+				E865A7E42A1F432900F105AA /* SettingsManager.swift */,
+				E865A7F72A2007A700F105AA /* SettingsMyProfileView.swift */,
+				E865A7F92A2029A400F105AA /* TTSwiftUIProfileImageView.swift */,
+				E865A7FB2A202A8700F105AA /* SettingsGeneralView.swift */,
+				E865A7FF2A2072BA00F105AA /* SubscriptionProPlanView.swift */,
+				E865A8012A207A7600F105AA /* SubscriptionFreePlanView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -336,6 +333,8 @@
 				E893A26E29598E2F004F7BC5 /* TTEmptyStateView.swift */,
 				E8CFC228295D371D006C23BE /* TTModalCardVC.swift */,
 				E865A7AC2A1C80C800F105AA /* TTProfileImageView.swift */,
+				E865A7F52A1FFE8100F105AA /* TTHostingController.swift */,
+				E865A7FD2A20718500F105AA /* Wiggle.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -386,6 +385,7 @@
 				E8188FC82A14C641005AA0BF /* UITableView+Ext.swift */,
 				E8188FD02A173D8D005AA0BF /* Date+Ext.swift */,
 				E8188FDC2A18811A005AA0BF /* Event+Ext.swift */,
+				E865A8032A207D7A00F105AA /* View+Ext.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -440,6 +440,7 @@
 				E893A2682959611B004F7BC5 /* FirebaseFirestoreSwift */,
 				E893A26A2959611B004F7BC5 /* FirebaseStorage */,
 				E873BCD62964D99A0015AE99 /* CalendarKit */,
+				E865A7F12A1FF25400F105AA /* Setting */,
 			);
 			productName = TimeTangle;
 			productReference = E8CEE29D2957956E000CD7FE /* TimeTangle.app */;
@@ -472,6 +473,7 @@
 			packageReferences = (
 				E893A25D2959611B004F7BC5 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				E873BCD52964D99A0015AE99 /* XCRemoteSwiftPackageReference "CalendarKit" */,
+				E865A7F02A1FF25400F105AA /* XCRemoteSwiftPackageReference "Setting" */,
 			);
 			productRefGroup = E8CEE29E2957956E000CD7FE /* Products */;
 			projectDirPath = "";
@@ -487,7 +489,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E873BCE0296555F10015AE99 /* SettingsEditProfileVCNib.xib in Resources */,
 				E8CEE2AD29579571000CD7FE /* LaunchScreen.storyboard in Resources */,
 				E873BCE92968D5860015AE99 /* CreateAccountVCNib.xib in Resources */,
 				E8CEE2AA29579571000CD7FE /* Assets.xcassets in Resources */,
@@ -504,19 +505,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E865A7A72A1BF87A00F105AA /* SettingsButtonCell.swift in Sources */,
-				E865A79E2A196BA600F105AA /* SettingIconView.swift in Sources */,
 				E893A273295A3C52004F7BC5 /* ProfileUsernameCell.swift in Sources */,
 				E873BCEB296904F50015AE99 /* RoomUserCell.swift in Sources */,
 				E81D25062A145217003C65C5 /* UILabel+Ext.swift in Sources */,
 				E873BCD92964E4200015AE99 /* RoomAggregateResultVC.swift in Sources */,
 				E8CEE2BB2957A89C000CD7FE /* AddUsersModalVC.swift in Sources */,
 				E8D004A92963B82B00907A64 /* RoomHistoryVC.swift in Sources */,
-				E865A7A52A1AD2A000F105AA /* SettingsProfileEditVC.swift in Sources */,
 				E8CEE2E129582A2E000CD7FE /* TTUser.swift in Sources */,
 				E8CEE2B529579D3A000CD7FE /* SearchVC.swift in Sources */,
 				E893A26F29598E2F004F7BC5 /* TTEmptyStateView.swift in Sources */,
 				E8188FC72A149EA8005AA0BF /* UIImage+Ext.swift in Sources */,
+				E865A7FA2A2029A400F105AA /* TTSwiftUIProfileImageView.swift in Sources */,
 				E8CFC222295C183D006C23BE /* SearchFriendsResultController.swift in Sources */,
 				E8CFC227295D0836006C23BE /* JoinRoomVC.swift in Sources */,
 				E8188FC52A149160005AA0BF /* UIView+Ext.swift in Sources */,
@@ -524,23 +523,23 @@
 				E8188FD32A1751D5005AA0BF /* CalendarModalCardVC.swift in Sources */,
 				E873BCE4296693C80015AE99 /* TTCloseButton.swift in Sources */,
 				E8CEE2D92957D1FD000CD7FE /* UIViewController+Ext.swift in Sources */,
+				E865A8042A207D7A00F105AA /* View+Ext.swift in Sources */,
 				E8CEE2D32957C7C7000CD7FE /* TTTitledTextField.swift in Sources */,
 				E8CEE2CA2957B03C000CD7FE /* LoginVC.swift in Sources */,
 				E865A7AD2A1C80C800F105AA /* TTProfileImageView.swift in Sources */,
+				E865A7F42A1FF30100F105AA /* SettingsView.swift in Sources */,
 				E893A275295A5DB1004F7BC5 /* TTFriendRequest.swift in Sources */,
 				E8CFC22D295D5E55006C23BE /* RoomsVC.swift in Sources */,
+				E865A8002A2072BA00F105AA /* SubscriptionProPlanView.swift in Sources */,
 				E893A27E295A8793004F7BC5 /* TTRoom.swift in Sources */,
-				E865A7AB2A1C7F4F00F105AA /* SettingsProfileHeaderCell.swift in Sources */,
 				E8CEE2E629590DF6000CD7FE /* UserQueueForRoomCell.swift in Sources */,
 				E8CFC21B295B8AD7006C23BE /* Notification.Name+Ext.swift in Sources */,
 				E8CFC22B295D3981006C23BE /* CreateRoomConfirmationVC.swift in Sources */,
 				E893A27A295A6D40004F7BC5 /* TTConstants.swift in Sources */,
-				E873BCE2296556080015AE99 /* SettingsEditProfileVC.swift in Sources */,
 				E865A7A92A1C108A00F105AA /* TTEvent.swift in Sources */,
 				E8188FCF2A15ED92005AA0BF /* SaveOrCancelIsland.swift in Sources */,
 				E84541B2295FADDC00CBB430 /* EventKitManager.swift in Sources */,
 				E893A271295A3718004F7BC5 /* AddFriendVC.swift in Sources */,
-				E8CEE2DD29581C85000CD7FE /* SettingsVC.swift in Sources */,
 				E8CEE2C82957AFF0000CD7FE /* FirebaseManager.swift in Sources */,
 				E84541AF295F818B00CBB430 /* RoomDetailVC.swift in Sources */,
 				E893A27C295A7564004F7BC5 /* FriendRequestCell.swift in Sources */,
@@ -549,20 +548,25 @@
 				E8188FDD2A18811A005AA0BF /* Event+Ext.swift in Sources */,
 				E8188FD12A173D8E005AA0BF /* Date+Ext.swift in Sources */,
 				E8CEE2B729579DE3000CD7FE /* TTTextField.swift in Sources */,
+				E865A8022A207A7600F105AA /* SubscriptionFreePlanView.swift in Sources */,
 				E8CEE2A12957956E000CD7FE /* AppDelegate.swift in Sources */,
+				E865A7F82A2007A700F105AA /* SettingsMyProfileView.swift in Sources */,
 				E8D004A62963B02C00907A64 /* RoomUsersVC.swift in Sources */,
 				E893A26D2959859D004F7BC5 /* FriendsVC.swift in Sources */,
 				E873BCF3297910330015AE99 /* RoomOverviewVC.swift in Sources */,
+				E865A7FC2A202A8700F105AA /* SettingsGeneralView.swift in Sources */,
 				E8CEE2CC2957B102000CD7FE /* TTTitleLabel.swift in Sources */,
 				E8CEE2CE2957BF22000CD7FE /* CreateAccountVC.swift in Sources */,
 				E8CFC229295D371D006C23BE /* TTModalCardVC.swift in Sources */,
 				E8CEE2A32957956E000CD7FE /* SceneDelegate.swift in Sources */,
 				E893A277295A62EF004F7BC5 /* FriendsAndRequestsVC.swift in Sources */,
+				E865A7FE2A20718500F105AA /* Wiggle.swift in Sources */,
 				E8CEE2D52957D17F000CD7FE /* TTAlertVC.swift in Sources */,
+				E865A7F62A1FFE8100F105AA /* TTHostingController.swift in Sources */,
 				E873BCE72966A0DC0015AE99 /* FirebaseStorageManager.swift in Sources */,
+				E865A7E52A1F432A00F105AA /* SettingsManager.swift in Sources */,
 				E8CEE2DB2957D71E000CD7FE /* TTError.swift in Sources */,
 				E8CEE2D72957D1B2000CD7FE /* TTBodyLabel.swift in Sources */,
-				E865A7A22A196BFB00F105AA /* SettingsCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -772,6 +776,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		E865A7F02A1FF25400F105AA /* XCRemoteSwiftPackageReference "Setting" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/aheze/Setting";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
 		E873BCD52964D99A0015AE99 /* XCRemoteSwiftPackageReference "CalendarKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/richardtop/CalendarKit.git";
@@ -791,6 +803,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		E865A7F12A1FF25400F105AA /* Setting */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E865A7F02A1FF25400F105AA /* XCRemoteSwiftPackageReference "Setting" */;
+			productName = Setting;
+		};
 		E873BCD62964D99A0015AE99 /* CalendarKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = E873BCD52964D99A0015AE99 /* XCRemoteSwiftPackageReference "CalendarKit" */;

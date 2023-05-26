@@ -99,4 +99,3 @@ extension Array {
         return self + [o]
     }
 }
-
