@@ -83,6 +83,7 @@ class RoomDetailVC: UIViewController {
         }
     }
     
+    //MARK: - NavigationBarItesm
     private func configureNavigationBarItems() {
         view.backgroundColor = .systemBackground
         
@@ -108,6 +109,10 @@ class RoomDetailVC: UIViewController {
                 } else {
                     self.saveOrCancelIsland.present()
                 }
+            },
+            
+            UIAction(title: "Room Settings", image: UIImage(systemName: "gear")) { [weak self] action in
+                self?.showRoomSettingsVC()
             }
         ])
         
@@ -125,17 +130,86 @@ class RoomDetailVC: UIViewController {
         add(childVC: roomAggregateVC, to: aggregateResultView)
     }
     
-    @objc private func refreshRoom() {
-        //Update Room Code, Starting and Ending Dates
-        let updateFields = [
-            TTConstants.roomStartingDate: startingDatePicker.date,
-            TTConstants.roomEndingDate: endingDatePicker.date
+    @objc private func showAddUserModal() {
+        let destVC = AddUsersModalVC(room: room) { [weak self] in
+            guard let self = self else { return }
+            self.dismiss(animated: true)
+        } addUserCompletionHandler: { [weak self] username in
+            self?.addUserCompletionHandler(username: username)
+        }
+        
+        destVC.modalPresentationStyle = .overFullScreen
+        destVC.modalTransitionStyle = .crossDissolve
+        self.present(destVC, animated: true)
+    }
+    
+    private func addUserCompletionHandler(username: String) {
+        let updatedRoomFields = [
+            TTConstants.roomUsers: self.room.users.arrayByAppending(username)
         ]
         
-        FirebaseManager.shared.updateRoom(for: room.code, with: updateFields) { [weak self] error in
-            guard let error = error else { return }
-            self?.presentTTAlert(title: "Cannot change starting date", message: error.rawValue, buttonTitle: "Ok")
+        FirebaseManager.shared.updateRoom(for: self.room.code, with: updatedRoomFields) { [weak self] error in
+            guard let self = self else { return }
+            
+            if let error = error {
+                self.presentTTAlert(title: "Error updating room", message: error.rawValue, buttonTitle: "Ok")
+            } else {
+                //update added user roomcodes field
+                FirebaseManager.shared.updateUserData(for: username, with: [
+                    TTConstants.roomCodes: FieldValue.arrayUnion([self.room.code])
+                ]) { [weak self] error in
+                    if let error = error {
+                        self?.presentTTAlert(title: "Cannot add user to room", message: error.rawValue, buttonTitle: "OK")
+                    } else {
+                        //add to room edit history
+                        self?.addRoomHistory(of: .addedUserToRoom, before: nil, after: username)
+                        self?.room.users.append(username)
+                        
+                        DispatchQueue.main.async {
+                            self?.updateView()
+                        }
+                        
+                        self?.dismiss(animated: true)
+                    }
+                }
+            }
         }
+    }
+    
+    @objc private func showRoomHistoryVC() {
+        roomHistoryVC = RoomHistoryVC(room: room)
+        navigationController?.pushViewController(roomHistoryVC, animated: true)
+    }
+    
+    private func renameRoom() {
+        let alertController = UIAlertController(title: "Rename Room", message: nil, preferredStyle: .alert)
+        
+        alertController.addTextField { [weak self] textField in
+            guard let self = self else { return }
+            textField.placeholder = "\(self.room.name)"
+        }
+        
+        let okAction = UIAlertAction(title: "OK", style: .default) { [weak self] _ in
+            guard let self = self else { return }
+            
+            if let newRoomName = alertController.textFields?.first?.text {
+                FirebaseManager.shared.updateRoom(for: self.room.code, with: [
+                    TTConstants.roomName: newRoomName
+                ]) { [weak self] error in
+                    guard let error = error else {
+                        self?.title = newRoomName.trimmingCharacters(in: .whitespacesAndNewlines)
+                        return
+                    }
+                    self?.presentTTAlert(title: "Fetch Room Error", message: error.rawValue, buttonTitle: "OK")
+                }
+            }
+        }
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
+        
+        alertController.addAction(okAction)
+        alertController.addAction(cancelAction)
+        present(alertController, animated: true )
     }
     
     @objc private func syncUserCalendar() {
@@ -152,32 +226,50 @@ class RoomDetailVC: UIViewController {
         updateSaveOrCancelIsland()
     }
     
+    private func showRoomSettingsVC() {
+        let roomSettingsView = RoomSettingsView(room: room) { [weak self] newRoom in
+            self?.room = newRoom
+            DispatchQueue.main.async {
+                self?.updateView()
+            }
+        } popUIViewController: { [weak self] in
+            self?.navigationController?.popViewController(animated: true)
+        }
+        let uiKitRoomSettingsView = TTHostingController(rootView: roomSettingsView)
+        present(uiKitRoomSettingsView, animated: true)
+    }
+
+    @objc private func refreshRoom() {
+        //Update Room Code, Starting and Ending Dates
+        let updateFields = [
+            TTConstants.roomStartingDate: startingDatePicker.date,
+            TTConstants.roomEndingDate: endingDatePicker.date
+        ]
+        
+        FirebaseManager.shared.updateRoom(for: room.code, with: updateFields) { [weak self] error in
+            guard let error = error else { return }
+            self?.presentTTAlert(title: "Cannot change starting date", message: error.rawValue, buttonTitle: "Ok")
+        }
+    }
+    
     @objc func clickedOnViewResultButton(_ sender: UIButton) {
         //show summary view
         roomOverviewVC = RoomOverviewVC(room: room, notVisibleMembers: usersThatAreNotVisible, openIntervals: openIntervals)
         navigationController?.pushViewController(roomOverviewVC, animated: true)
     }
     
-    @objc private func showAddUserModal() {
-        let destVC = AddUsersModalVC(room: room) { [weak self] in
-            guard let self = self else { return }
-            self.dismiss(animated: true)
-        }
-        destVC.modalPresentationStyle = .overFullScreen
-        destVC.modalTransitionStyle = .crossDissolve
-        destVC.addUsersModalVCDelegate = self
-        self.present(destVC, animated: true)
-    }
-    
-    @objc private func showRoomHistoryVC() {
-        roomHistoryVC = RoomHistoryVC(room: room)
-        navigationController?.pushViewController(roomHistoryVC, animated: true)
-    }
-    
     private func updateView() {
+        title = room.name
         usersCountButton.setTitle("\(room.users.count) \(room.users.count > 1 ? "Members" : "Member")", for: .normal)
         startingDatePicker.date = room.startingDate
+        startingDatePicker.isEnabled = !room.setting.lockRoomChanges
+        startingDatePicker.minimumDate = room.setting.boundedStartDate
+        startingDatePicker.maximumDate = room.setting.boundedEndDate
+        
         endingDatePicker.date = room.endingDate
+        endingDatePicker.isEnabled = !room.setting.lockRoomChanges
+        endingDatePicker.minimumDate = room.setting.boundedStartDate
+        endingDatePicker.maximumDate = room.setting.boundedEndDate 
     }
     
     private func configureSaveOrCancelIsland() {
@@ -211,7 +303,7 @@ class RoomDetailVC: UIViewController {
             //dismiss UIDatePickerContainerViewController
             dismiss(animated: true)
             presentTTAlert(title: "Invalid Starting Date", message: "Starting date cannot be after ending date", buttonTitle: "Ok")
-            sender.date = endingDatePicker.date
+            sender.date = room.startingDate
             return
         }
         room.startingDate = sender.date
@@ -226,6 +318,7 @@ class RoomDetailVC: UIViewController {
             //dismiss UIDatePickerContainerViewController
             dismiss(animated: true)
             presentTTAlert(title: "Invalid Ending Date", message: "Ending date cannot be before starting date", buttonTitle: "Ok")
+            sender.date = room.endingDate
             return
         }
         room.endingDate = sender.date
@@ -270,37 +363,6 @@ class RoomDetailVC: UIViewController {
 
 //MARK: - Delegates
 
-extension RoomDetailVC: AddUsersModalVCDelegate {
-    func didSelectUserToBeAdded(for username: String) {
-        //add user to Firebase room
-        //get user data
-        do  {
-            let updatedRoomFields = [
-                TTConstants.roomUsers: room.users.arrayByAppending(username)
-            ]
-            FirebaseManager.shared.updateRoom(for: room.code, with: updatedRoomFields) { [weak self] error in
-                guard let error = error else { return }
-                self?.presentTTAlert(title: "Error updating room", message: error.rawValue, buttonTitle: "Ok")
-            }
-            //update added user roomcodes field
-            FirebaseManager.shared.updateUserData(for: username, with: [
-                TTConstants.roomCodes: FieldValue.arrayUnion([room.code])
-            ]) { error in
-                guard let error = error else { return }
-            }
-            
-            //add to room edit history
-            addRoomHistory(of: .addedUserToRoom, before: nil, after: username)
-            dismiss(animated: true)
-        }
-//        } catch {
-//            dismiss(animated: true)
-//            print("Error adding user to room")
-//            presentTTAlert(title: "Error adding user to room", message: TTError.unableToUpdateRoom.rawValue, buttonTitle: "Ok")
-//        }
-    }
-}
-
 //Manages toggling user visibility
 extension RoomDetailVC: RoomUserCellDelegate {
     func changedUserVisibility(for username: String) {
@@ -336,32 +398,36 @@ extension RoomDetailVC: SaveOrCancelIslandDelegate {
     }
     
     func didSaveIsland() {
-        let previousStartingDate = originalRoomState.startingDate
-        let previousEndingDate = originalRoomState.endingDate
-        
-        FirebaseManager.shared.updateRoom(for: room.code, with: [
-            TTConstants.roomStartingDate: room.startingDate,
-            TTConstants.roomEndingDate: room.endingDate,
-            TTConstants.roomEvents: originalRoomState.events.map { $0.dictionary }
-        ]) { [weak self] error in
-            guard let self = self else { return }
-            guard let error = error  else {
-                let dateFormat = "MMM d y, h:mm a"
-                
-                if room.startingDate != previousStartingDate {
-                    self.addRoomHistory(of: .changedStartingDate, before: previousStartingDate.formatted(with: dateFormat), after: self.room.startingDate.formatted(with: dateFormat))
+        if !room.setting.lockRoomChanges {
+            let previousStartingDate = originalRoomState.startingDate
+            let previousEndingDate = originalRoomState.endingDate
+            
+            FirebaseManager.shared.updateRoom(for: room.code, with: [
+                TTConstants.roomStartingDate: room.startingDate,
+                TTConstants.roomEndingDate: room.endingDate,
+                TTConstants.roomEvents: originalRoomState.events.map { $0.dictionary }
+            ]) { [weak self] error in
+                guard let self = self else { return }
+                guard let error = error  else {
+                    let dateFormat = "MMM d y, h:mm a"
+                    
+                    if room.startingDate != previousStartingDate {
+                        self.addRoomHistory(of: .changedStartingDate, before: previousStartingDate.formatted(with: dateFormat), after: self.room.startingDate.formatted(with: dateFormat))
+                    }
+                    
+                    if room.endingDate != previousEndingDate {
+                        self.addRoomHistory(of: .changedEndingDate, before: previousEndingDate.formatted(with: dateFormat), after: self.room.endingDate.formatted(with: dateFormat))
+                    }
+            
+                    DispatchQueue.main.async {
+                        self.saveOrCancelIsland.dismiss()
+                    }
+                    return
                 }
-                
-                if room.endingDate != previousEndingDate {
-                    self.addRoomHistory(of: .changedEndingDate, before: previousEndingDate.formatted(with: dateFormat), after: self.room.endingDate.formatted(with: dateFormat))
-                }
-        
-                DispatchQueue.main.async {
-                    self.saveOrCancelIsland.dismiss()
-                }
-                return
+                self.presentTTAlert(title: "Cannot change ending date", message: error.rawValue, buttonTitle: "Ok")
             }
-            self.presentTTAlert(title: "Cannot change ending date", message: error.rawValue, buttonTitle: "Ok")
+        } else {
+            presentTTAlert(title: "Cannot Save Room", message: "Room setting \"Lock Room Changes\" is set to true. This room cannot be edited", buttonTitle: "OK")
         }
     }
 }

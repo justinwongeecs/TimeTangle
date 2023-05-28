@@ -9,15 +9,12 @@ import UIKit
 
 class TTEmptyStateView: UIView {
     
-    let messageLabel = TTTitleLabel(textAlignment: .center, fontSize: 28)
-
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        configure()
-    }
+    private let messageLabel: TTTitleLabel!
     
-    init(message: String) {
+    required init(message: String, fontSize: CGFloat = 28) {
+        messageLabel = TTTitleLabel(textAlignment: .center, fontSize: fontSize)
         super.init(frame: .zero)
+        
         messageLabel.text = message
         configure()
     }

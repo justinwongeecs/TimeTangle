@@ -37,6 +37,14 @@ struct TTConstants {
     static let roomHistories = "histories"
     static let roomAdmins = "admins"
     static let roomEvents = "events"
+    
+    //TTRoomSetting
+    static let roomSettingMinimumNumOfUsers = "setting.minimumNumOfUsers"
+    static let roomSettingMaximumNumOfUsers = "setting.maximumNumOfUsers"
+    static let roomSettingBoundedStartDate = "setting.boundedStartDate"
+    static let roomSettingBoundedEndDate = "setting.boundedEndDate"
+    static let roomSettingLockRoomChanges = "setting.lockRoomChanges"
+    static let roomSettingAllowRoomJoin = "setting.allowRoomJoin"
     //MARK: - UI
     static let emptyStateViewTag = 100
     

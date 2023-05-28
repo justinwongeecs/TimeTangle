@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Setting
+import PhotosUI
 
 struct SettingsMyProfileView: View {
     
@@ -17,6 +18,11 @@ struct SettingsMyProfileView: View {
     @State private var firstname = ""
     @State private var lastname = ""
     @State private var username = ""
+    
+    @State private var imageSelection = [PhotosPickerItem]()
+    
+    @State private var ttError: TTError? = nil
+    @State private var showErrorAlert = false
     
     var body: some View {
         SettingStack(isSearchable: false) {
@@ -44,6 +50,23 @@ struct SettingsMyProfileView: View {
                 }
             }
         }
+        .onChange(of: imageSelection) { _ in
+            Task {
+                if let data = try? await imageSelection.first?.loadTransferable(type: Data.self) {
+                    if let uiImage = UIImage(data: data) {
+                        uploadProfileImageDataToFirestore(for: uiImage)
+                        profileImage = uiImage
+                        return
+                    }
+                }
+                ttError = TTError(rawValue: TTError.unableToFetchImage.rawValue)
+                showErrorAlert = true
+            }
+        }
+        .presentScreen(isPresented: $showErrorAlert, modalPresentationStyle: .fullScreen) {
+            TTSwiftUIAlertView(alertTitle: "Error", message: ttError?.rawValue ?? "No Message", buttonTitle: "OK")
+                .ignoresSafeArea(.all)
+        }
     }
     
     //MARK: - Profile Picture Section
@@ -51,10 +74,10 @@ struct SettingsMyProfileView: View {
         SettingCustomView(id: "ProfilePicture") {
             VStack(spacing: 10) {
                 profileImageView
-                Button(action: {}) {
+                PhotosPicker(selection: $imageSelection, maxSelectionCount: 1, matching: .images, photoLibrary: .shared()) {
                     Text("Edit Picture")
+                        .font(.system(size: 15).bold())
                         .foregroundColor(.white)
-                        .bold()
                 }
                 .padding(10)
                 .background(Color(.systemGray3))
@@ -104,8 +127,9 @@ struct SettingsMyProfileView: View {
                             TTConstants.firstname: firstname,
                             TTConstants.lastname: lastname
                         ]) { error in
-                            //TODO: Figure out how to present TTError
-                            guard error == nil else { return }
+                            guard let error = error else { return }
+                            ttError = error
+                            showErrorAlert = true
                         }
                     })
                     Button("Cancel", role: .cancel) {
@@ -151,10 +175,26 @@ struct SettingsMyProfileView: View {
         }
     }
     
-    //MARK: - Logout Section
-//    @SettingBuilder private var logoutSection: some Setting {
-//
-//    }
+    private func uploadProfileImageDataToFirestore(for image: UIImage) {
+        guard let currentUser = FirebaseManager.shared.currentUser else { return }
+        
+        var compressionQuality = 1.0
+        var compressedImageByteCount = image.jpegData(compressionQuality: compressionQuality)?.count ?? 0
+        
+        while (compressedImageByteCount > TTConstants.firestoreMaximumImageDataBytes) {
+            compressedImageByteCount = image.jpegData(compressionQuality: compressionQuality)?.count ?? 0
+            compressionQuality -= 0.1
+        }
+        
+        guard let compressedImageData = image.jpegData(compressionQuality: compressionQuality) else { return }
+
+        FirebaseManager.shared.updateUserData(for: currentUser.username, with: [
+            TTConstants.profilePictureData: compressedImageData
+        ]) { error in
+            guard let error = error else { return }
+            print(error.rawValue)
+        }
+    }
 }
 
 struct SettingsMyProfilePreviewProvider_Previews: PreviewProvider {

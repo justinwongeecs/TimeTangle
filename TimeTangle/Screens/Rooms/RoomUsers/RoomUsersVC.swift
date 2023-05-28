@@ -31,6 +31,7 @@ class RoomUsersVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        title = ""
         updateVCTitle()
         view.backgroundColor = .systemBackground
         configureActivityIndicator()

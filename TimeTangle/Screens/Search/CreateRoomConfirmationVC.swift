@@ -17,8 +17,8 @@ class CreateRoomConfirmationVC: TTModalCardVC {
     
     private let containerViewHeader = UIStackView()
     private var headerLabel = TTTitleLabel(textAlignment: .center, fontSize: 18)
-    let roomCodeView = UIView()
-    let roomCodeLabel = TTBodyLabel(textAlignment: .center)
+    private var roomCodeView: TTRoomCodeView!
+    private var roomCode: String!
     let roomNameTextField = UIStackView()
     let textField = TTTextField()
     let confirmationButton = TTButton(backgroundColor: .systemGreen, title: "Tangle!")
@@ -31,7 +31,6 @@ class CreateRoomConfirmationVC: TTModalCardVC {
         headerLabel.text = "Confirm Room Settings"
         configureContainerViewHeader()
         configureRoomCodeView()
-        configureRoomCodeLabel()
         configureRoomNameTitledText()
         configureConfirmationButton()
     }
@@ -43,23 +42,6 @@ class CreateRoomConfirmationVC: TTModalCardVC {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-    
-    private func configureRoomCodeView() {
-        view.addSubview(roomCodeView)
-        roomCodeView.translatesAutoresizingMaskIntoConstraints = false
-        roomCodeView.backgroundColor = .systemGray5
-        roomCodeView.layer.masksToBounds = true
-        roomCodeView.layer.cornerRadius = 16
-        
-        roomCodeView.addSubview(roomCodeLabel)
-        
-        NSLayoutConstraint.activate([
-            roomCodeView.topAnchor.constraint(equalTo: containerViewHeader.bottomAnchor, constant: 10),
-            roomCodeView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 50),
-            roomCodeView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -50),
-            roomCodeView.heightAnchor.constraint(equalToConstant: 80)
-        ])
     }
     
     private func configureContainerViewHeader() {
@@ -86,17 +68,17 @@ class CreateRoomConfirmationVC: TTModalCardVC {
         ])
     }
     
-    private func configureRoomCodeLabel() {
-        roomCodeLabel.font = UIFont.boldSystemFont(ofSize: 50)
-        roomCodeLabel.text = generateRandomRoomCode()
-        
-        let padding: CGFloat = 10
+    private func configureRoomCodeView() {
+        roomCode = generateRandomRoomCode()
+        roomCodeView = TTRoomCodeView(codeText: roomCode)
+        roomCodeView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(roomCodeView)
         
         NSLayoutConstraint.activate([
-            roomCodeLabel.centerYAnchor.constraint(equalTo: roomCodeView.centerYAnchor),
-            roomCodeLabel.topAnchor.constraint(equalTo: roomCodeView.topAnchor, constant: padding),
-            roomCodeLabel.leadingAnchor.constraint(equalTo: roomCodeView.leadingAnchor, constant: padding),
-            roomCodeLabel.trailingAnchor.constraint(equalTo: roomCodeView.trailingAnchor, constant: -padding),
+            roomCodeView.topAnchor.constraint(equalTo: containerViewHeader.bottomAnchor, constant: 10),
+            roomCodeView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 50),
+            roomCodeView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -50),
+            roomCodeView.heightAnchor.constraint(equalToConstant: 80)
         ])
     }
     
@@ -147,11 +129,11 @@ class CreateRoomConfirmationVC: TTModalCardVC {
             return
         }
         
-        guard let roomCode = roomCodeLabel.text,
+        guard let roomCode = roomCode,
         let currentUser = FirebaseManager.shared.currentUser else { return }
         
         //Create a room instance in Firestore
-        let newRoom = TTRoom(name: textField.text!, users: usersInQueue.map{$0.username}, code: roomCode, startingDate: Date(), endingDate: Date(), histories: [], events: [], admins: [currentUser.username])
+        let newRoom = TTRoom(name: textField.text!, users: usersInQueue.map{$0.username}, code: roomCode, startingDate: Date(), endingDate: Date(), histories: [], events: [], admins: [currentUser.username], setting: TTRoomSetting(minimumNumOfUsers: 2, maximumNumOfUsers: 10, boundedStartDate: Date(), boundedEndDate: Date(), lockRoomChanges: false, allowRoomJoin: true))
         FirebaseManager.shared.createRoom(for: newRoom) { [weak self] result in
             switch result {
             case .success(_):

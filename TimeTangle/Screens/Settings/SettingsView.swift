@@ -8,12 +8,14 @@
 import SwiftUI
 import Setting
 
+//MARK: - SettingsViewModel
 class SettingsViewModel: ObservableObject {
     @AppStorage(SettingsConstants.allowNotifications) var allowNotifications = true
     @AppStorage(SettingsConstants.friendsDiscoverability) var friendsDiscoverability = true
     @AppStorage(SettingsConstants.timePeriodToDeleteRoomsIndex) var timePeriodToDeleteRoomsIndex = 0
     @AppStorage(SettingsConstants.appearanceIndex) var appearanceIndex = 0
     @AppStorage(SettingsConstants.automaticallyPullsFromCalendar) var automaticallyPullsFromCalendar = true
+    @AppStorage(SettingsConstants.subscriptionPlanIsFree) var subscriptionPlanIsFree = true 
 }
 
 struct SettingsView: View {
@@ -149,15 +151,17 @@ struct SettingsView: View {
 
             }
             
-            SettingCustomView(id: "FreePlan") {
-                Color(uiColor: UIColor.lightGray)
-                    .opacity(0.3)
-                    .overlay {
-                        SubscriptionFreePlanView()
-                    }
-                    .frame(height: size.height * 0.25)
-                    .cornerRadius(12)
-                    .padding(.horizontal, 15)
+            if model.subscriptionPlanIsFree {
+                SettingCustomView(id: "FreePlan") {
+                    Color(uiColor: UIColor.lightGray)
+                        .opacity(0.3)
+                        .overlay {
+                            SubscriptionFreePlanView()
+                        }
+                        .frame(height: size.height * 0.25)
+                        .cornerRadius(12)
+                        .padding(.horizontal, 15)
+                }
             }
         }
         .previewIcon("bubbles.and.sparkles", foregroundColor: .white, backgroundColor: .purple)
@@ -183,8 +187,8 @@ struct SettingsView: View {
                             Text("$0.99")
                                 .bold()
                         }
-                        .frame(maxWidth: .infinity)
                         .leftAligned()
+                        .frame(maxWidth: .infinity)
                     }
                     .foregroundColor(.green)
                    
@@ -200,8 +204,8 @@ struct SettingsView: View {
                             Text("$1.99")
                                 .bold()
                         }
-                        .frame(maxWidth: .infinity)
                         .leftAligned()
+                        .frame(maxWidth: .infinity)
                     }
                     .foregroundColor(.green)
                     .padding(15)
@@ -216,8 +220,8 @@ struct SettingsView: View {
                             Text("$2.99")
                                 .bold()
                         }
-                        .frame(maxWidth: .infinity)
                         .leftAligned()
+                        .frame(maxWidth: .infinity)
                     }
                     .foregroundColor(.green)
                     .padding(15)

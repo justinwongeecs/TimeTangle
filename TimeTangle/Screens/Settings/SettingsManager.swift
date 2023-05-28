@@ -14,6 +14,7 @@ struct SettingsConstants {
     static let timePeriodToDeleteRoomsIndex = "TimePeriodToDeleteRoomsIndex"
     static let appearanceIndex = "AppearanceIndex"
     static let automaticallyPullsFromCalendar = "AutomaticallyPullsFromCalendar"
+    static let subscriptionPlanIsFree = "SubscriptionPlanIsFree"
 }
 
 class SettingsManager {

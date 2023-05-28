@@ -9,7 +9,26 @@ import UIKit
 
 class RoomsVC: UIViewController {
     
-    private var rooms = [TTRoom]()
+    private var rooms = [TTRoom]() {
+        didSet {
+            if rooms.isEmpty {
+                if #available(iOS 16.4, *) {
+                    roomsSearchBar.isEnabled = false
+                } else {
+                    // Fallback on earlier versions
+                    roomsSearchBar.isHidden = true
+                }
+            } else {
+                if #available(iOS 16.4, *) {
+                    roomsSearchBar.isEnabled = true
+                } else {
+                    // Fallback on earlier versions
+                    roomsSearchBar.isHidden = false
+                }
+            }
+        }
+    }
+    
     private var filterRooms = [TTRoom]()
     
     private let roomsSearchBar = UISearchBar()
@@ -27,11 +46,11 @@ class RoomsVC: UIViewController {
         configureSearchBar()
         configureSearchCountLabel()
         configureRoomsTable()
-        getRoomsFromCurrentUser()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         navigationController?.navigationBar.prefersLargeTitles = true
+        getRoomsFromCurrentUser()
     }
     
     private func configureViewController() {

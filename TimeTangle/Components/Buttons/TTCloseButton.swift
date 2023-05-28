@@ -24,6 +24,6 @@ class TTCloseButton: UIButton {
     
     private func configure() {
         setImage(UIImage(systemName: "xmark.circle.fill", withConfiguration: UIImage.SymbolConfiguration(pointSize: 24, weight: .bold, scale: .large)), for: .normal)
-        tintColor = .systemGray4
+        tintColor = .lightGray
     }
 }

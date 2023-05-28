@@ -249,6 +249,16 @@ class FirebaseManager {
         }
     }
     
+    func deleteRoom(for roomCode: String, completed: @escaping(TTError?) -> Void) {
+        db.collection(TTConstants.roomsCollection).document(roomCode).delete() { err in
+            if let _ = err {
+                completed(TTError.unableToDeleteRoom)
+            } else {
+                completed(nil)
+            }
+        }
+    }
+    
     //MARK: - Authentication
     
     func createUser(firstName: String, lastName: String, email: String, password: String, username: String, completed: @escaping(Result<Void, TTError>) -> Void) {

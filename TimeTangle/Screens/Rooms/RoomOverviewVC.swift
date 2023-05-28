@@ -156,7 +156,6 @@ extension RoomOverviewVC: UITableViewDelegate, UITableViewDataSource {
         
         let titleLabel = UILabel()
         titleLabel.font = UIFont.boldSystemFont(ofSize: 20)
-        titleLabel.textColor = .black
         titleLabel.text = roomSummarySections[section].date.formatted(with: "M/d/yyyy")
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         headerView.addSubview(titleLabel)

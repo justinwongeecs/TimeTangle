@@ -27,6 +27,7 @@ enum TTError: String, Error {
     case unableToFetchRoom = "Unable to fetch room. Please try again."
     case unableToUpdateRoom = "Unable to update room. Please try again."
     case unableToAddRoomHistory = "Unable to add room history."
+    case unableToDeleteRoom = "Unable to delete room. Please try again."
     
     //MARK: - Firebase Storage
     case unableToGetImageMetadata = "Unable to get image metadata"
@@ -41,4 +42,10 @@ enum TTError: String, Error {
     case friendAlreadyRequested = "User has already been requested."
     
     case unableToFetchProfileImageFromUser = "Unable to get requested profile picture."
+    
+    //MARK: - Room Settings
+    case invalidBoundedStartDate = "Bounded start date cannot be greater than bounded end date"
+    case invalidBoundedEndDate = "Bounded end date cannot be less than bounded start date"
+    case invalidMinimumNumOfUsersIndex = "Minimum number of users cannot be greater than maximmum number of users"
+    case invalidMaximumNumOfUsersIndex = "Maximum number of users cannot be greater than minimum number of users"
 }
