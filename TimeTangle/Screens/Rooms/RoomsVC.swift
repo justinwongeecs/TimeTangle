@@ -9,25 +9,25 @@ import UIKit
 
 class RoomsVC: UIViewController {
     
-    private var rooms = [TTRoom]() {
-        didSet {
-            if rooms.isEmpty {
-                if #available(iOS 16.4, *) {
-                    roomsSearchBar.isEnabled = false
-                } else {
-                    // Fallback on earlier versions
-                    roomsSearchBar.isHidden = true
-                }
-            } else {
-                if #available(iOS 16.4, *) {
-                    roomsSearchBar.isEnabled = true
-                } else {
-                    // Fallback on earlier versions
-                    roomsSearchBar.isHidden = false
-                }
-            }
-        }
-    }
+    private var rooms = [TTRoom]()
+//        didSet {
+//            if rooms.isEmpty {
+//                if #available(iOS 16.4, *) {
+//                    roomsSearchBar.isEnabled = false
+//                } else {
+//                    // Fallback on earlier versions
+//                    roomsSearchBar.isHidden = true
+//                }
+//            } else {
+//                if #available(iOS 16.4, *) {
+//                    roomsSearchBar.isEnabled = true
+//                } else {
+//                    // Fallback on earlier versions
+//                    roomsSearchBar.isHidden = false
+//                }
+//            }
+//        }
+//    }
     
     private var filterRooms = [TTRoom]()
     
@@ -42,7 +42,6 @@ class RoomsVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureViewController()
-        configureRefreshControl()
         configureSearchBar()
         configureSearchCountLabel()
         configureRoomsTable()
@@ -56,9 +55,6 @@ class RoomsVC: UIViewController {
     private func configureViewController() {
         view.backgroundColor = .systemBackground
         navigationController?.navigationBar.prefersLargeTitles = true
-
-        //get updates from current user rooms
-        NotificationCenter.default.addObserver(self, selector: #selector(fetchUpdatedCurrentUserRooms(_:)), name: .updatedCurrentUserRooms, object: nil)
     }
     
     private func configureSearchBar() {
@@ -88,17 +84,6 @@ class RoomsVC: UIViewController {
         ])
     }
     
-    private func configureRefreshControl() {
-        refreshControl.attributedTitle = NSAttributedString(string: "Pull to refresh")
-        refreshControl.addTarget(self, action: #selector(refresh(_:)), for: .valueChanged)
-        roomsTable.addSubview(refreshControl)
-    }
-    
-    @objc private func refresh(_ sender: AnyObject) {
-        getRoomsFromCurrentUser()
-        refreshControl.endRefreshing()
-    }
-    
     private func configureRoomsTable() {
         view.addSubview(roomsTable)
         roomsTable.translatesAutoresizingMaskIntoConstraints = false
@@ -117,19 +102,11 @@ class RoomsVC: UIViewController {
         ])
     }
     
-    @objc private func fetchUpdatedCurrentUserRooms(_ notification: Notification) {
-        DispatchQueue.main.async {
-            guard let fetchedRooms = notification.object as? [TTRoom] else { return }
-            self.rooms = fetchedRooms
-            self.filterRooms = fetchedRooms
-            self.roomsTable.reloadData()
-        }
-    }
-    
     private func getRoomsFromCurrentUser() {
         guard let currentUser = FirebaseManager.shared.currentUser else { return }
+        print(currentUser.username)
         fetchRooms(for: currentUser)
-        roomsTable.reloadData()
+
     } 
     
     //FIXME: - Not sure if it best practice to fetch for every single room for user because we only have the room codes for the user
@@ -145,9 +122,11 @@ class RoomsVC: UIViewController {
                     case .success(let room):
                         self?.rooms.append(room)
                         self?.filterRooms.append(room)
+                        print("Rooms: \(self?.rooms)")
                         DispatchQueue.main.async {
                             self?.roomsTable.reloadData()
                         }
+                        
                     case .failure(let error):
                         self?.presentTTAlert(title: "Cannot fetch room", message: error.rawValue, buttonTitle: "Ok")
                     }
@@ -156,6 +135,10 @@ class RoomsVC: UIViewController {
         } else {
             //show empty view
             showEmptyStateView(with: "No Rooms", in: self.view)
+        }
+        
+        DispatchQueue.main.async {
+            self.roomsTable.reloadData()
         }
     }
     

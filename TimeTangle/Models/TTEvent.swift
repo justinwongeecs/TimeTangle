@@ -12,6 +12,7 @@ struct TTEvent: Codable, Equatable {
     var startDate: Date
     var endDate: Date
     var isAllDay: Bool
+    var createdBy: String
     
     var dictionary: [String: Any] {
         return [

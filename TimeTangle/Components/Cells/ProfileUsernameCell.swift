@@ -14,7 +14,7 @@ class ProfileUsernameCell: UITableViewCell {
     private var user: TTUser?
     
     private var hStackView = UIStackView()
-    internal var avatarImageView = TTProfileImageView(widthHeight: 40)
+    internal var avatarImageView = TTProfileImageView(widthHeight: TTConstants.profileImageViewInCellHeightAndWidth)
     internal let usernameLabel = TTTitleLabel(textAlignment: .left, fontSize: 15)
         
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -31,8 +31,9 @@ class ProfileUsernameCell: UITableViewCell {
         usernameLabel.text = user.username
     
         if let imageData = user.profilePictureData, let image = UIImage(data: imageData) {
-            print("ProfileUsernameCellImageData: \(imageData)")
             avatarImageView.setImage(to: image)
+        } else {
+            avatarImageView.setToDefaultImage()
         }
     }
     
@@ -54,9 +55,11 @@ class ProfileUsernameCell: UITableViewCell {
         hStackView.addArrangedSubview(usernameLabel)
         
         NSLayoutConstraint.activate([
+            avatarImageView.widthAnchor.constraint(equalToConstant: TTConstants.profileImageViewInCellHeightAndWidth),
+            avatarImageView.heightAnchor.constraint(equalToConstant: TTConstants.profileImageViewInCellHeightAndWidth),
+            
             hStackView.topAnchor.constraint(equalTo: topAnchor),
             hStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10),
-            hStackView.trailingAnchor.constraint(equalTo: trailingAnchor),
             hStackView.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
     }

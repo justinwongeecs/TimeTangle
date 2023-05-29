@@ -14,17 +14,6 @@ class EventKitManager {
     static let shared = EventKitManager()
     let store = EKEventStore()
     
-//    init(completed: @escaping(Result<Void, TTError>) -> Void) {
-//        store.requestAccess(to: .event) { granted, error in
-//            //TODO: parse error and give more specific error messages
-//            guard let _ = error, granted == false else {
-//                completed(.success(()))
-//                return
-//            }
-//            completed(.failure(.unableToGetEventKitAccess))
-//        }
-//    }
-    
     init() {
         store.requestAccess(to: .event) { [weak self] granted, error in
             //TODO: parse error and give more specific error messages
@@ -57,15 +46,21 @@ class EventKitManager {
         return foundEvents
     }
     
-    func convertEKEventToTTEvent(for event: EKEvent) -> TTEvent {
-        return TTEvent(name: event.title, startDate: event.startDate, endDate: event.endDate, isAllDay: event.isAllDay)
+    func convertEKEventToTTEvent(for event: EKEvent) -> TTEvent? {
+        guard let currentUser = FirebaseManager.shared.currentUser else { return nil }
+        return TTEvent(name: event.title, startDate: event.startDate, endDate: event.endDate, isAllDay: event.isAllDay, createdBy: currentUser.username)
     }
     
     func getUserTTEvents(from startDateBound: Date, to upperDateBound: Date) -> [TTEvent] {
-        guard let currentUserUsername = FirebaseManager.shared.currentUser?.username else { return [] }
-        
+        var ttEvents = [TTEvent]()
         let ekEvents = getCurrentEKEvents(from: startDateBound, to: upperDateBound)
-        return ekEvents.map { convertEKEventToTTEvent(for: $0) }
+        for ekEvent in ekEvents {
+            if let convertedEKEventToTTEvent = convertEKEventToTTEvent(for: ekEvent) {
+                ttEvents.append(convertedEKEventToTTEvent)
+            }
+        }
+        
+        return ttEvents
     }
     
     func createEKEvent(isAllDay: Bool, title: String, startDate: Date, endDate: Date) -> EKEvent {

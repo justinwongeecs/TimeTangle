@@ -32,4 +32,14 @@ extension Date {
     func compare(with date: Date, toGranularity: Calendar.Component) -> ComparisonResult {
         return Calendar.current.compare(self, to: date, toGranularity: toGranularity)
     }
+    
+    func getDateWithMonthOffset(by monthOffset: Int) -> Date? {
+        let calendar = Calendar.current
+        var dateComponent = DateComponents()
+        dateComponent.month = monthOffset
+        if let monthOffsetedDate = calendar.date(byAdding: dateComponent, to: self) {
+            return monthOffsetedDate
+        }
+        return nil
+    }
 }

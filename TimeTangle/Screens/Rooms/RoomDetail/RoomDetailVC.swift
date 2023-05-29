@@ -11,6 +11,11 @@ import FirebaseFirestore
 
 protocol RoomUpdateDelegate: AnyObject {
     func roomDidUpdate(for room: TTRoom)
+    func roomUserVisibilityDidUpdate(for username: String)
+}
+
+extension RoomUpdateDelegate {
+    func roomUserVisibilityDidUpdate(for username: String) {}
 }
 
 class RoomDetailVC: UIViewController {
@@ -33,7 +38,7 @@ class RoomDetailVC: UIViewController {
     private var isPresentingRoomChangesView: Bool = false
     
     //filters displaying users
-    var usersThatAreNotVisible = [String]()
+    var usersNotVisible = [String]()
     
     init(room: TTRoom, nibName: String) {
         super.init(nibName: nibName, bundle: nil)
@@ -56,13 +61,6 @@ class RoomDetailVC: UIViewController {
         updateView()
     }
     
-//    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-//        super.traitCollectionDidChange(previousTraitCollection)
-//
-//        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-//        }
-//    }
-    
     private func setOriginalRoomState(with room: TTRoom) {
         //copy of room assigned to originalRoomState since TTRoom is a struct
         originalRoomState = room
@@ -83,7 +81,7 @@ class RoomDetailVC: UIViewController {
         }
     }
     
-    //MARK: - NavigationBarItesm
+    //MARK: - NavigationBarItems
     private func configureNavigationBarItems() {
         view.backgroundColor = .systemBackground
         
@@ -125,7 +123,7 @@ class RoomDetailVC: UIViewController {
     }
     
     private func configureRoomAggregateResultView() {
-        roomAggregateVC = RoomAggregateResultVC(room: room, usersNotVisible: usersThatAreNotVisible)
+        roomAggregateVC = RoomAggregateResultVC(room: room, usersNotVisible: usersNotVisible)
         roomAggregateVC.roomAggregateResultDelegate = self
         add(childVC: roomAggregateVC, to: aggregateResultView)
     }
@@ -145,7 +143,7 @@ class RoomDetailVC: UIViewController {
     
     private func addUserCompletionHandler(username: String) {
         let updatedRoomFields = [
-            TTConstants.roomUsers: self.room.users.arrayByAppending(username)
+            TTConstants.roomUsers: FieldValue.arrayUnion([username])
         ]
         
         FirebaseManager.shared.updateRoom(for: self.room.code, with: updatedRoomFields) { [weak self] error in
@@ -155,20 +153,22 @@ class RoomDetailVC: UIViewController {
                 self.presentTTAlert(title: "Error updating room", message: error.rawValue, buttonTitle: "Ok")
             } else {
                 //update added user roomcodes field
+                print(username)
                 FirebaseManager.shared.updateUserData(for: username, with: [
                     TTConstants.roomCodes: FieldValue.arrayUnion([self.room.code])
                 ]) { [weak self] error in
+                    print("Current User : \(FirebaseManager.shared.currentUser?.username ?? "")")
                     if let error = error {
                         self?.presentTTAlert(title: "Cannot add user to room", message: error.rawValue, buttonTitle: "OK")
                     } else {
                         //add to room edit history
                         self?.addRoomHistory(of: .addedUserToRoom, before: nil, after: username)
                         self?.room.users.append(username)
-                        
+
                         DispatchQueue.main.async {
                             self?.updateView()
                         }
-                        
+
                         self?.dismiss(animated: true)
                     }
                 }
@@ -254,7 +254,7 @@ class RoomDetailVC: UIViewController {
     
     @objc func clickedOnViewResultButton(_ sender: UIButton) {
         //show summary view
-        roomOverviewVC = RoomOverviewVC(room: room, notVisibleMembers: usersThatAreNotVisible, openIntervals: openIntervals)
+        roomOverviewVC = RoomOverviewVC(room: room, notVisibleMembers: usersNotVisible, openIntervals: openIntervals)
         navigationController?.pushViewController(roomOverviewVC, animated: true)
     }
     
@@ -292,7 +292,7 @@ class RoomDetailVC: UIViewController {
     
     //push new view controller to display list of members view
     @IBAction func clickedUsersCountButton(_ sender: UIButton) {
-        roomUsersVC = RoomUsersVC(room: room, usersNotVisible: usersThatAreNotVisible)
+        roomUsersVC = RoomUsersVC(room: room, usersNotVisible: usersNotVisible)
         roomUsersVC.delegate = self 
         navigationController?.pushViewController(roomUsersVC, animated: true)
     }
@@ -352,7 +352,7 @@ class RoomDetailVC: UIViewController {
     private func updateRoomAggregateVC() {
         //filter and or add to room.events so that between startDate and endDate
         room.events = room.events.filter { $0.startDate >= startingDatePicker.date && $0.endDate <= endingDatePicker.date }
-        roomAggregateVC.setView(usersNotVisible: usersThatAreNotVisible, room: room)
+        roomAggregateVC.setView(usersNotVisible: usersNotVisible, room: room)
     }
     
     //MARK: - Getters and Setters
@@ -362,21 +362,6 @@ class RoomDetailVC: UIViewController {
 }
 
 //MARK: - Delegates
-
-//Manages toggling user visibility
-extension RoomDetailVC: RoomUserCellDelegate {
-    func changedUserVisibility(for username: String) {
-      
-        if usersThatAreNotVisible.contains(username) {
-            if let removeIndex = usersThatAreNotVisible.firstIndex(of: username) {
-                usersThatAreNotVisible.remove(at: removeIndex)
-            }
-        } else {
-            usersThatAreNotVisible.append(username)
-        }
-       updateRoomAggregateVC()
-    }
-}
 
 extension RoomDetailVC: RoomAggregateResultVCDelegate {
     func updatedAggregateResultVC(events: [Event]) {
@@ -388,6 +373,18 @@ extension RoomDetailVC: RoomUpdateDelegate {
     func roomDidUpdate(for room: TTRoom) {
         self.room = room
         updateView()
+        updateRoomAggregateVC()
+    }
+    
+    func roomUserVisibilityDidUpdate(for username: String) {
+        if usersNotVisible.contains(username) {
+            if let removeIndex = usersNotVisible.firstIndex(of: username) {
+                usersNotVisible.remove(at: removeIndex)
+            }
+        } else {
+            usersNotVisible.append(username)
+        }
+       updateRoomAggregateVC()
     }
 }
 

@@ -116,6 +116,12 @@ class TTProfileImageView: UIView {
         profileImageView.image = image 
     }
     
+    func setToDefaultImage() {
+        let config = UIImage.SymbolConfiguration(pointSize: 50)
+        let profileImage = UIImage(systemName: "person.crop.circle", withConfiguration: config)
+        profileImageView.image = profileImage
+    }
+    
     func setShadowColor(to color: CGColor) {
         profileImageOuterView.layer.shadowColor = color 
     }

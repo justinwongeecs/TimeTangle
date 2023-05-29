@@ -133,7 +133,7 @@ class RoomOverviewVC: UIViewController {
                 endOfDay = ttEvent.endDate
             }
             
-            let newTTEvent = TTEvent(name: ttEvent.name, startDate: currentDate, endDate: endOfDay, isAllDay: ttEvent.isAllDay)
+            let newTTEvent = TTEvent(name: ttEvent.name, startDate: currentDate, endDate: endOfDay, isAllDay: ttEvent.isAllDay, createdBy: ttEvent.createdBy)
             
             ttEvents.append(newTTEvent)
             currentDate = calendar.date(byAdding: .day, value: 1, to: startOfDay)!

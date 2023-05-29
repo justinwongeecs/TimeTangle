@@ -47,6 +47,7 @@ struct TTConstants {
     static let roomSettingAllowRoomJoin = "setting.allowRoomJoin"
     //MARK: - UI
     static let emptyStateViewTag = 100
+    static let profileImageViewInCellHeightAndWidth: CGFloat = 40
     
     static let firestoreMaximumImageDataBytes = 1048487
 }

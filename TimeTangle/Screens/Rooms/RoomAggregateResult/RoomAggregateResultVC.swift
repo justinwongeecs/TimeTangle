@@ -54,12 +54,14 @@ class RoomAggregateResultVC: DayViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         move(to: currentPresentedDate)
-        dayView.autoScrollToFirstEvent = true
+//        dayView.autoScrollToFirstEvent = true
     }
     
     func setView(usersNotVisible: [String], room: TTRoom) {
         self.usersNotVisible = usersNotVisible
         self.room = room
+        
+        self.room.events = room.events.filter { !usersNotVisible.contains($0.createdBy) }
 
         dayView.reloadData()
     }

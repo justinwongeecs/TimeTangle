@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import SwiftUI
 import FirebaseFirestore
 
 class RoomUsersVC: UIViewController {
@@ -31,7 +30,6 @@ class RoomUsersVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = ""
         updateVCTitle()
         view.backgroundColor = .systemBackground
         configureActivityIndicator()
@@ -41,6 +39,7 @@ class RoomUsersVC: UIViewController {
     
     //Is this the best place to put this?
     private func fetchRoomTTUsers() {
+        title = ""
         activityIndicator.startAnimating()
         FirebaseManager.shared.fetchMultipleUsersDocumentData(with: room.users) { [weak self] result in
             self?.activityIndicator.stopAnimating()
@@ -89,14 +88,14 @@ class RoomUsersVC: UIViewController {
         ])
     }
     
-    private func sortUsersByAdminAndName() {
-        //Need to create a copy to avoid "simultaneous access error" 
-        var users = ttUsers
-        users.sort(by: {
-            self.room.doesContainsAdmin(for: $0.username) && !self.room.doesContainsAdmin(for: $1.username)
-        })
-        ttUsers = users
-    }
+//    private func sortUsersByAdminAndName() {
+//        //Need to create a copy to avoid "simultaneous access error"
+//        var users = ttUsers
+//        users.sort(by: {
+//            self.room.doesContainsAdmin(for: $0.username) && !self.room.doesContainsAdmin(for: $1.username)
+//        })
+//        ttUsers = users
+//    }
     
     private func updateVCTitle() {
         title = "\(ttUsers.count) \(ttUsers.count > 1 ? "Members" : "Member")"
@@ -115,10 +114,9 @@ extension RoomUsersVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = usersTableView.dequeueReusableCell(withIdentifier: RoomUserCell.reuseID) as! RoomUserCell
         let user = ttUsers[indexPath.section]
+        print("\(user.profilePictureData) for \(user.username)")
         cell.set(for: user, usersNotVisible: usersNotVisible, room: room)
-        if let previousVC = previousViewController() as? RoomDetailVC {
-            cell.delegate = previousVC.self
-        }
+        cell.delegate = self
         return cell
     }
     
@@ -147,73 +145,6 @@ extension RoomUsersVC: UITableViewDelegate, UITableViewDataSource {
         usersTableView.setEditing(editing, animated: true)
     }
     
-    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        
-        let username = room.users[indexPath.section]
-        var actions = [UIContextualAction]()
-        
-        let deleteAction = UIContextualAction(style: .normal, title: nil) { [weak self] (contextualAction, view, completion) in
-            guard let self = self else { return }
-            // Delete something
-            removeUser(for: username) { didDeleteUser in
-                completion(true)
-                if didDeleteUser {
-                    DispatchQueue.main.async {
-                        let indexSet = IndexSet(arrayLiteral: indexPath.section)
-                        tableView.beginUpdates()
-                        tableView.deleteSections(indexSet, with: .right)
-                        tableView.endUpdates()
-                        tableView.reloadData()
-                        self.updateVCTitle()
-                    }
-                }
-            }
-        }
-        
-        let largeConfig = UIImage.SymbolConfiguration(pointSize: 17.0, weight: .bold, scale: .large)
-        
-        let deleteActionImage = UIImage(systemName: "xmark", withConfiguration: largeConfig)
-        deleteAction.image = deleteActionImage?.withTintColor(.white, renderingMode: .alwaysTemplate).addBackgroundCircle(.systemRed)
-        deleteAction.backgroundColor = .systemBackground
-        
-        
-        let grantAdminAction = UIContextualAction(style: .normal, title: nil) { [weak self] (contextualAction, view, completion) in
-            guard let self = self else { return }
-            self.grantUserAdminAccess(for: username) { changeAdmin in
-                completion(true)
-                if changeAdmin {
-                    self.sortUsersByAdminAndName()
-                    DispatchQueue.main.async {
-                        tableView.reloadData(with: .automatic)
-                    }
-                }
-            }
-        }
-        
-        if room.doesContainsAdmin(for: username) {
-            let symbolConfig = UIImage.SymbolConfiguration.preferringMulticolor()
-            let grantAdminImage = UIImage(named: "remove.admin.icon")?.applyingSymbolConfiguration(symbolConfig)
-            grantAdminAction.image = grantAdminImage?.withRenderingMode(.alwaysOriginal).addBackgroundCircle(.systemPurple)
-        } else {
-            let symbolConfig = UIImage.SymbolConfiguration.preferringMulticolor()
-            let grantAdminImage = UIImage(named: "add.admin.icon")?.applyingSymbolConfiguration(symbolConfig)
-            grantAdminAction.image = grantAdminImage?.withRenderingMode(.alwaysOriginal).addBackgroundCircle(.systemPurple)
-        }
-        
-        grantAdminAction.backgroundColor = .systemBackground
-        
-        if let currentUser = FirebaseManager.shared.currentUser, username != currentUser.username {
-            actions.append(deleteAction)
-        }
-        
-        actions.append(grantAdminAction)
-        
-        let config = UISwipeActionsConfiguration(actions: actions)
-        config.performsFirstActionWithFullSwipe = false
-        
-        return config
-    }
-    
     private func removeUser(for username: String, completion: @escaping((Bool) -> Void)) {
         let alertController = UIAlertController(title: "Delete User?", message: "Are you sure you want to remove \(username)", preferredStyle: .alert)
         
@@ -229,9 +160,21 @@ extension RoomUsersVC: UITableViewDelegate, UITableViewDataSource {
                 delegate.roomDidUpdate(for: room)
             }
             
-            FirebaseManager.shared.updateRoom(for: self.room.code, with: newRoomData) { error in
-                guard error == nil else { return }
-                completion(true)
+            FirebaseManager.shared.updateRoom(for: self.room.code, with: newRoomData) { [weak self] error in
+                guard let self = self else { return }
+                if let error = error {
+                    self.presentTTAlert(title: "Cannot update room", message: error.rawValue, buttonTitle: "OK")
+                } else {
+                    FirebaseManager.shared.updateUserData(for: username, with: [
+                        TTConstants.roomCodes: FieldValue.arrayRemove([self.room.code])
+                    ]) { [weak self] error in
+                        if let error = error {
+                            self?.presentTTAlert(title: "Cannot update user", message: error.rawValue, buttonTitle: "OK")
+                        } else {
+                            completion(true)
+                        }
+                    }
+                }
             }
         }
         
@@ -247,7 +190,7 @@ extension RoomUsersVC: UITableViewDelegate, UITableViewDataSource {
         present(alertController, animated: true)
     }
     
-    private func grantUserAdminAccess(for username: String, completion: @escaping((Bool) -> Void)) {
+    private func toggleUserAdminAccess(for username: String, completion: @escaping((Bool) -> Void)) {
         //Show Confirmation Alert
         
         let isUserAdmin = room.doesContainsAdmin(for: username)
@@ -298,5 +241,33 @@ extension RoomUsersVC: UITableViewDelegate, UITableViewDataSource {
         
         present(alertController, animated: true)
     }
+}
+
+//MARK: - RoomUserCellDelegate
+extension RoomUsersVC: RoomUserCellDelegate {
+    func roomUserCellVisibilityDidChange(for user: TTUser) {
+        delegate?.roomUserVisibilityDidUpdate(for: user.username)
+    }
     
+    func roomUserCellDidToggleAdmin(for user: TTUser) {
+        toggleUserAdminAccess(for: user.username) { [weak self] _ in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                self.usersTableView.reloadData()
+            }
+        }
+    }
+    
+    func roomUserCellDidRemoveUser(for user: TTUser) {
+        removeUser(for: user.username) { [weak self] _ in
+            guard let self = self else { return }
+            if let ttUsersIndex = self.ttUsers.firstIndex(of: user) {
+                self.ttUsers.remove(at: ttUsersIndex)
+                DispatchQueue.main.async {
+                    self.updateVCTitle()
+                    self.usersTableView.reloadData()
+                }
+            }
+        }
+    }
 }

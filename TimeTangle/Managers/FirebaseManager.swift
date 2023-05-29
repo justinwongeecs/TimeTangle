@@ -34,7 +34,7 @@ class FirebaseManager {
                         self?.currentUser = user
                         self?.goToSearchScreen()
                         self?.listenToCurrentUser()
-                        self?.listenToCurrentUserRooms()
+//                        self?.listenToCurrentUserRooms()
                     case .failure(_):
                         print("failure")
                     }
@@ -165,8 +165,7 @@ class FirebaseManager {
             
             self?.fetchUserDocumentData(with: username) { [weak self] result in
                 switch result {
-                case .success(let user):
-                    self?.currentUser = user
+                case .success(_):
                     completed(nil)
                 case .failure(_):
                     completed(TTError.unableToUpdateUser)

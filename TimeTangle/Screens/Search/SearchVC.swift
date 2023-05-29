@@ -30,6 +30,7 @@ class SearchVC: UIViewController {
         configureActivityIndicator()
         createDismissKeyboardTapGesture()
         
+        addCurrentUser()
         NotificationCenter.default.addObserver(self, selector: #selector(fetchUpdatedUser), name: .updatedUser, object: nil)
     }
     
@@ -54,7 +55,6 @@ class SearchVC: UIViewController {
     }
     
     @objc private func fetchUpdatedUser() {
-        print("SearchVC fetchupdateduser")
         guard let currentUser = FirebaseManager.shared.currentUser else { return }
         activityIndicator.startAnimating()
         FirebaseManager.shared.fetchMultipleUsersDocumentData(with: currentUser.friends) { [weak self] result in
