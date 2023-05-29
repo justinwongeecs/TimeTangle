@@ -13,10 +13,11 @@ protocol AddFriendVCDelegate: AnyObject {
 
 class AddFriendVC: UIViewController {
     
-    var friendSearchResults: [TTUser] = []
+    private var friendSearchResults: [TTUser] = []
+    private var allUsersWithoutFriendsAndFriendRequestsAndCurrentUser = [TTUser]()
     
-    let searchTextField = TTTextField()
-    let friendSearchResultsTable = UITableView()
+    private let searchTextField = TTTextField()
+    private let friendSearchResultsTable = UITableView()
     
     weak var delegate: AddFriendVCDelegate!
     var friendsAndRequestsVCRef: FriendsAndRequestsVC?
@@ -27,15 +28,9 @@ class AddFriendVC: UIViewController {
         configureVC()
         configureSearchTextField()
         configureFriendResultsTable()
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        //check to see if friendSearchResults is empty, if so display empty view
-        if friendSearchResults.isEmpty {
-            self.showEmptyStateView(with: "No Search Results", in: self.view)
-            //search field will be covered by the empty state view so we need to bring it forwards
-            view.bringSubviewToFront(searchTextField)
-        }
+        updateTableData()
+        
+        fetchAllUsers()
     }
     
     private func configureVC() {
@@ -45,6 +40,8 @@ class AddFriendVC: UIViewController {
         let backButton = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(dismissModal))
         backButton.tintColor = .systemGreen
         navigationItem.leftBarButtonItem = backButton
+        
+        configureDismissEditingTapGestureRecognizer()
     }
     
     @objc private func dismissModal() {
@@ -84,24 +81,35 @@ class AddFriendVC: UIViewController {
     }
     
     private func updateTableData() {
-        if friendSearchResults.isEmpty {
-            removeEmptyStateView()
-            //display empty state view instead
-            showEmptyStateView(with: "No Search Results", in: self.view)
-        } else {
-            //remove empty state view
-            removeEmptyStateView()
-            view.bringSubviewToFront(friendSearchResultsTable)
-        }
-        
         DispatchQueue.main.async {
+            if self.friendSearchResults.isEmpty {
+                self.friendSearchResultsTable.backgroundView = TTEmptyStateView(message: "No Search Results")
+            } else {
+                self.friendSearchResultsTable.backgroundView = nil
+            }
+            
             self.friendSearchResultsTable.reloadData()
         }
     }
     
-    private func removeEmptyStateView() {
-        if let viewWithTag = view.viewWithTag(TTConstants.emptyStateViewTag) {
-            viewWithTag.removeFromSuperview()
+    private func fetchAllUsers() {
+        guard let currentUser = FirebaseManager.shared.currentUser,
+        let friendsAndRequestsVCRef = friendsAndRequestsVCRef else { return }
+        
+        FirebaseManager.shared.fetchUsers { [weak self] result in
+            switch result {
+            case .success(let allUsers):
+                var usersToBeRemoved: [String] = []
+                //TODO: Check
+                usersToBeRemoved.append(contentsOf: friendsAndRequestsVCRef.friends.map{ $0.username })
+                usersToBeRemoved.append(contentsOf: friendsAndRequestsVCRef.friendRequests.map{$0.recipientUsername})
+                usersToBeRemoved.append(currentUser.username)
+
+                let allUsersWithoutFriendsAndFriendRequestsAndCurrentUser = allUsers.filter { !usersToBeRemoved.contains($0.username) }
+                self?.allUsersWithoutFriendsAndFriendRequestsAndCurrentUser = allUsersWithoutFriendsAndFriendRequestsAndCurrentUser
+            case .failure(let error):
+                self?.presentTTAlert(title: "Unable to fetch users", message: error.rawValue, buttonTitle: "Ok")
+            }
         }
     }
 }
@@ -115,38 +123,23 @@ extension AddFriendVC: UITextFieldDelegate {
     }
     
     func textFieldDidChangeSelection(_ textField: UITextField) {
-        showLoadingView()
+        friendSearchResults = []
         guard let filter = searchTextField.text, !filter.isEmpty else {
-            friendSearchResults = []
             updateTableData()
-            dismissLoadingView()
             return
         }
         
-        guard let currentUser = FirebaseManager.shared.currentUser, let friendsAndRequestsVCRef = friendsAndRequestsVCRef else { return }
-        
-        FirebaseManager.shared.fetchUsers { [unowned self] result in
-            switch result {
-            case .success(let allUsers):
-                var usersToBeRemoved: [String] = []
-                //TODO: Check 
-                usersToBeRemoved.append(contentsOf: friendsAndRequestsVCRef.friends.map{ $0.username })
-                usersToBeRemoved.append(contentsOf: friendsAndRequestsVCRef.friendRequests.map{$0.recipientUsername})
-                usersToBeRemoved.append(currentUser.username)
-                
-                let allUsersWithoutFriendsAndFriendRequestsAndCurrentUser = allUsers.filter { !usersToBeRemoved.contains($0.username) }
-                friendSearchResults = allUsersWithoutFriendsAndFriendRequestsAndCurrentUser.filter { $0.username.lowercased().contains(filter) }
-                updateTableData()
-            case .failure(let error):
-                self.presentTTAlert(title: "Unable to fetch users", message: error.rawValue, buttonTitle: "Ok")
-            }
-        }
-        dismissLoadingView()
+        friendSearchResults = allUsersWithoutFriendsAndFriendRequestsAndCurrentUser.filter { $0.username.lowercased().contains(filter.lowercased()) }
+        updateTableData()
     }
 }
 
 extension AddFriendVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 1
+    }
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
         return friendSearchResults.count
     }
     
@@ -160,6 +153,28 @@ extension AddFriendVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedUser = friendSearchResults[indexPath.section]
         delegate.selectedUserToAddFriend(for: selectedUser)
+    }
+    
+    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        let view: UIView = UIView.init(frame: CGRect.init(x: 0, y: 0, width: self.view.bounds.size.width, height: 5))
+        view.backgroundColor = .clear
+        return view
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 50.0
+    }
+    
+    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        return 7.0
+    }
+    
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return 7.0
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        searchTextField.resignFirstResponder()
     }
 }
 

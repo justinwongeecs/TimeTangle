@@ -120,6 +120,8 @@ class RoomUserCell: ProfileUsernameCell {
     
     //MARK: - Menu Button
     private func configureMenuButton() {
+        guard let room = room, let user = user, let currentUser = FirebaseManager.shared.currentUser else { return }
+        
         menuButton.setImage(UIImage(systemName: "ellipsis"), for: .normal)
         menuButton.tintColor = .lightGray
         menuButton.translatesAutoresizingMaskIntoConstraints = false
@@ -127,35 +129,32 @@ class RoomUserCell: ProfileUsernameCell {
         
         
         let menu: UIMenu!
+        var uiActions = [UIAction]()
         let symbolConfig = UIImage.SymbolConfiguration(scale: .large)
         
-        let currentUserUIActions = [
-            UIAction(title: "Grant Admin", image: UIImage(systemName: "person.crop.circle.badge.checkmark", withConfiguration: symbolConfig)) { [weak self] action in
+        let grantAdminUIAction = UIAction(title: "Grant Admin", image: UIImage(systemName: "person.crop.circle.badge.checkmark", withConfiguration: symbolConfig)) { [weak self] action in
                 guard let user = self?.user else { return }
               
                 self?.delegate?.roomUserCellDidToggleAdmin(for: user)
-            },
-            
-            UIAction(title: "Remove Admin", image: UIImage(systemName: "person.crop.circle.badge.xmark", withConfiguration: symbolConfig)) { [weak self] action in
-                guard let user = self?.user else { return }
-                self?.delegate?.roomUserCellDidToggleAdmin(for: user)
-            }
-        ]
+        }
+        
+        let removeAdminUIAction = UIAction(title: "Remove Admin", image: UIImage(systemName: "person.crop.circle.badge.xmark", withConfiguration: symbolConfig)) { [weak self] action in
+            guard let user = self?.user else { return }
+            self?.delegate?.roomUserCellDidToggleAdmin(for: user)
+        }
         
         let removeUserUIAction = UIAction(title: "Remove User", image: UIImage(systemName: "person.badge.minus", withConfiguration: symbolConfig)) { [weak self] action in
             guard let user = self?.user else { return }
             self?.delegate?.roomUserCellDidRemoveUser(for: user)
         }
-            
-        let notCurrentUserUIActions = currentUserUIActions.arrayByAppending(removeUserUIAction)
-           
-        guard let currentUser = FirebaseManager.shared.currentUser else { return }
         
-        if user?.username == currentUser.username {
-            menu = UIMenu(title: "", children: currentUserUIActions)
+        if user.username == currentUser.username && room.doesContainsAdmin(for: currentUser.username) {
+            uiActions.append(removeAdminUIAction)
         } else {
-            menu = UIMenu(title: "", children: notCurrentUserUIActions)
+            uiActions.append(contentsOf: [grantAdminUIAction, removeUserUIAction, removeUserUIAction])
         }
+        
+        menu = UIMenu(title: "", children: uiActions)
       
         menuButton.menu = menu
         menuButton.showsMenuAsPrimaryAction = true

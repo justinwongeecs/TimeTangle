@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FirebaseFirestore
 
 protocol FriendsAndRequestVCDelegate: AnyObject {
     func didNeedToFilterSearchResults(_ controller: FriendsAndRequestsVC, with allUsers: [TTUser])
@@ -19,7 +20,14 @@ enum FriendsVCSegmentedState {
 class FriendsAndRequestsVC: UIViewController {
     
     //TODO: - friends and friendRequests require public access level due to AddFriendVC
-    var friends = [TTUser]()
+    var searchBar: UISearchBar!
+    var friends = [TTUser]() {
+        didSet {
+            if friends.isEmpty {
+                filteredFriends = []
+            }
+        }
+    }
     private var filteredFriends = [TTUser]()
     var friendRequests: [TTFriendRequest] = []
     private var searchWord = ""
@@ -37,7 +45,16 @@ class FriendsAndRequestsVC: UIViewController {
     
     weak var delegate: FriendsAndRequestVCDelegate!
     let tableViewsPadding: CGFloat = 10
-
+    
+    required init(searchBar: UISearchBar) {
+        self.searchBar = searchBar
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         configureBackgroundView()
@@ -46,6 +63,7 @@ class FriendsAndRequestsVC: UIViewController {
         configureFriendsTable()
     
         fetchFriends()
+        reloadTable()
         
         NotificationCenter.default.addObserver(self, selector: #selector(fetchUpdatedUser(_:)), name: .updatedUser, object: nil)
     }
@@ -55,25 +73,35 @@ class FriendsAndRequestsVC: UIViewController {
     }
     
     private func fetchFriends() {
+        print("fetch Friends")
         guard let currentUser = FirebaseManager.shared.currentUser else { return }
+        print("currentUser: \(currentUser)")
+        friendRequests = currentUser.friendRequests
         
-        FirebaseManager.shared.fetchMultipleUsersDocumentData(with: currentUser.friends) { [weak self] result in
-            switch result {
-            case .success(let users):
-                self?.friends = users
-                self?.filteredFriends = users
-                self?.filterFriends(with: self?.searchWord ?? "")
-                self?.friendRequests = currentUser.friendRequests
-                self?.reloadTable()
-            case .failure(let error):
-                self?.presentTTAlert(title: "Fetch Error", message: error.rawValue, buttonTitle: "OK")
+        if !currentUser.friends.isEmpty {
+            FirebaseManager.shared.fetchMultipleUsersDocumentData(with: currentUser.friends) { [weak self] result in
+                switch result {
+                case .success(let users):
+                    print("fetch sucess")
+                    self?.friends = users
+                    self?.filterFriends(with: self?.searchWord ?? "")
+                case .failure(let error):
+                    print("fetch error")
+                    self?.presentTTAlert(title: "Fetch Error", message: error.rawValue, buttonTitle: "OK")
+                }
+                print("Hello Reload Table")
+                DispatchQueue.main.async {
+                    self?.reloadTable()
+                }
             }
+        } else {
+            friends = []
         }
+        reloadTable()
     }
     
     func filterFriends(with searchWord: String) {
         self.searchWord = searchWord
-        removeEmptyStateView(in: self.view)
         
         if searchWord.isEmpty {
             filteredFriends = friends
@@ -89,7 +117,6 @@ class FriendsAndRequestsVC: UIViewController {
                 updateSearchFriendsCountLabel(with: filteredFriends.count)
             }
         }
-        table.reloadData()
     }
     
     private func configureBackgroundView() {
@@ -153,18 +180,32 @@ class FriendsAndRequestsVC: UIViewController {
     }
     
     private func reloadTable() {
-        removeEmptyStateView(in: view)
         switch friendsVCSegementedState {
         case .myFriends:
             if friends.isEmpty {
-                showEmptyStateView(with: "No Friends :(", in: view, viewsPresentInFront: [friendsSC])
+                if #available(iOS 16.4, *) {
+                    searchBar.isEnabled = false
+                } else {
+                    // Fallback on earlier versions
+                    searchBar.isHidden = true
+                }
+                table.backgroundView = TTEmptyStateView(message: "No Friends Available")
+            } else {
+                if #available(iOS 16.4, *) {
+                    searchBar.isEnabled = true
+                } else {
+                    // Fallback on earlier versions
+                    searchBar.isHidden = false 
+                }
+                table.backgroundView = nil
             }
         case .friendRequests:
             if friendRequests.isEmpty {
-                showEmptyStateView(with: "No Friend Requests", in: view, viewsPresentInFront: [friendsSC])
+                table.backgroundView = TTEmptyStateView(message: "No Friend Requests")
+            } else {
+                table.backgroundView = nil
             }
         }
-
         table.reloadData()
     }
     
@@ -224,6 +265,8 @@ extension FriendsAndRequestsVC: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
+        print(friendsVCSegementedState)
+        
         if friendsVCSegementedState == .myFriends  {
             let friend = filteredFriends[indexPath.section]
             let myFriendCell = table.dequeueReusableCell(withIdentifier: ProfileUsernameCell.reuseID) as! ProfileUsernameCell
@@ -259,6 +302,10 @@ extension FriendsAndRequestsVC: UITableViewDelegate, UITableViewDataSource {
         view.backgroundColor = .clear
         return view
     }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        searchBar.resignFirstResponder()
+    }
 }
 
 //MARK: - AddFriendVCDelegate
@@ -277,35 +324,43 @@ extension FriendsAndRequestsVC: AddFriendVCDelegate {
             return
         }
         
+        //current user is the SENDER
+        //parameter user is the RECEIPIENT
         guard let currentUser = FirebaseManager.shared.currentUser else { return }
-        
+                
         //update user on Firebase
-        let senderFriendRequest = TTFriendRequest(profilePictureData: currentUser.profilePictureData, senderUsername: currentUser.username, recipientUsername: user.username, requestType: .outgoing)
-        let recipientFriendRequest = TTFriendRequest(profilePictureData: currentUser.profilePictureData, senderUsername: currentUser.username, recipientUsername: user.username, requestType: .receiving)
+        let senderFriendRequest = TTFriendRequest(senderProfilePictureData: currentUser.profilePictureData, recipientProfilePictureData: user.profilePictureData, senderUsername: currentUser.username, recipientUsername: user.username, requestType: .outgoing)
+        var recipientFriendRequest = senderFriendRequest
+        recipientFriendRequest.requestType = .receiving
         
         let senderUpdateData = [
-            TTConstants.friendRequests: currentUser.friendRequests.arrayByAppending(senderFriendRequest).map{ $0.dictionary }
+            TTConstants.friendRequests: FieldValue.arrayUnion([senderFriendRequest.dictionary])
+                //currentUser.friendRequests.arrayByAppending(senderFriendRequest).map{ $0.dictionary }
         ]
         let recipientUpdateData = [
-            TTConstants.friendRequests: user.friendRequests.arrayByAppending(recipientFriendRequest).map{ $0.dictionary }
+            TTConstants.friendRequests: FieldValue.arrayUnion([recipientFriendRequest.dictionary])
+                //user.friendRequests.arrayByAppending(recipientFriendRequest).map{ $0.dictionary }
         ]
         
         //update current user's friendRequests field
         FirebaseManager.shared.updateUserData(for: currentUser.username, with: senderUpdateData) { [weak self] error in
-            guard let error = error else { return }
-        
-            //error returned, present error to user
-            self?.presentTTAlert(title: "Update User Error", message: error.rawValue, buttonTitle: "Ok")
+            if let error = error {
+                //error returned, present error to user
+                print("Error 1: \(error.rawValue)")
+                self?.presentTTAlert(title: "Update User Error", message: error.rawValue, buttonTitle: "Ok")
+            } else {
+                //update receiving user's friendRequests field
+                FirebaseManager.shared.updateUserData(for: user.username, with: recipientUpdateData) { [weak self] error in
+                    if let error = error {
+                        print("Error 2")
+                        self?.presentTTAlert(title: "Update User Error", message: error.rawValue, buttonTitle: "Ok")
+                    } else {
+                        self?.fetchFriends()
+                        self?.dismiss(animated: true)
+                    }
+                }
+            }
         }
-        
-        //update receiving user's friendRequests field
-        FirebaseManager.shared.updateUserData(for: user.username, with: recipientUpdateData) { [weak self] error in
-            guard let error = error else { return }
-            
-            self?.presentTTAlert(title: "Update User Error", message: error.rawValue, buttonTitle: "Ok")
-        }
-        
-        dismiss(animated: true)
     }
 }
 

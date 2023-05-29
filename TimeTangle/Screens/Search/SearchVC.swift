@@ -58,8 +58,8 @@ class SearchVC: UIViewController {
         guard let currentUser = FirebaseManager.shared.currentUser else { return }
         activityIndicator.startAnimating()
         FirebaseManager.shared.fetchMultipleUsersDocumentData(with: currentUser.friends) { [weak self] result in
+            self?.activityIndicator.stopAnimating()
             guard let self = self else { return }
-            self.activityIndicator.stopAnimating()
             switch result {
             case .success(let allFriends):
                 self.allFriends = allFriends

@@ -299,16 +299,18 @@ struct SettingsView: View {
 struct SettingsProfileHeaderView: View {
     
     @State private var profileImage: UIImage?
+    @State private var name: String = ""
+    @State private var username: String = ""
     
     var body: some View {
         NavigationLink(destination: SettingsMyProfileView()) {
             HStack(spacing: 20) {
                 TTSwiftUIProfileImageView(image: profileImage, size: 70)
                 VStack(alignment: .leading) {
-                    Text("Justin Wong")
+                    Text(name)
                         .foregroundColor(.primary)
                         .font(.title2.bold())
-                    Text("jwongeecs")
+                    Text(username)
                         .foregroundColor(.secondary)
                     Text("Free Plan")
                         .foregroundColor(.secondary)
@@ -324,6 +326,8 @@ struct SettingsProfileHeaderView: View {
             if let imageData = currentUser.profilePictureData, let image = UIImage(data: imageData) {
                 profileImage = image
             }
+            name = currentUser.getFullName()
+            username = currentUser.username
         }
     }
 }

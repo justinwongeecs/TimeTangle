@@ -227,7 +227,8 @@ class RoomDetailVC: UIViewController {
     }
     
     private func showRoomSettingsVC() {
-        let roomSettingsView = RoomSettingsView(room: room) { [weak self] newRoom in
+        let config = Configuration()
+        let roomSettingsView = RoomSettingsView(room: room, config: config) { [weak self] newRoom in
             self?.room = newRoom
             DispatchQueue.main.async {
                 self?.updateView()
@@ -235,8 +236,9 @@ class RoomDetailVC: UIViewController {
         } popUIViewController: { [weak self] in
             self?.navigationController?.popViewController(animated: true)
         }
-        let uiKitRoomSettingsView = TTHostingController(rootView: roomSettingsView)
-        present(uiKitRoomSettingsView, animated: true)
+        let roomSettingsHostingController = TTHostingController(rootView: roomSettingsView)
+        config.hostingController = roomSettingsHostingController
+        present(roomSettingsHostingController, animated: true)
     }
 
     @objc private func refreshRoom() {

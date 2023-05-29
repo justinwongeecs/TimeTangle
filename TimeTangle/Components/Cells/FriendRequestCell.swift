@@ -16,7 +16,7 @@ class FriendRequestCell: UITableViewCell {
 
     static let reuseID = "FriendRequestCell"
     
-    let avatarImageView = TTProfileImageView(widthHeight: 40)
+    let avatarImageView = TTProfileImageView(widthHeight: TTConstants.profileImageViewInCellHeightAndWidth)
     let usernameLabel = TTTitleLabel(textAlignment: .left, fontSize: 20)
     let friendRequestTypeLabel = TTBodyLabel(textAlignment: .right)
     
@@ -46,18 +46,21 @@ class FriendRequestCell: UITableViewCell {
     
     func set(for friendRequest: TTFriendRequest) {
         self.friendRequest = friendRequest
-        
-        if let profileImageData = friendRequest.profilePictureData, let image = UIImage(data: profileImageData) {
-            avatarImageView.setImage(to: image)
-        }
+    
         friendRequestTypeLabel.text = friendRequest.requestType.description
          
         switch friendRequest.requestType {
         case .outgoing:
+            if let recipientUserImageData = friendRequest.recipientProfilePictureData, let image = UIImage(data: recipientUserImageData) {
+                avatarImageView.setImage(to: image)
+            }
             usernameLabel.text = friendRequest.recipientUsername
             friendRequestTypeLabel.textColor = .secondaryLabel
             buttonsStackView.isHidden = true
         case .receiving:
+            if let senderUserImageData = friendRequest.senderProfilePictureData, let image = UIImage(data: senderUserImageData) {
+                avatarImageView.setImage(to: image)
+            }
             usernameLabel.text = friendRequest.senderUsername
             //remove friendReqeustTypeLabel because we will show accept or decline buttons instead
             friendRequestTypeLabel.removeFromSuperview()
@@ -82,8 +85,8 @@ class FriendRequestCell: UITableViewCell {
         NSLayoutConstraint.activate([
             avatarImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
             avatarImageView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: padding),
-            avatarImageView.heightAnchor.constraint(equalToConstant: 60),
-            avatarImageView.widthAnchor.constraint(equalToConstant: 60),
+            avatarImageView.heightAnchor.constraint(equalToConstant: TTConstants.profileImageViewInCellHeightAndWidth),
+            avatarImageView.widthAnchor.constraint(equalToConstant: TTConstants.profileImageViewInCellHeightAndWidth),
             
             usernameLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
             usernameLabel.leadingAnchor.constraint(equalTo: avatarImageView.trailingAnchor, constant: 24),
@@ -110,11 +113,11 @@ class FriendRequestCell: UITableViewCell {
         declineButton.addTarget(self, action: #selector(declineFriendRequest), for: .touchUpInside)
         
         NSLayoutConstraint.activate([
-            acceptButton.heightAnchor.constraint(equalToConstant: 30),
-            acceptButton.widthAnchor.constraint(equalToConstant: 30),
+            acceptButton.heightAnchor.constraint(equalToConstant: 40),
+            acceptButton.widthAnchor.constraint(equalToConstant: 40),
 
-            declineButton.heightAnchor.constraint(equalToConstant: 30),
-            declineButton.widthAnchor.constraint(equalToConstant: 30)
+            declineButton.heightAnchor.constraint(equalToConstant: 40),
+            declineButton.widthAnchor.constraint(equalToConstant: 40)
         ])
     }
     
@@ -141,6 +144,8 @@ class FriendRequestCell: UITableViewCell {
     @objc private func acceptFriendRequest() {
         guard let friendRequest = friendRequest else { return }
         
+        print("FriendRequest Dict: \(friendRequest.dictionary)")
+        
         //add appropriate friends to both the sender and recipient, remove friend requests from both
         let newRecipientData = [
             TTConstants.friends: FieldValue.arrayUnion([friendRequest.senderUsername]),
@@ -149,7 +154,7 @@ class FriendRequestCell: UITableViewCell {
         
         var senderFriendRequestDict = friendRequest
         senderFriendRequestDict.requestType = .outgoing
-        print(senderFriendRequestDict)
+        print("Sender Friend Request Dic: \(senderFriendRequestDict.dictionary)")
         
         let newSenderData = [
             TTConstants.friends: FieldValue.arrayUnion([friendRequest.recipientUsername]),

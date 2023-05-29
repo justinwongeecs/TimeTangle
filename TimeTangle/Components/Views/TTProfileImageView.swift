@@ -52,6 +52,8 @@ class TTProfileImageView: UIView {
     }
     
     private func configureProfileImageView() {
+        translatesAutoresizingMaskIntoConstraints = false
+        
         profileImageOuterView = UIView(frame: CGRect(x: 0, y: 0, width: profileImageWidthHeight, height: profileImageWidthHeight))
         profileImageOuterView.translatesAutoresizingMaskIntoConstraints = false
     

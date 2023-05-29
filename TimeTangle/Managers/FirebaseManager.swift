@@ -40,7 +40,6 @@ class FirebaseManager {
                     }
                 }
             } else {
-                print("null user")
                 self?.currentUser = nil
                 self?.goToLoginScreen()
             }
@@ -55,6 +54,7 @@ class FirebaseManager {
         currentUserListener = db.collection(TTConstants.usersCollection).document(username).addSnapshotListener { [weak self] docSnapshot, error in
             guard let document = docSnapshot else { return }
             do {
+                print("Update to current user")
                 let currentUserData = try document.data(as: TTUser.self)
                 self?.currentUser = currentUserData
                 self?.broadcastUpdatedUser()
@@ -79,14 +79,21 @@ class FirebaseManager {
         sceneWindow?.makeKeyAndVisible()
     }
     
-    private func goToLoginScreen() {
-        sceneWindow?.rootViewController = LoginVC()
-        sceneWindow?.makeKeyAndVisible()
-    }
-    
-    func unbind() {
-        if let handle = handle {
-            Auth.auth().removeStateDidChangeListener(handle)
+    private func goToLoginScreen(animated: Bool = false) {
+        if animated {
+            UIView.animate(withDuration: 2) {
+                self.sceneWindow?.rootViewController = LoginVC()
+                self.sceneWindow?.rootViewController?.view.layer.opacity = 0.3
+                self.sceneWindow?.makeKeyAndVisible()
+
+            } completion: { _ in
+                UIView.animate(withDuration: 1.5) {
+                    self.sceneWindow?.rootViewController?.view.layer.opacity = 1
+                }
+            }
+        } else {
+            self.sceneWindow?.rootViewController = LoginVC()
+            self.sceneWindow?.makeKeyAndVisible()
         }
     }
     
@@ -95,7 +102,7 @@ class FirebaseManager {
     
     func fetchUsers(completed: @escaping(Result<[TTUser], TTError>) -> Void) {
         db.collection("users").getDocuments() { (querySnapshot, err) in
-            if let err = err {
+            if let _ = err {
                 completed(.failure(.unableToFetchUsers))
             } else {
                 var ttUsers: [TTUser] = []
@@ -138,19 +145,21 @@ class FirebaseManager {
     }
     
     func fetchMultipleUsersDocumentData(with usernames: [String], completed: @escaping(Result<[TTUser], TTError>) -> Void) {
-        db.collection("users").whereField("username", in: usernames).getDocuments() { querySnapshot, err in
-            if let _ = err {
-                completed(.failure(TTError.unableToFetchUsers))
-            } else {
-                var users = [TTUser]()
-                for document in querySnapshot!.documents {
-                    do {
-                        users.append( try document.data(as: TTUser.self))
-                    } catch {
-                        completed(.failure(TTError.unableToFetchUsers))
+        if !usernames.isEmpty {
+            db.collection("users").whereField("username", in: usernames).getDocuments() { querySnapshot, err in
+                if let _ = err {
+                    completed(.failure(TTError.unableToFetchUsers))
+                } else {
+                    var users = [TTUser]()
+                    for document in querySnapshot!.documents {
+                        do {
+                            users.append( try document.data(as: TTUser.self))
+                        } catch {
+                            completed(.failure(TTError.unableToFetchUsers))
+                        }
                     }
+                    completed(.success(users))
                 }
-                completed(.success(users))
             }
         }
     }
@@ -163,7 +172,7 @@ class FirebaseManager {
                 return
             }
             
-            self?.fetchUserDocumentData(with: username) { [weak self] result in
+            self?.fetchUserDocumentData(with: username) { result in
                 switch result {
                 case .success(_):
                     completed(nil)
@@ -339,8 +348,8 @@ class FirebaseManager {
         do {
             try Auth.auth().signOut()
             self.currentUser = nil
-            unbind()
             stopListeningToCurrentUser()
+            self.goToLoginScreen(animated: true)
             completed(.success(()))
         } catch {
             completed(.failure(.unableToSignOutUser))
@@ -401,6 +410,7 @@ class FirebaseManager {
     }
     
     private func createSettingsNC() -> UINavigationController {
+        let config = Configuration()
         let settingsVC = TTHostingController(rootView: SettingsView())
         settingsVC.tabBarItem = UITabBarItem(title: "Settings", image: UIImage(systemName: "gearshape"), tag: 3)
         return UINavigationController(rootViewController: settingsVC)

@@ -11,6 +11,7 @@ import FirebaseFirestore
 
 struct RoomSettingsView: View {
     @Environment(\.dismiss) var dismiss
+    var config: Configuration 
     @State var room: TTRoom!
     private(set) var updateClosure: (TTRoom) -> Void
     private var popUIViewController: () -> Void
@@ -29,8 +30,9 @@ struct RoomSettingsView: View {
     @State private var lockRoomChanges = false
     @State private var allowRoomJoin = true
     
-    init(room: TTRoom, updateClosure: @escaping (TTRoom) -> Void, popUIViewController: @escaping() -> Void) {
+    init(room: TTRoom, config: Configuration, updateClosure: @escaping (TTRoom) -> Void, popUIViewController: @escaping() -> Void) {
         _room = State(initialValue: room)
+        self.config = config 
         self.updateClosure = updateClosure
         self.popUIViewController = popUIViewController
         _newRoomNameText = State(initialValue: room.name)
@@ -43,7 +45,7 @@ struct RoomSettingsView: View {
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             SettingStack(isSearchable: false, embedInNavigationStack: true) {
                 SettingPage(title: "\(room.name) Settings", navigationTitleDisplayMode: .inline) {
                     SettingGroup(id: "Change Room Name Button", header: "Room Name") {
@@ -122,7 +124,7 @@ struct RoomSettingsView: View {
                         saveToFirestore()
                     }) {
                         Text("Save")
-                            .frame(width: 100)
+                            .frame(width: 60)
                             .foregroundColor(.white)
                             .bold()
                             .padding(8)
@@ -164,9 +166,8 @@ struct RoomSettingsView: View {
                     nilError()
                 }
             }
-            .presentScreen(isPresented: $showErrorAlert, modalPresentationStyle: .overFullScreen) {
-                TTSwiftUIAlertView(alertTitle: "Error", message: ttError?.rawValue ?? "No Message", buttonTitle: "OK")
-                    .ignoresSafeArea(.all)
+            .onChange(of: showErrorAlert) { _ in
+                config.hostingController?.presentTTAlert(title: "Setting Error", message: ttError?.rawValue ?? "No Message", buttonTitle: "OK")
             }
         }
     }
@@ -249,9 +250,6 @@ struct RoomSettingsView: View {
                       primaryButton: .cancel(),
                       secondaryButton: .default(Text("OK")) { deleteRoom() })
             }
-            .presentScreen(isPresented: $showErrorAlert, modalPresentationStyle: .overFullScreen) {
-                TTSwiftUIAlertView(alertTitle: "Delete Room Error", message: ttError?.rawValue ?? "No Message", buttonTitle: "OK")
-            }
         }
     }
     
@@ -272,9 +270,6 @@ struct RoomSettingsView: View {
                       message: Text("Are you sure you want to leave \(room.name)?"),
                       primaryButton: .cancel(),
                       secondaryButton: .default(Text("OK")) { leaveRoom() })
-            }
-            .presentScreen(isPresented: $showErrorAlert, modalPresentationStyle: .overFullScreen) {
-                TTSwiftUIAlertView(alertTitle: "Leave Room Error", message: ttError?.rawValue ?? "No Message", buttonTitle: "OK")
             }
         }
     }
@@ -376,8 +371,9 @@ struct RoomSettingsView: View {
 }
 
 struct RoomSettingsView_Previews: PreviewProvider {
+    static let configuration = Configuration()
     static let room = TTRoom(name: "Meeting 1", users: [], code: "ABCDE", startingDate: Date(), endingDate: Date(), histories: [], events: [], admins: [], setting: TTRoomSetting(minimumNumOfUsers: 2, maximumNumOfUsers: 10, boundedStartDate: Date(), boundedEndDate: Date(), lockRoomChanges: false, allowRoomJoin: true))
     static var previews: some View {
-        RoomSettingsView(room: room, updateClosure: {_ in }, popUIViewController: {})
+        RoomSettingsView(room: room, config: configuration, updateClosure: {_ in }, popUIViewController: {})
     }
 }

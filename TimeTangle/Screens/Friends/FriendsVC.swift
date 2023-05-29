@@ -9,9 +9,9 @@ import UIKit
 
 class FriendsVC: UIViewController {
     
-    let searchBarField = UISearchBar()    
-    let friendsAndRequestsView = UIView()
-    let friendsAndRequestsVC = FriendsAndRequestsVC()
+    private let searchBarField = UISearchBar()
+    private let friendsAndRequestsView = UIView()
+    private var friendsAndRequestsVC: FriendsAndRequestsVC!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,6 +28,8 @@ class FriendsVC: UIViewController {
         let addFriendButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addFriend))
         addFriendButton.tintColor = .systemGreen
         navigationItem.rightBarButtonItem = addFriendButton
+        
+        configureDismissEditingTapGestureRecognizer()
     }
 
     
@@ -60,6 +62,7 @@ class FriendsVC: UIViewController {
 
     
     private func configureFriendsAndRequestsView() {
+        friendsAndRequestsVC = FriendsAndRequestsVC(searchBar: searchBarField)
         view.addSubview(friendsAndRequestsView)
         friendsAndRequestsView.translatesAutoresizingMaskIntoConstraints = false
 
@@ -78,12 +81,6 @@ class FriendsVC: UIViewController {
 extension FriendsVC: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         friendsAndRequestsVC.filterFriends(with: searchText)
-    }
-    
-    //don't think this is necessary since we aren't using a search controller
-    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        //user tapped the Done button on the keyboard
-        //filter friends
     }
 }
 

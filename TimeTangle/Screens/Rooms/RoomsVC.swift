@@ -9,25 +9,25 @@ import UIKit
 
 class RoomsVC: UIViewController {
     
-    private var rooms = [TTRoom]()
-//        didSet {
-//            if rooms.isEmpty {
-//                if #available(iOS 16.4, *) {
-//                    roomsSearchBar.isEnabled = false
-//                } else {
-//                    // Fallback on earlier versions
-//                    roomsSearchBar.isHidden = true
-//                }
-//            } else {
-//                if #available(iOS 16.4, *) {
-//                    roomsSearchBar.isEnabled = true
-//                } else {
-//                    // Fallback on earlier versions
-//                    roomsSearchBar.isHidden = false
-//                }
-//            }
-//        }
-//    }
+    private var rooms = [TTRoom]() {
+        didSet {
+            if rooms.isEmpty {
+                if #available(iOS 16.4, *) {
+                    roomsSearchBar.isEnabled = false
+                } else {
+                    // Fallback on earlier versions
+                    roomsSearchBar.isHidden = true
+                }
+            } else {
+                if #available(iOS 16.4, *) {
+                    roomsSearchBar.isEnabled = true
+                } else {
+                    // Fallback on earlier versions
+                    roomsSearchBar.isHidden = false
+                }
+            }
+        }
+    }
     
     private var filterRooms = [TTRoom]()
     
@@ -55,6 +55,8 @@ class RoomsVC: UIViewController {
     private func configureViewController() {
         view.backgroundColor = .systemBackground
         navigationController?.navigationBar.prefersLargeTitles = true
+        
+        configureDismissEditingTapGestureRecognizer()
     }
     
     private func configureSearchBar() {
@@ -122,7 +124,6 @@ class RoomsVC: UIViewController {
                     case .success(let room):
                         self?.rooms.append(room)
                         self?.filterRooms.append(room)
-                        print("Rooms: \(self?.rooms)")
                         DispatchQueue.main.async {
                             self?.roomsTable.reloadData()
                         }
@@ -211,6 +212,10 @@ extension RoomsVC: UITableViewDelegate, UITableViewDataSource {
         selectedVCIndex = indexPath.section
         
         navigationController?.pushViewController(roomInfoVC, animated: true)
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        roomsSearchBar.resignFirstResponder()
     }
 }
 

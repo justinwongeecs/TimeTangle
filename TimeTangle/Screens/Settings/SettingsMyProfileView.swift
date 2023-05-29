@@ -14,6 +14,7 @@ struct SettingsMyProfileView: View {
     @State private var profileImage: UIImage?
     @State private var showChangeNameAlert = false
     @State private var showChangeUsernameAlert = false
+    @State private var showLogoutConfirmationAlert = false
     
     @State private var firstname = ""
     @State private var lastname = ""
@@ -35,14 +36,31 @@ struct SettingsMyProfileView: View {
                     SettingCustomView(id: "Logout") {
                         HStack {
                             Button(action: {
-                                
+                                showLogoutConfirmationAlert.toggle()
                             }) {
                                 Text("Log Out")
                                     .leftAligned()
                                     .foregroundColor(.red)
                                     .frame(maxWidth: .infinity)
                             }
-                
+                            .confirmationDialog("Confirm Logout", isPresented: $showLogoutConfirmationAlert) {
+                                Button("OK", action: {
+                                    FirebaseManager.shared.signOutUser { result in
+                                        switch result {
+                                        case .success(_):
+                                            break
+                                        case .failure(_):
+                                            ttError = TTError.unableToSignOutUser
+                                            showErrorAlert = true
+                                        }
+                                    }
+                                })
+                                Button("Cancel", role: .cancel) {
+                                    showLogoutConfirmationAlert.toggle()
+                                }
+                            } message: {
+                                Text("Are you sure you want to logout?")
+                            }
                             Spacer()
                         }
                         .padding(15)
@@ -85,6 +103,7 @@ struct SettingsMyProfileView: View {
             }
             .onAppear {
                 guard let currentUser = FirebaseManager.shared.currentUser else { return }
+                print(currentUser)
                 if let imageData = currentUser.profilePictureData, let image = UIImage(data: imageData) {
                     profileImage = image
                 }
@@ -106,7 +125,7 @@ struct SettingsMyProfileView: View {
     //MARK: - Name Section
     @SettingBuilder private var nameSection: some Setting {
         SettingGroup(id: "Name", header: "Name") {
-            SettingText(title: "Justin Wong")
+            SettingText(title: "\(firstname)\(lastname)")
             SettingCustomView(id: "ChangeName") {
                 Button(action: {
                     showChangeNameAlert.toggle()
@@ -143,7 +162,7 @@ struct SettingsMyProfileView: View {
     //MARK: - Username Section
     @SettingBuilder private var usernameSection: some Setting {
         SettingGroup(id: "Username", header: "Username") {
-            SettingText(title: "jwongeecs")
+            SettingText(title: username)
             SettingCustomView(id: "ChangeUsername") {
                 HStack {
                     Button(action: {
@@ -187,6 +206,7 @@ struct SettingsMyProfileView: View {
         }
         
         guard let compressedImageData = image.jpegData(compressionQuality: compressionQuality) else { return }
+        print("CompressedImageData: \(compressedImageData.count)")
 
         FirebaseManager.shared.updateUserData(for: currentUser.username, with: [
             TTConstants.profilePictureData: compressedImageData

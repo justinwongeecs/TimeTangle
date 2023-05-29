@@ -49,5 +49,5 @@ struct TTConstants {
     static let emptyStateViewTag = 100
     static let profileImageViewInCellHeightAndWidth: CGFloat = 40
     
-    static let firestoreMaximumImageDataBytes = 1048487
+    static let firestoreMaximumImageDataBytes = 200000
 }
