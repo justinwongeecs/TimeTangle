@@ -16,6 +16,8 @@ class ProfileUsernameCell: UITableViewCell {
     private var hStackView = UIStackView()
     internal var avatarImageView = TTProfileImageView(widthHeight: TTConstants.profileImageViewInCellHeightAndWidth)
     internal let usernameLabel = TTTitleLabel(textAlignment: .left, fontSize: 15)
+    
+    private var hStackViewLeadingConstraint: NSLayoutConstraint!
         
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -24,6 +26,11 @@ class ProfileUsernameCell: UITableViewCell {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    override func setEditing(_ editing: Bool, animated: Bool) {
+        super.setEditing(editing, animated: animated)
+        update()
     }
     
     func set(for user: TTUser) {
@@ -54,14 +61,29 @@ class ProfileUsernameCell: UITableViewCell {
         hStackView.addArrangedSubview(avatarImageView)
         hStackView.addArrangedSubview(usernameLabel)
         
+        hStackViewLeadingConstraint = hStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10)
+        hStackViewLeadingConstraint.isActive = true
+        
         NSLayoutConstraint.activate([
             avatarImageView.widthAnchor.constraint(equalToConstant: TTConstants.profileImageViewInCellHeightAndWidth),
             avatarImageView.heightAnchor.constraint(equalToConstant: TTConstants.profileImageViewInCellHeightAndWidth),
             
             hStackView.topAnchor.constraint(equalTo: topAnchor),
-            hStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10),
+            hStackView.centerYAnchor.constraint(equalTo: centerYAnchor),
             hStackView.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
+    }
+    
+    private func update() {
+        if self.isEditing {
+            self.hStackViewLeadingConstraint.isActive = false
+            self.hStackViewLeadingConstraint = self.hStackView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 60)
+            self.hStackViewLeadingConstraint.isActive = true
+        } else {
+            self.hStackViewLeadingConstraint.isActive = false
+            self.hStackViewLeadingConstraint = self.hStackView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 10)
+            self.hStackViewLeadingConstraint.isActive = true
+        }
     }
     
     internal func getUsername() -> String {

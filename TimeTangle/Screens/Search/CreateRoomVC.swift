@@ -1,5 +1,5 @@
 //
-//  SearchVC.swift
+//  CreateRoomVC.swift
 //  TimeTangle
 //
 //  Created by Justin Wong on 12/24/22.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-class SearchVC: UIViewController {
+class CreateRoomVC: UIViewController {
     
     private var allFriends = [TTUser]()
     private var usersQueueForRoomCreation = [TTUser]()
@@ -36,7 +36,7 @@ class SearchVC: UIViewController {
     
     private func configureViewController() {
         view.backgroundColor = .systemBackground
-        title = "Search"
+        title = "Create Room"
         navigationController?.navigationBar.prefersLargeTitles = true
         
         //Join Room Button
@@ -57,19 +57,22 @@ class SearchVC: UIViewController {
     @objc private func fetchUpdatedUser() {
         guard let currentUser = FirebaseManager.shared.currentUser else { return }
         activityIndicator.startAnimating()
-        FirebaseManager.shared.fetchMultipleUsersDocumentData(with: currentUser.friends) { [weak self] result in
-            self?.activityIndicator.stopAnimating()
-            guard let self = self else { return }
-            switch result {
-            case .success(let allFriends):
-                self.allFriends = allFriends
-                let usersQueueUsernames = self.usersQueueForRoomCreation.map{ $0.username }
-                self.usersQueueForRoomCreation = allFriends.filter { usersQueueUsernames.contains($0.username) }
-                self.addCurrentUser()
-                self.refreshTableView()
-            case .failure(let error):
-                self.presentTTAlert(title: "Fetch Error", message: error.rawValue, buttonTitle: "OK")
+        if !currentUser.friends.isEmpty  {
+            FirebaseManager.shared.fetchMultipleUsersDocumentData(with: currentUser.friends) { [weak self] result in
+                self?.activityIndicator.stopAnimating()
+                guard let self = self else { return }
+                switch result {
+                case .success(let allFriends):
+                    self.allFriends = allFriends
+                    let usersQueueUsernames = self.usersQueueForRoomCreation.map{ $0.username }
+                    self.usersQueueForRoomCreation.append(contentsOf: allFriends.filter { usersQueueUsernames.contains($0.username) })
+                    self.refreshTableView()
+                case .failure(let error):
+                    self.presentTTAlert(title: "Fetch Error", message: error.rawValue, buttonTitle: "OK")
+                }
             }
+        } else {
+            activityIndicator.stopAnimating()
         }
     }
     
@@ -124,7 +127,7 @@ class SearchVC: UIViewController {
         usersQueueTable.delegate = self
         usersQueueTable.dataSource = self
         
-        usersQueueTable.register(ProfileUsernameCell.self, forCellReuseIdentifier: ProfileUsernameCell.reuseID)
+        usersQueueTable.register(CreateRoomUserQueueCell.self, forCellReuseIdentifier: CreateRoomUserQueueCell.getReuseID())
         
         NSLayoutConstraint.activate([
             usersQueueTable.topAnchor.constraint(equalTo: usersQueueCountLabel.bottomAnchor, constant: 10),
@@ -172,20 +175,9 @@ class SearchVC: UIViewController {
     }
     
     private func addCurrentUser() {
-        if let currentUserUsername = FirebaseManager.shared.currentUser?.username  {
-            activityIndicator.startAnimating()
-            FirebaseManager.shared.fetchUserDocumentData(with: currentUserUsername) { [weak self] result in
-                self?.activityIndicator.stopAnimating()
-                switch result {
-                case .success(let user):
-                    self?.usersQueueForRoomCreation.append(user)
-                    self?.refreshTableView()
-                    break
-                case .failure(_):
-                    break
-                }
-            }
-        }
+        guard let currentUser = FirebaseManager.shared.currentUser else { return }
+        usersQueueForRoomCreation.append(currentUser)
+        refreshTableView()
     }
     
     private func refreshTableView() {
@@ -201,11 +193,19 @@ class SearchVC: UIViewController {
 }
 
 //MARK: - Delegates
-extension SearchVC: UITableViewDataSource, UITableViewDelegate {
+extension CreateRoomVC: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = usersQueueTable.dequeueReusableCell(withIdentifier: ProfileUsernameCell.reuseID) as! ProfileUsernameCell
+        let cell = usersQueueTable.dequeueReusableCell(withIdentifier: CreateRoomUserQueueCell.getReuseID()) as! CreateRoomUserQueueCell
         let userInQueue = usersQueueForRoomCreation[indexPath.section]
-        cell.set(for: userInQueue)
+        cell.set(for: userInQueue) {
+            if userInQueue.username != FirebaseManager.shared.currentUser?.username {
+                self.usersQueueForRoomCreation.remove(at: indexPath.section)
+                self.usersQueueTable.beginUpdates()
+                self.usersQueueTable.deleteSections([indexPath.section], with: .fade)
+                self.usersQueueTable.endUpdates()
+                self.updateUsersQueueCountLabel()
+            }
+        }
         return cell
     }
     
@@ -234,24 +234,9 @@ extension SearchVC: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 50.0
     }
-    
-    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        guard editingStyle == .delete else { return }
-        
-        
-        let userInQueue = usersQueueForRoomCreation[indexPath.section]
-        
-        if userInQueue.username != FirebaseManager.shared.currentUser?.username {
-            usersQueueForRoomCreation.remove(at: indexPath.section)
-            usersQueueTable.beginUpdates()
-            usersQueueTable.deleteSections([indexPath.section], with: .fade)
-            usersQueueTable.endUpdates()
-            updateUsersQueueCountLabel()
-        }
-    }
 }
 
-extension SearchVC: UISearchBarDelegate {
+extension CreateRoomVC: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         searchFriendsResultController.search(with: searchText)
     }
@@ -263,14 +248,14 @@ extension SearchVC: UISearchBarDelegate {
     }
 }
 
-extension SearchVC: UISearchControllerDelegate {
+extension CreateRoomVC: UISearchControllerDelegate {
     func presentSearchController(_ searchController: UISearchController) {
         searchController.showsSearchResultsController = true
         searchFriendsResultController.setAllFriends(with: allFriends)
     }
 }
 
-extension SearchVC: SearchFriendsResultControllerDelegate {
+extension CreateRoomVC: SearchFriendsResultControllerDelegate {
     func didSelectSuggestedSearch(for user: TTUser) {
         searchController.showsSearchResultsController = false
         searchController.dismiss(animated: true, completion: nil)
@@ -281,8 +266,11 @@ extension SearchVC: SearchFriendsResultControllerDelegate {
     }
 }
 
-extension SearchVC: CreateRoomConfirmationVCDelegate {
+extension CreateRoomVC: CreateRoomConfirmationVCDelegate {
     func didSuccessfullyCreateRoom() {
+        usersQueueForRoomCreation = []
+        addCurrentUser()
+        updateUsersQueueCountLabel()
         dismiss(animated: true)
     }
 }

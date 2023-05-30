@@ -9,26 +9,7 @@ import UIKit
 
 class RoomsVC: UIViewController {
     
-    private var rooms = [TTRoom]() {
-        didSet {
-            if rooms.isEmpty {
-                if #available(iOS 16.4, *) {
-                    roomsSearchBar.isEnabled = false
-                } else {
-                    // Fallback on earlier versions
-                    roomsSearchBar.isHidden = true
-                }
-            } else {
-                if #available(iOS 16.4, *) {
-                    roomsSearchBar.isEnabled = true
-                } else {
-                    // Fallback on earlier versions
-                    roomsSearchBar.isHidden = false
-                }
-            }
-        }
-    }
-    
+    private var rooms = [TTRoom]()
     private var filterRooms = [TTRoom]()
     
     private let roomsSearchBar = UISearchBar()
@@ -45,17 +26,19 @@ class RoomsVC: UIViewController {
         configureSearchBar()
         configureSearchCountLabel()
         configureRoomsTable()
+        
+//        fetchRooms()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         navigationController?.navigationBar.prefersLargeTitles = true
-        getRoomsFromCurrentUser()
+        fetchRooms()
     }
     
     private func configureViewController() {
         view.backgroundColor = .systemBackground
-        navigationController?.navigationBar.prefersLargeTitles = true
         
+//        NotificationCenter.default.addObserver(self, selector: #selector(fetchRooms), name: .updatedCurrentUserRooms, object: nil)
         configureDismissEditingTapGestureRecognizer()
     }
     
@@ -104,28 +87,30 @@ class RoomsVC: UIViewController {
         ])
     }
     
-    private func getRoomsFromCurrentUser() {
-        guard let currentUser = FirebaseManager.shared.currentUser else { return }
-        print(currentUser.username)
-        fetchRooms(for: currentUser)
 
-    } 
+//    @objc private func fetchUpdatedUser(_ notification: Notification) {
+//        guard let fetchedUser = notification.object as? TTUser else { return }
+//        self.fetchRooms(for: fetchedUser)
+//        self.roomsTable.reloadData()
+//    }
     
-    //FIXME: - Not sure if it best practice to fetch for every single room for user because we only have the room codes for the user
-    private func fetchRooms(for user: TTUser) {
-        removeEmptyStateView(in: self.view)
+    @objc private func fetchRooms() {
+        guard let currentUser = FirebaseManager.shared.currentUser else { return }
+        print("Rooms currentuser: \(currentUser)")
+        roomsTable.backgroundView = nil
         self.rooms = []
         self.filterRooms = []
         
-        if user.roomCodes.count > 0 {
-            for roomCode in user.roomCodes {
+        if currentUser.roomCodes.count > 0 {
+            for roomCode in currentUser.roomCodes {
                 FirebaseManager.shared.fetchRoom(for: roomCode) { [weak self] result in
                     switch result {
                     case .success(let room):
                         self?.rooms.append(room)
                         self?.filterRooms.append(room)
+                        self?.filterRooms.sort { $0.name < $1.name }
                         DispatchQueue.main.async {
-                            self?.roomsTable.reloadData()
+                            self?.updateRoomTableView()
                         }
                         
                     case .failure(let error):
@@ -134,8 +119,27 @@ class RoomsVC: UIViewController {
                 }
             }
         } else {
-            //show empty view
-            showEmptyStateView(with: "No Rooms", in: self.view)
+            updateRoomTableView()
+        }
+    }
+    
+    private func updateRoomTableView() {
+        if filterRooms.isEmpty {
+            roomsTable.backgroundView = TTEmptyStateView(message: "No Rooms Found")
+            if #available(iOS 16.4, *) {
+                roomsSearchBar.isEnabled = false
+            } else {
+                // Fallback on earlier versions
+                roomsSearchBar.isHidden = true
+            }
+        } else {
+            roomsTable.backgroundView = nil
+            if #available(iOS 16.4, *) {
+                roomsSearchBar.isEnabled = true
+            } else {
+                // Fallback on earlier versions
+                roomsSearchBar.isHidden = false
+            }
         }
         
         DispatchQueue.main.async {
@@ -173,6 +177,7 @@ class RoomsVC: UIViewController {
     private func updateSearchCountLabel(with count: Int) {
         searchCountLabel.text = "\(count) Found"
     }
+    
 }
 
 //MARK: - Delegates
@@ -221,20 +226,20 @@ extension RoomsVC: UITableViewDelegate, UITableViewDataSource {
 
 extension RoomsVC: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        removeEmptyStateView(in: self.view)
+        roomsTable.backgroundView = nil
         
         guard !searchText.isEmpty else {
-            filterRooms = rooms
-            roomsTable.reloadData()
+            filterRooms = rooms.sorted { $0.name < $1.name }
+            updateRoomTableView()
             displaySearchCountLabel(isHidden: true)
             return
         }
         
         filterRooms = rooms.filter{ $0.name.lowercased().contains(searchText.lowercased()) }
+        filterRooms.sort{ $0.name < $1.name }
         if filterRooms.isEmpty {
             displaySearchCountLabel(isHidden: true)
-            //show empty room search view
-            showEmptyStateView(with: "No Rooms Found", in: self.view)
+            roomsTable.backgroundView = TTEmptyStateView(message: "No Rooms Found")
         } else {
             updateSearchCountLabel(with: filterRooms.count)
             displaySearchCountLabel(isHidden: false)
@@ -259,8 +264,8 @@ class RoomCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         configureCell()
-        configureRoomNameLabel()
-        configureDateCreatedLabel()
+        addSubview(roomNameLabel)
+        addSubview(dateCreatedLabel)
         configureLabelsStackView()
     }
     
@@ -271,6 +276,15 @@ class RoomCell: UITableViewCell {
     func set(for room: TTRoom) {
         self.room = room
         roomNameLabel.text = room.name
+        
+        let formattedStartDate = room.startingDate.formatted(date: .numeric, time: .omitted)
+        let formattedEndDate = room.endingDate.formatted(date: .numeric, time: .omitted)
+        
+        if formattedStartDate == formattedEndDate {
+            dateCreatedLabel.text = formattedStartDate
+        } else {
+            dateCreatedLabel.text = "\(formattedStartDate) - \(formattedEndDate)"
+        }
     }
     
     private func configureCell() {
@@ -295,14 +309,5 @@ class RoomCell: UITableViewCell {
             labelsStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -roomCellPadding),
             labelsStackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -roomCellPadding)
         ])
-    }
-    
-    private func configureRoomNameLabel() {
-        addSubview(roomNameLabel)
-    }
-    
-    private func configureDateCreatedLabel() {
-        addSubview(dateCreatedLabel)
-        dateCreatedLabel.text = "12/28/22"
     }
 }

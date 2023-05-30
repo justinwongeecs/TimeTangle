@@ -46,6 +46,7 @@ class RoomUsersVC: UIViewController {
             switch result {
             case .success(let ttUsers):
                 self?.ttUsers = ttUsers
+                self?.sortUsersByAdminAndName()
             case .failure(let error):
                 self?.ttUsers = []
                 self?.presentTTAlert(title: "Fetch Error", message: error.rawValue, buttonTitle: "OK")
@@ -88,14 +89,14 @@ class RoomUsersVC: UIViewController {
         ])
     }
     
-//    private func sortUsersByAdminAndName() {
-//        //Need to create a copy to avoid "simultaneous access error"
-//        var users = ttUsers
-//        users.sort(by: {
-//            self.room.doesContainsAdmin(for: $0.username) && !self.room.doesContainsAdmin(for: $1.username)
-//        })
-//        ttUsers = users
-//    }
+    private func sortUsersByAdminAndName() {
+        //Need to create a copy to avoid "simultaneous access error"
+        var users = ttUsers
+        users.sort(by: {
+            self.room.doesContainsAdmin(for: $0.username) && !self.room.doesContainsAdmin(for: $1.username)
+        })
+        ttUsers = users
+    }
     
     private func updateVCTitle() {
         title = "\(ttUsers.count) \(ttUsers.count > 1 ? "Members" : "Member")"
@@ -114,7 +115,6 @@ extension RoomUsersVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = usersTableView.dequeueReusableCell(withIdentifier: RoomUserCell.reuseID) as! RoomUserCell
         let user = ttUsers[indexPath.section]
-        print("\(user.profilePictureData) for \(user.username)")
         cell.set(for: user, usersNotVisible: usersNotVisible, room: room)
         cell.delegate = self
         return cell
@@ -224,8 +224,9 @@ extension RoomUsersVC: UITableViewDelegate, UITableViewDataSource {
                 delegate.roomDidUpdate(for: room)
             }
             
-            FirebaseManager.shared.updateRoom(for: self.room.code, with: newRoomData) { error in
+            FirebaseManager.shared.updateRoom(for: self.room.code, with: newRoomData) { [weak self] error in
                 guard error == nil else { return }
+                self?.sortUsersByAdminAndName()
                 completion(true)
             }
         }

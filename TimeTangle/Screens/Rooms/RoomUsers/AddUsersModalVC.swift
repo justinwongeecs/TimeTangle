@@ -117,14 +117,15 @@ class AddUsersModalVC: TTModalCardVC {
     private func reloadVC() {
         if !room.setting.allowRoomJoin {
             filteredFriendsTableView.backgroundView = TTEmptyStateView(message: "Cannot add user. Room setting \"Allow Room Join\" is toggled off", fontSize: 15)
-            disableFriendsSearchBar()
+            friendsSearchBar.disableSearchBar()
         } else if room.setting.maximumNumOfUsers == room.users.count {
             filteredFriendsTableView.backgroundView = TTEmptyStateView(message: "Cannot add user. Reached room setting \"Maximum Users\" of \(room.setting.maximumNumOfUsers)", fontSize: 15)
-            disableFriendsSearchBar()
+            friendsSearchBar.disableSearchBar()
         } else if filteredFriends.count == 0 {
             filteredFriendsTableView.backgroundView = TTEmptyStateView(message: "No Friends Available")
-            disableFriendsSearchBar()
+            friendsSearchBar.disableSearchBar()
         } else {
+            friendsSearchBar.enableSearchBar()
             filteredFriendsTableView.backgroundView = nil
         }
         
@@ -180,11 +181,15 @@ class AddUsersModalVC: TTModalCardVC {
 
 extension AddUsersModalVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 1
+    }
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
         return filteredFriends.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let friend = filteredFriends[indexPath.row]
+        let friend = filteredFriends[indexPath.section]
         let cell = filteredFriendsTableView.dequeueReusableCell(withIdentifier: ProfileUsernameCell.reuseID) as! ProfileUsernameCell
         cell.set(for: friend)
 
@@ -192,12 +197,26 @@ extension AddUsersModalVC: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedFriend = filteredFriends[indexPath.row]
+        let selectedFriend = filteredFriends[indexPath.section]
         addUserCompletionHandler(selectedFriend.username)
+    }
+    
+    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        let view: UIView = UIView.init(frame: CGRect.init(x: 0, y: 0, width: self.view.bounds.size.width, height: 5))
+        view.backgroundColor = .clear
+        return view
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 50.0
+    }
+    
+    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        return 7.0
+    }
+    
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return 7.0
     }
 }
 

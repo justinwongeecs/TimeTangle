@@ -20,18 +20,28 @@ class FriendsVC: UIViewController {
         configureFriendsAndRequestsView()
     }
     
+    override func setEditing(_ editing: Bool, animated: Bool) {
+        super.setEditing(editing, animated: animated)
+        friendsAndRequestsVC.setTableViewEditing(to: editing)
+    }
+    
     private func configureViewController() {
         view.backgroundColor = .systemBackground
         title = "Friends"
         navigationController?.navigationBar.prefersLargeTitles = true
         
-        let addFriendButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addFriend))
-        addFriendButton.tintColor = .systemGreen
-        navigationItem.rightBarButtonItem = addFriendButton
-        
+        configureNavBar()
         configureDismissEditingTapGestureRecognizer()
     }
-
+    
+    private func configureNavBar() {
+        let addFriendButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addFriend))
+        addFriendButton.tintColor = .systemGreen
+        
+        let editButton = editButtonItem
+        editButton.tintColor = .systemGreen
+        navigationItem.rightBarButtonItems = [editButton, addFriendButton]
+    }
     
     @objc private func addFriend() {
         //show modal UI to add friend
@@ -48,7 +58,7 @@ class FriendsVC: UIViewController {
         searchBarField.autocorrectionType = .no
         searchBarField.searchBarStyle = .minimal
         searchBarField.translatesAutoresizingMaskIntoConstraints = false
-        searchBarField.placeholder = "Search for Friend"
+        searchBarField.placeholder = "Search for friend"
         searchBarField.autocapitalizationType = .none
         
         //Constraints for searchUserField in relationship to searchArea

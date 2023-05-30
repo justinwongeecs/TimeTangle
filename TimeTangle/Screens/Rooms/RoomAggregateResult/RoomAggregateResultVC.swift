@@ -54,15 +54,14 @@ class RoomAggregateResultVC: DayViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         move(to: currentPresentedDate)
-//        dayView.autoScrollToFirstEvent = true
     }
     
     func setView(usersNotVisible: [String], room: TTRoom) {
         self.usersNotVisible = usersNotVisible
         self.room = room
-        
         self.room.events = room.events.filter { !usersNotVisible.contains($0.createdBy) }
 
+        updateStepperButtons()
         dayView.reloadData()
     }
     
@@ -157,7 +156,7 @@ class RoomAggregateResultVC: DayViewController {
         }
     }
     
-    private func configureStepperButtons() {
+    private func updateStepperButtons() {
         if let yesterdayDate = dayView.calendar.date(byAdding: .day, value: -1, to: currentPresentedDate) {
             let result = Calendar.current.compare(yesterdayDate, to: room.startingDate, toGranularity: .day)
             if result == .orderedSame || result == .orderedDescending{
@@ -179,7 +178,6 @@ class RoomAggregateResultVC: DayViewController {
         }
     }
     
-    
     private func configureTimelinePagerView() {
         NSLayoutConstraint.activate([
             dayView.timelinePagerView.topAnchor.constraint(equalTo: stepperDayHeaderView.bottomAnchor),
@@ -197,27 +195,38 @@ class RoomAggregateResultVC: DayViewController {
         openDateIntervals = [DateInterval]()
 
         for ttEvent in room.events {
-            let newEvent = Event()
-            newEvent.text = ttEvent.name
-            newEvent.dateInterval = DateInterval(start: ttEvent.startDate, end: ttEvent.endDate)
-            newEvent.color = .systemGreen
-            newEvent.isAllDay = ttEvent.isAllDay
-            newEvent.lineBreakMode = .byTruncatingTail
-            events.append(newEvent)
+            if !ttEvent.isAllDay {
+                let newEvent = Event()
+                newEvent.text = ttEvent.name
+                newEvent.dateInterval = DateInterval(start: ttEvent.startDate, end: ttEvent.endDate)
+                newEvent.color = .systemGreen
+                newEvent.isAllDay = ttEvent.isAllDay
+                newEvent.lineBreakMode = .byTruncatingTail
+                events.append(newEvent)
+            }
         }
         
         let openIntervalEvents = createEventsForOpenIntervals(with: room.events)
-        events.append(contentsOf: openIntervalEvents)
+        var validOpenIntervalEvents = [Event]()
         
+        //filter out any open intervals with the same starting and ending date
+        for openIntervalEvent in openIntervalEvents {
+            let openIntervalStartDate = openIntervalEvent.dateInterval.start
+            let openIntervalEndDate = openIntervalEvent.dateInterval.end
+            if openIntervalStartDate.compare(with: openIntervalEndDate, toGranularity: .minute) != .orderedSame {
+                events.append(openIntervalEvent)
+                validOpenIntervalEvents.append(openIntervalEvent)
+            }
+        }
+        
+        removeEmptyStateView(in: view)
         //show empty state view if there are not events
         if events.isEmpty {
             showEmptyStateView(with: "No Events", in: view)
-        } else {
-            removeEmptyStateView(in: view)
         }
         
         if let delegate = roomAggregateResultDelegate {
-            delegate.updatedAggregateResultVC(events: openIntervalEvents)
+            delegate.updatedAggregateResultVC(events: validOpenIntervalEvents)
         }
         
         return events
@@ -275,6 +284,6 @@ class RoomAggregateResultVC: DayViewController {
     override func dayView(dayView: DayView, willMoveTo date: Date) {
         calendarViewButton.setTitle(date.formatted(with: "MMM d y"), for: .normal)
         self.currentPresentedDate = date
-        configureStepperButtons()
+        updateStepperButtons()
     }
 }

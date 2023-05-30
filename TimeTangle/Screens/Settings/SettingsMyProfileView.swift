@@ -29,8 +29,46 @@ struct SettingsMyProfileView: View {
         SettingStack(isSearchable: false) {
             SettingPage(title: "My Profile", navigationTitleDisplayMode: .inline) {
                 profilePictureSection
-                nameSection
-                usernameSection
+                
+                //Change Name Section
+                SettingGroup(id: "Name", header: "Name") {
+                    SettingText(title: "\(firstname) \(lastname)")
+                    SettingCustomView(id: "ChangeName") {
+                        Button(action: {
+                            showChangeNameAlert.toggle()
+                        }) {
+                            Text("Change Name")
+                                .leftAligned()
+                                .foregroundColor(.blue)
+                                .frame(maxWidth: .infinity)
+
+                        }
+                        .padding(15)
+                        .alert("Change Name", isPresented: $showChangeNameAlert) {
+                            TextField("First Name", text: $firstname)
+                            TextField("Last Name", text: $lastname)
+                            Button("OK", action: {
+                                guard let currentUser = FirebaseManager.shared.currentUser else { return }
+                                FirebaseManager.shared.updateUserData(for: currentUser.username, with: [
+                                    TTConstants.firstname: firstname.trimmingCharacters(in: .whitespacesAndNewlines),
+                                    TTConstants.lastname: lastname.trimmingCharacters(in: .whitespacesAndNewlines)
+                                ]) { error in
+                                    guard let error = error else { return }
+                                    ttError = error
+                                    showErrorAlert = true
+                                }
+                            })
+                            Button("Cancel", role: .cancel) {
+                                showChangeNameAlert.toggle()
+                            }
+                        }
+                    }
+                }
+                
+                //Username Section
+                SettingGroup(id: "Username", header: "Username") {
+                    SettingText(title: username)
+                }
                 
                 SettingGroup(id: "Logout") {
                     SettingCustomView(id: "Logout") {
@@ -122,43 +160,6 @@ struct SettingsMyProfileView: View {
         }
     }
     
-    //MARK: - Name Section
-    @SettingBuilder private var nameSection: some Setting {
-        SettingGroup(id: "Name", header: "Name") {
-            SettingText(title: "\(firstname)\(lastname)")
-            SettingCustomView(id: "ChangeName") {
-                Button(action: {
-                    showChangeNameAlert.toggle()
-                }) {
-                    Text("Change Name")
-                        .leftAligned()
-                        .foregroundColor(.blue)
-                        .frame(maxWidth: .infinity)
-
-                }
-                .padding(15)
-                .alert("Change Name", isPresented: $showChangeNameAlert) {
-                    TextField("First Name", text: $firstname)
-                    TextField("Last Name", text: $lastname)
-                    Button("OK", action: {
-                        guard let currentUser = FirebaseManager.shared.currentUser else { return }
-                        FirebaseManager.shared.updateUserData(for: currentUser.username, with: [
-                            TTConstants.firstname: firstname,
-                            TTConstants.lastname: lastname
-                        ]) { error in
-                            guard let error = error else { return }
-                            ttError = error
-                            showErrorAlert = true
-                        }
-                    })
-                    Button("Cancel", role: .cancel) {
-                        showChangeNameAlert.toggle()
-                    }
-                }
-            }
-        }
-    }
-    
     //MARK: - Username Section
     @SettingBuilder private var usernameSection: some Setting {
         SettingGroup(id: "Username", header: "Username") {
@@ -196,17 +197,8 @@ struct SettingsMyProfileView: View {
     
     private func uploadProfileImageDataToFirestore(for image: UIImage) {
         guard let currentUser = FirebaseManager.shared.currentUser else { return }
-        
-        var compressionQuality = 1.0
-        var compressedImageByteCount = image.jpegData(compressionQuality: compressionQuality)?.count ?? 0
-        
-        while (compressedImageByteCount > TTConstants.firestoreMaximumImageDataBytes) {
-            compressedImageByteCount = image.jpegData(compressionQuality: compressionQuality)?.count ?? 0
-            compressionQuality -= 0.1
-        }
-        
-        guard let compressedImageData = image.jpegData(compressionQuality: compressionQuality) else { return }
-        print("CompressedImageData: \(compressedImageData.count)")
+
+        guard let compressedImageData = image.jpegData(compressionQuality: 0.1) else { return }
 
         FirebaseManager.shared.updateUserData(for: currentUser.username, with: [
             TTConstants.profilePictureData: compressedImageData

@@ -34,7 +34,7 @@ class FirebaseManager {
                         self?.currentUser = user
                         self?.goToSearchScreen()
                         self?.listenToCurrentUser()
-//                        self?.listenToCurrentUserRooms()
+                        self?.listenToCurrentUserRooms()
                     case .failure(_):
                         print("failure")
                     }
@@ -57,6 +57,9 @@ class FirebaseManager {
                 print("Update to current user")
                 let currentUserData = try document.data(as: TTUser.self)
                 self?.currentUser = currentUserData
+                //Is this the right way to do this lol? 
+                self?.currentUserRoomsListener?.remove()
+                self?.listenToCurrentUserRooms()
                 self?.broadcastUpdatedUser()
             } catch {
                 print("Can't listen to current user")
@@ -204,6 +207,7 @@ class FirebaseManager {
     
     func listenToCurrentUserRooms() {
         guard let currentUserRoomCodes = currentUser?.roomCodes, currentUserRoomCodes.count > 0 else { return }
+        print("CurrentUserRoomCodes: \(currentUser?.roomCodes)")
 
         currentUserRoomsListener = db.collection(TTConstants.roomsCollection).whereField(TTConstants.roomCode, in: currentUserRoomCodes).addSnapshotListener { [weak self] querySnapshot, error in
             guard let documents = querySnapshot?.documents else {
@@ -216,6 +220,7 @@ class FirebaseManager {
             do {
                 let roomsData = try documents.map { try $0.data(as: TTRoom.self)}
                 self?.notificationCenter.post(name: .updatedCurrentUserRooms, object: roomsData)
+                print(roomsData)
                 print("send updated rooms notification ")
             } catch {
                 //Error get roomsData
@@ -240,7 +245,7 @@ class FirebaseManager {
             case .success(let room):
                 completed(.success(room))
             case .failure(let error):
-                print(error)
+                print("Fetch room error: \(error)")
                 completed(.failure(.unableToFetchRoom))
             }
         }
@@ -372,7 +377,7 @@ class FirebaseManager {
     func createTabbar() -> UITabBarController {
         let tabbar = UITabBarController()
         UITabBar.appearance().tintColor = .systemGreen
-        tabbar.viewControllers = [createSearchNC(), createRoomsNC(), createFriendsNC(), createSettingsNC()]
+        tabbar.viewControllers = [createRoomNC(), createRoomsNC(), createFriendsNC(), createSettingsNC()]
         tabbar.tabBar.isTranslucent = true
         tabbar.tabBar.backgroundImage = UIImage()
         tabbar.tabBar.shadowImage = UIImage() // add this if you want remove tabBar separator
@@ -389,10 +394,10 @@ class FirebaseManager {
         return tabbar
     }
     
-    private func createSearchNC() -> UINavigationController {
-        let searchVC = SearchVC()
-        searchVC.title = "Search"
-        searchVC.tabBarItem = UITabBarItem(tabBarSystemItem: .search, tag: 0)
+    private func createRoomNC() -> UINavigationController {
+        let searchVC = CreateRoomVC()
+        searchVC.title = "Create Room"
+        searchVC.tabBarItem = UITabBarItem(title: "Create Room", image: UIImage(systemName: "door.left.hand.open"), tag: 0)
         return UINavigationController(rootViewController: searchVC)
     }
     

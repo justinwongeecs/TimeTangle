@@ -19,11 +19,13 @@ class SearchFriendsResultController: UIViewController {
     private var filteredFriends = [TTUser]()
     
     weak var suggestedSearchDelegate: SearchFriendsResultControllerDelegate!
-    weak var searchVCRef: SearchVC!
+    weak var searchVCRef: CreateRoomVC!
 
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
+        
+        configureDismissEditingTapGestureRecognizer()
         configureSearchFriendsResultTable()
     }
     

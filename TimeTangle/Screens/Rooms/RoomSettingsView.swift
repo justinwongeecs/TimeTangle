@@ -172,11 +172,6 @@ struct RoomSettingsView: View {
         }
     }
     
-    //MARK: - ChangeRoomNameButton
-//    @SettingBuilder private var changeRoomNameButton: some Setting  {
-//
-//    }
-    
     //MARK: - MinimumNumberofUsersPicker
     @SettingBuilder private var minimumNumberOfUsersPicker: some Setting {
         SettingPicker(title: "Minimum Users", choices: [

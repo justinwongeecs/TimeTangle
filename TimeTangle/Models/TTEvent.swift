@@ -19,7 +19,8 @@ struct TTEvent: Codable, Equatable {
             "name": name,
             "startDate": startDate,
             "endDate": endDate,
-            "isAllDay": isAllDay
+            "isAllDay": isAllDay,
+            "createdBy": createdBy
         ]
     }
     

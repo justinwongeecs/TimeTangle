@@ -32,6 +32,7 @@ class RoomOverviewVC: UIViewController {
         self.notVisibleMembers = notVisibleMembers
         self.splittedTTEvents = []
         super.init(nibName: nil, bundle: nil)
+        funcRemoveAllDayEvents()
     }
     
     required init?(coder: NSCoder) {
@@ -51,9 +52,18 @@ class RoomOverviewVC: UIViewController {
         }
     }
     
+    private func funcRemoveAllDayEvents() {
+        self.room.events = self.room.events.filter { !$0.isAllDay }
+    }
+    
     private func configureRoomSummarySections() {
-        guard !splittedTTEvents.isEmpty else { return }
+        guard !splittedTTEvents.isEmpty else {
+            roomSummarySections = []
+            timesTableView.backgroundView = TTEmptyStateView(message: "No Events")
+            return
+        }
         
+        timesTableView.backgroundView = nil
         var sections = [RoomOverviewSection]()
         let firstEvent = splittedTTEvents.first!
         sections.append(RoomOverviewSection(date: firstEvent.startDate, events: [firstEvent]))
@@ -134,7 +144,7 @@ class RoomOverviewVC: UIViewController {
             }
             
             let newTTEvent = TTEvent(name: ttEvent.name, startDate: currentDate, endDate: endOfDay, isAllDay: ttEvent.isAllDay, createdBy: ttEvent.createdBy)
-            
+
             ttEvents.append(newTTEvent)
             currentDate = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
         }

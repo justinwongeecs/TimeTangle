@@ -26,6 +26,6 @@ struct TTUser: Codable, Equatable {
     var profilePictureData: Data?
     
     func getFullName() -> String {
-        return "\(firstname)\(lastname)"
+        return "\(firstname) \(lastname)"
     }
 }

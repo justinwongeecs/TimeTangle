@@ -138,7 +138,7 @@ class RoomUserCell: ProfileUsernameCell {
                 self?.delegate?.roomUserCellDidToggleAdmin(for: user)
         }
         
-        let removeAdminUIAction = UIAction(title: "Remove Admin", image: UIImage(systemName: "person.crop.circle.badge.xmark", withConfiguration: symbolConfig)) { [weak self] action in
+        let revokeAdminUIAction = UIAction(title: "Revoke Admin", image: UIImage(systemName: "person.crop.circle.badge.xmark", withConfiguration: symbolConfig)) { [weak self] action in
             guard let user = self?.user else { return }
             self?.delegate?.roomUserCellDidToggleAdmin(for: user)
         }
@@ -149,9 +149,13 @@ class RoomUserCell: ProfileUsernameCell {
         }
         
         if user.username == currentUser.username && room.doesContainsAdmin(for: currentUser.username) {
-            uiActions.append(removeAdminUIAction)
+            uiActions.append(revokeAdminUIAction)
         } else {
-            uiActions.append(contentsOf: [grantAdminUIAction, removeUserUIAction, removeUserUIAction])
+            if room.doesContainsAdmin(for: user.username) {
+                uiActions.append(contentsOf: [revokeAdminUIAction, removeUserUIAction])
+            } else {
+                uiActions.append(contentsOf: [grantAdminUIAction, removeUserUIAction])
+            }
         }
         
         menu = UIMenu(title: "", children: uiActions)

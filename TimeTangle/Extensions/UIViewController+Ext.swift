@@ -39,7 +39,15 @@ extension UIViewController {
         addChild(childVC)
         containerView.addSubview(childVC.view)
         childVC.view.frame = containerView.bounds
+        childVC.view.translatesAutoresizingMaskIntoConstraints = false 
         childVC.didMove(toParent: self)
+        
+        NSLayoutConstraint.activate([
+            childVC.view.topAnchor.constraint(equalTo: containerView.topAnchor),
+            childVC.view.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            childVC.view.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
+            childVC.view.bottomAnchor.constraint(equalTo: containerView.bottomAnchor)
+        ])
     }
     
     func createDismissKeyboardTapGesture() {

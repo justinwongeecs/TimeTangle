@@ -44,7 +44,7 @@ class RoomDetailVC: UIViewController {
         super.init(nibName: nibName, bundle: nil)
         self.room = room
         title = "\(room.name)"
-        setOriginalRoomState(with: room)
+        originalRoomState = room
     }
     
     required init?(coder: NSCoder) {
@@ -57,29 +57,29 @@ class RoomDetailVC: UIViewController {
         configureNavigationBarItems()
         configureRoomAggregateResultView()
         configureSaveOrCancelIsland()
-        configureAdminEnability()
+//        configureAdminEnability()
         updateView()
     }
     
-    private func setOriginalRoomState(with room: TTRoom) {
-        //copy of room assigned to originalRoomState since TTRoom is a struct
-        originalRoomState = room
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.navigationBar.prefersLargeTitles = false
     }
     
-    private func configureAdminEnability() {
-        guard let currentUser = FirebaseManager.shared.currentUser else { return }
-        if !room.doesContainsAdmin(for: currentUser.username) {
-            startingDatePicker.isEnabled = false
-            startingDatePicker.isUserInteractionEnabled = false
-            endingDatePicker.isEnabled = false
-            endingDatePicker.isUserInteractionEnabled = false
-        } else {
-            startingDatePicker.isEnabled = true
-            startingDatePicker.isUserInteractionEnabled = true
-            endingDatePicker.isEnabled = true
-            endingDatePicker.isUserInteractionEnabled = true
-        }
-    }
+//    private func configureAdminEnability() {
+//        guard let currentUser = FirebaseManager.shared.currentUser else { return }
+//        if !room.doesContainsAdmin(for: currentUser.username) {
+//            startingDatePicker.isEnabled = false
+//            startingDatePicker.isUserInteractionEnabled = false
+//            endingDatePicker.isEnabled = false
+//            endingDatePicker.isUserInteractionEnabled = false
+//        } else {
+//            startingDatePicker.isEnabled = true
+//            startingDatePicker.isUserInteractionEnabled = true
+//            endingDatePicker.isEnabled = true
+//            endingDatePicker.isUserInteractionEnabled = true
+//        }
+//    }
     
     //MARK: - NavigationBarItems
     private func configureNavigationBarItems() {
@@ -167,6 +167,7 @@ class RoomDetailVC: UIViewController {
 
                         DispatchQueue.main.async {
                             self?.updateView()
+                            self?.updateSaveOrCancelIsland()
                         }
 
                         self?.dismiss(animated: true)
@@ -376,6 +377,7 @@ extension RoomDetailVC: RoomUpdateDelegate {
         self.room = room
         updateView()
         updateRoomAggregateVC()
+        updateSaveOrCancelIsland()
     }
     
     func roomUserVisibilityDidUpdate(for username: String) {
@@ -393,18 +395,20 @@ extension RoomDetailVC: RoomUpdateDelegate {
 extension RoomDetailVC: SaveOrCancelIslandDelegate {
     func didCancelIsland() {
         room = originalRoomState
+        updateView()
         updateRoomAggregateVC()
     }
     
     func didSaveIsland() {
         if !room.setting.lockRoomChanges {
+            
             let previousStartingDate = originalRoomState.startingDate
             let previousEndingDate = originalRoomState.endingDate
             
             FirebaseManager.shared.updateRoom(for: room.code, with: [
                 TTConstants.roomStartingDate: room.startingDate,
                 TTConstants.roomEndingDate: room.endingDate,
-                TTConstants.roomEvents: originalRoomState.events.map { $0.dictionary }
+                TTConstants.roomEvents: room.events.map { $0.dictionary }
             ]) { [weak self] error in
                 guard let self = self else { return }
                 guard let error = error  else {
