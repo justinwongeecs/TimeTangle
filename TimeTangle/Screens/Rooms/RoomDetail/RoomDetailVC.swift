@@ -153,11 +153,9 @@ class RoomDetailVC: UIViewController {
                 self.presentTTAlert(title: "Error updating room", message: error.rawValue, buttonTitle: "Ok")
             } else {
                 //update added user roomcodes field
-                print(username)
                 FirebaseManager.shared.updateUserData(for: username, with: [
                     TTConstants.roomCodes: FieldValue.arrayUnion([self.room.code])
                 ]) { [weak self] error in
-                    print("Current User : \(FirebaseManager.shared.currentUser?.username ?? "")")
                     if let error = error {
                         self?.presentTTAlert(title: "Cannot add user to room", message: error.rawValue, buttonTitle: "OK")
                     } else {
@@ -367,8 +365,8 @@ class RoomDetailVC: UIViewController {
 //MARK: - Delegates
 
 extension RoomDetailVC: RoomAggregateResultVCDelegate {
-    func updatedAggregateResultVC(events: [Event]) {
-        openIntervals = events.map { $0.toTTEvent() }
+    func updatedAggregateResultVC(ttEvents: [TTEvent]) {
+        openIntervals = ttEvents
     }
 }
 

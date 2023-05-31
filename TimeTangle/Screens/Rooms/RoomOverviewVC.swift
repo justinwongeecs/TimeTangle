@@ -8,9 +8,10 @@
 import UIKit
 import CalendarKit
 
-enum RoomTimesViewType {
+enum RoomOverviewFilterType {
     case availableTimes
     case unAvailableTimes
+    case all
 }
 
 private struct RoomOverviewSection {
@@ -22,15 +23,15 @@ class RoomOverviewVC: UIViewController {
     
     private var room: TTRoom!
     private var roomSummarySections: [RoomOverviewSection]!
+    private var filteredRoomSummarySections = [RoomOverviewSection]()
     private var notVisibleMembers = [String]()
     private var timesTableView: UITableView!
-    private var splittedTTEvents: [TTEvent]!
+    private var currentFilterMode: RoomOverviewFilterType = .all
     
     init(room: TTRoom, notVisibleMembers: [String], openIntervals: [TTEvent]) {
         self.room = room
         self.room.events.append(contentsOf: openIntervals)
         self.notVisibleMembers = notVisibleMembers
-        self.splittedTTEvents = []
         super.init(nibName: nil, bundle: nil)
         funcRemoveAllDayEvents()
     }
@@ -41,14 +42,75 @@ class RoomOverviewVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        configureNavigationBarItems()
         configureVC()
         configureTimesTable()
         navigationController?.navigationBar.prefersLargeTitles = false
         
-        splitTimeIntervalsByDays()
         configureRoomSummarySections()
         DispatchQueue.main.async {
             self.timesTableView.reloadData()
+        }
+    }
+    
+    private func configureVC() {
+        view.backgroundColor = .systemBackground
+        title = "\(room.name) Overview"
+    }
+    
+    private func configureNavigationBarItems() {
+        let filterEventsMenu = UIMenu(title: "", children: [
+            UIAction(title: "Show All", image: UIImage(systemName: "list.bullet.rectangle")) { [weak self] action in
+                self?.filterShowAll()
+            },
+            UIAction(title: "Show Open Intervals", image: UIImage(systemName: "checkmark.circle")) { [weak self] action in
+                self?.filterAndShowOpenIntervals()
+            },
+            UIAction(title: "Show Unavailable Intervals", image: UIImage(systemName: "xmark.circle")) { [weak self] action in
+                self?.filterAndShowUnavailableIntervals()
+            }
+        ])
+        
+        let filterEventsButton = UIBarButtonItem(image: UIImage(systemName: "line.3.horizontal.decrease.circle"), primaryAction: nil, menu: filterEventsMenu)
+        
+        filterEventsButton.tintColor = .systemGreen
+        navigationItem.rightBarButtonItem = filterEventsButton
+    }
+    
+    private func filterShowAll() {
+        if currentFilterMode != .all {
+            filteredRoomSummarySections = roomSummarySections
+            currentFilterMode = .all
+            timesTableView.reloadData()
+        }
+    }
+    
+    private func filterAndShowOpenIntervals() {
+        if currentFilterMode != .availableTimes {
+            guard let roomSummarySections = roomSummarySections else { return }
+            var openIntervalSections = roomSummarySections
+            
+            for i in 0..<openIntervalSections.count {
+                openIntervalSections[i].events = openIntervalSections[i].events.filter { $0.createdBy == "TimeTangle" }
+            }
+            filteredRoomSummarySections = openIntervalSections.filter { !$0.events.isEmpty }
+            currentFilterMode = .availableTimes
+            timesTableView.reloadData()
+        }
+    }
+    
+    private func filterAndShowUnavailableIntervals() {
+        if currentFilterMode != .unAvailableTimes {
+            guard let roomSummarySections = roomSummarySections else { return }
+            var unavailableSections = roomSummarySections
+            
+            for i in 0..<unavailableSections.count {
+                unavailableSections[i].events = unavailableSections[i].events.filter { $0.createdBy != "TimeTangle" }
+            }
+            
+            filteredRoomSummarySections = unavailableSections.filter { !$0.events.isEmpty }
+            currentFilterMode = .unAvailableTimes
+            timesTableView.reloadData()
         }
     }
     
@@ -57,7 +119,7 @@ class RoomOverviewVC: UIViewController {
     }
     
     private func configureRoomSummarySections() {
-        guard !splittedTTEvents.isEmpty else {
+        guard !room.events.isEmpty else {
             roomSummarySections = []
             timesTableView.backgroundView = TTEmptyStateView(message: "No Events")
             return
@@ -65,11 +127,11 @@ class RoomOverviewVC: UIViewController {
         
         timesTableView.backgroundView = nil
         var sections = [RoomOverviewSection]()
-        let firstEvent = splittedTTEvents.first!
+        let firstEvent = room.events.first!
         sections.append(RoomOverviewSection(date: firstEvent.startDate, events: [firstEvent]))
         
-        for index in stride(from: 1, to: splittedTTEvents.count, by: 1) {
-            let event = splittedTTEvents[index]
+        for index in stride(from: 1, to: room.events.count, by: 1) {
+            let event = room.events[index]
             
             if let index = sections.firstIndex(where: { $0.date.compare(with: event.startDate, toGranularity: .day) == .orderedSame}) {
                 sections[index].events.append(event)
@@ -85,11 +147,7 @@ class RoomOverviewVC: UIViewController {
         
         //Sort sections
         roomSummarySections = sections.sorted(by: { $0.date < $1.date })
-    }
-
-    private func configureVC() {
-        view.backgroundColor = .systemBackground
-        title = "\(room.name) Overview"
+        filteredRoomSummarySections = roomSummarySections
     }
     
     private func configureTimesTable() {
@@ -109,55 +167,13 @@ class RoomOverviewVC: UIViewController {
             timesTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
-    
-    private func splitTimeIntervalsByDays() {
-        for ttEvent in room.events {
-            //check if ttEvent's start and end date are within the same date
-            if !checkIfTwoDatesAreSameDay(first: ttEvent.startDate, second: ttEvent.endDate) {
-                splittedTTEvents.append(contentsOf: getTTEventsIntervalsForDays(ttEvent: ttEvent))
-            } else {
-                splittedTTEvents.append(ttEvent)
-            }
-        }
-    }
-    
-    private func checkIfTwoDatesAreSameDay(first firstDate: Date, second secondDate: Date) -> Bool {
-        let calendar = Calendar.current
-        let components1 = calendar.dateComponents([.year, .month, .day], from: firstDate)
-        let components2 = calendar.dateComponents([.year, .month, .day], from: secondDate)
-        return components1.year == components2.year &&
-        components1.month == components2.month &&
-        components1.day == components2.day
-    }
-    
-    private func getTTEventsIntervalsForDays(ttEvent: TTEvent) -> [TTEvent] {
-        let calendar = Calendar.current
-        var currentDate = ttEvent.startDate
-        var ttEvents = [TTEvent]()
-        
-        while currentDate <= ttEvent.endDate {
-            let startOfDay = calendar.startOfDay(for: currentDate)
-            var endOfDay = calendar.date(bySettingHour: 23, minute: 59, second: 59, of: currentDate)!
-            
-            if endOfDay >= ttEvent.endDate {
-                endOfDay = ttEvent.endDate
-            }
-            
-            let newTTEvent = TTEvent(name: ttEvent.name, startDate: currentDate, endDate: endOfDay, isAllDay: ttEvent.isAllDay, createdBy: ttEvent.createdBy)
-
-            ttEvents.append(newTTEvent)
-            currentDate = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
-        }
-        
-        return ttEvents
-    }
 }
 
 //MARK: - RoomOverviewVC TableView Delegates
 extension RoomOverviewVC: UITableViewDelegate, UITableViewDataSource {
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        return roomSummarySections.count
+        return filteredRoomSummarySections.count
     }
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
@@ -166,7 +182,7 @@ extension RoomOverviewVC: UITableViewDelegate, UITableViewDataSource {
         
         let titleLabel = UILabel()
         titleLabel.font = UIFont.boldSystemFont(ofSize: 20)
-        titleLabel.text = roomSummarySections[section].date.formatted(with: "M/d/yyyy")
+        titleLabel.text = filteredRoomSummarySections[section].date.formatted(with: "M/d/yyyy")
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         headerView.addSubview(titleLabel)
         
@@ -180,22 +196,15 @@ extension RoomOverviewVC: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return roomSummarySections[section].events.count
+        return filteredRoomSummarySections[section].events.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = timesTableView.dequeueReusableCell(withIdentifier: RoomOverviewCell.reuseID) as! RoomOverviewCell
         
-        let section = roomSummarySections[indexPath.section]
+        let section = filteredRoomSummarySections[indexPath.section]
         let event = section.events[indexPath.row]
-     
-        //FIX: Really Janky Way of detecting if an event is an open interval or not
-        if event.name.hasPrefix("Open") {
-            cell.set(for: event, ofType: .availableTimes)
-            
-        } else {
-            cell.set(for: event, ofType: .unAvailableTimes)
-        }
+        cell.set(for: event)
 
         return cell
     }
@@ -206,8 +215,8 @@ class RoomOverviewCell: UITableViewCell {
     
     static let reuseID = "RoomOverviewCell"
     
-    private var roomNameLabel: UILabel!
-    private var timeIntervalLabel: UILabel!
+    private var createdByUserLabel = UILabel()
+    private var roomNameAndTimeLabel = UILabel()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -218,57 +227,70 @@ class RoomOverviewCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func set(for event: TTEvent, ofType viewType: RoomTimesViewType) {
-        if viewType == .unAvailableTimes {
-            roomNameLabel.textColor = .systemRed
-            timeIntervalLabel.textColor = .systemRed
-        } else {
-            roomNameLabel.textColor = .systemGreen
-            timeIntervalLabel.textColor = .systemGreen
-        }
-    
-        //roomNameLabel
-        roomNameLabel.text = "\(event.name): "
-        
-        //timeIntervalLabel
+    func set(for event: TTEvent) {
         let timeFormatter = DateFormatter()
         timeFormatter.dateFormat = "h:mm a"
         timeFormatter.amSymbol = "AM"
         timeFormatter.pmSymbol = "PM"
         
-        let text = "\(timeFormatter.string(from: event.startDate)) - \(timeFormatter.string(from: event.endDate))"
-        timeIntervalLabel.text = text
+        var roomNameAndTimeAttributedString = NSMutableAttributedString(string: "")
+        var attrs = [NSAttributedString.Key.font : UIFont.boldSystemFont(ofSize: 15)]
+        var boldString = NSMutableAttributedString(string: "\(event.name): ", attributes:attrs)
+        
+        let timeIntervalText = "\(timeFormatter.string(from: event.startDate)) - \(timeFormatter.string(from: event.endDate))"
+        boldString.append(NSMutableAttributedString(string: timeIntervalText))
+        roomNameAndTimeLabel.attributedText = boldString
+        
+        //configure cell based on event.createdBy
+        if event.createdBy != "TimeTangle" {
+            roomNameAndTimeLabel.textColor = .systemRed
+            createdByUserLabel.isHidden = false
+            createdByUserLabel.text = event.createdBy
+            backgroundColor = .systemRed.withAlphaComponent(0.15)
+        } else {
+            roomNameAndTimeLabel.textColor = .systemGreen
+            createdByUserLabel.isHidden = true
+            backgroundColor = .systemGreen.withAlphaComponent(0.15)
+        }
     }
     
     private func configureCell() {
         let defaultFontSize = UIFont.preferredFont(forTextStyle: .body).pointSize
+        roomNameAndTimeLabel.numberOfLines = 2
+        roomNameAndTimeLabel.translatesAutoresizingMaskIntoConstraints = false
         
-        roomNameLabel = UILabel()
-        roomNameLabel.font = UIFont.boldSystemFont(ofSize: defaultFontSize)
-        roomNameLabel.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(roomNameLabel)
-        
-        timeIntervalLabel = UILabel()
-        timeIntervalLabel.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(timeIntervalLabel)
+        createdByUserLabel.font = UIFont.boldSystemFont(ofSize: defaultFontSize * 0.8)
+        createdByUserLabel.translatesAutoresizingMaskIntoConstraints = false
         
         backgroundColor = .clear
         isUserInteractionEnabled = false
         selectionStyle = .none
+        
+        let vStackView = UIStackView()
+        vStackView.axis = .vertical
+        vStackView.distribution = .fill
+        vStackView.alignment = .leading
+        vStackView.spacing = 5
+        vStackView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(vStackView)
         
         let hStackView = UIStackView()
         hStackView.axis = .horizontal
         hStackView.distribution = .fill
         hStackView.alignment = .center
         hStackView.translatesAutoresizingMaskIntoConstraints = false
-        hStackView.addArrangedSubview(roomNameLabel)
-        hStackView.addArrangedSubview(timeIntervalLabel)
-        addSubview(hStackView)
+        hStackView.setContentCompressionResistancePriority(UILayoutPriority.required, for: .vertical)
+        hStackView.addArrangedSubview(roomNameAndTimeLabel)
+        
+        vStackView.addArrangedSubview(hStackView)
+        vStackView.addArrangedSubview(createdByUserLabel)
+        vStackView.addSubview(hStackView)
         
         NSLayoutConstraint.activate([
-            hStackView.centerYAnchor.constraint(equalTo: centerYAnchor),
-            hStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10),
-            hStackView.heightAnchor.constraint(equalToConstant: 20)
+            vStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10),
+            vStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10),
+            vStackView.topAnchor.constraint(equalTo: topAnchor, constant: 10),
+            vStackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -10)
         ])
     }
 }

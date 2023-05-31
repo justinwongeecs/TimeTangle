@@ -10,7 +10,7 @@ import EventKitUI
 import CalendarKit
 
 protocol RoomAggregateResultVCDelegate: AnyObject {
-    func updatedAggregateResultVC(events: [Event])
+    func updatedAggregateResultVC(ttEvents: [TTEvent])
 }
 
 class RoomAggregateResultVC: DayViewController {
@@ -193,20 +193,19 @@ class RoomAggregateResultVC: DayViewController {
         
         var events = [Event]()
         openDateIntervals = [DateInterval]()
+        let roomNonAllDayEvents = room.events.filter { !$0.isAllDay }
 
-        for ttEvent in room.events {
-            if !ttEvent.isAllDay {
-                let newEvent = Event()
-                newEvent.text = ttEvent.name
-                newEvent.dateInterval = DateInterval(start: ttEvent.startDate, end: ttEvent.endDate)
-                newEvent.color = .systemGreen
-                newEvent.isAllDay = ttEvent.isAllDay
-                newEvent.lineBreakMode = .byTruncatingTail
-                events.append(newEvent)
-            }
+        for ttEvent in roomNonAllDayEvents {
+            let newEvent = Event()
+            newEvent.text = ttEvent.name
+            newEvent.dateInterval = DateInterval(start: ttEvent.startDate, end: ttEvent.endDate)
+            newEvent.color = .systemGreen
+            newEvent.isAllDay = ttEvent.isAllDay
+            newEvent.lineBreakMode = .byTruncatingTail
+            events.append(newEvent)
         }
         
-        let openIntervalEvents = createEventsForOpenIntervals(with: room.events)
+        let openIntervalEvents = createEventsForOpenIntervals(with: roomNonAllDayEvents)
         var validOpenIntervalEvents = [Event]()
         
         //filter out any open intervals with the same starting and ending date
@@ -226,32 +225,29 @@ class RoomAggregateResultVC: DayViewController {
         }
         
         if let delegate = roomAggregateResultDelegate {
-            delegate.updatedAggregateResultVC(events: validOpenIntervalEvents)
+            delegate.updatedAggregateResultVC(ttEvents: splitTimeIntervalsByDays(for: openIntervalEvents.map { $0.toTTEvent() }))
         }
         
         return events
     }
     
     func createEventsForOpenIntervals(with occupiedEvents: [TTEvent]) -> [Event] {
+        var occupiedEvents = occupiedEvents.sorted { $0.startDate < $1.endDate }
         var openInternalEvents = [Event]()
         guard let room = room else { return [Event]() }
         
-        var startingComparisonDate = room.startingDate
-        for occupiedEvent in occupiedEvents {
-            //if startingComparisonDate equals the next occupied start date continue to find next starting date that does not conflict
-            if startingComparisonDate == occupiedEvent.startDate {
-                startingComparisonDate = occupiedEvent.endDate
-                continue
+        var pointerDate = room.startingDate
+        
+        for i in 0..<occupiedEvents.count {
+            let occupiedEvent = occupiedEvents[i]
+            if pointerDate < occupiedEvent.startDate {
+                openDateIntervals.append(DateInterval(start: pointerDate, end: occupiedEvent.startDate))
             }
-            
-            if startingComparisonDate < occupiedEvent.startDate {
-                openDateIntervals.append(DateInterval(start: startingComparisonDate, end: occupiedEvent.startDate))
-                startingComparisonDate = occupiedEvent.endDate
-            }
+            pointerDate = occupiedEvent.endDate
         }
         
         //add last open interval if there is one ending at room's end date
-        openDateIntervals.append(DateInterval(start: startingComparisonDate, end: room.endingDate))
+        openDateIntervals.append(DateInterval(start: pointerDate, end: room.endingDate))
         
         //create events based on openIntervals
         for openInterval in openDateIntervals {
@@ -263,6 +259,50 @@ class RoomAggregateResultVC: DayViewController {
             openInternalEvents.append(newEvent)
         }
         return openInternalEvents
+    }
+    
+    private func splitTimeIntervalsByDays(for ttEvents: [TTEvent]) -> [TTEvent] {
+        var splittedTTEvents = [TTEvent]()
+        for ttEvent in ttEvents {
+            //check if ttEvent's start and end date are within the same date
+            if !checkIfTwoDatesAreSameDay(first: ttEvent.startDate, second: ttEvent.endDate) {
+                splittedTTEvents.append(contentsOf: getTTEventsIntervalsForDays(ttEvent: ttEvent))
+            } else {
+                splittedTTEvents.append(ttEvent)
+            }
+        }
+        return splittedTTEvents
+    }
+    
+    private func checkIfTwoDatesAreSameDay(first firstDate: Date, second secondDate: Date) -> Bool {
+        let calendar = Calendar.current
+        let components1 = calendar.dateComponents([.year, .month, .day], from: firstDate)
+        let components2 = calendar.dateComponents([.year, .month, .day], from: secondDate)
+        return components1.year == components2.year &&
+        components1.month == components2.month &&
+        components1.day == components2.day
+    }
+    
+    private func getTTEventsIntervalsForDays(ttEvent: TTEvent) -> [TTEvent] {
+        let calendar = Calendar.current
+        var currentDate = ttEvent.startDate
+        var ttEvents = [TTEvent]()
+        
+        while currentDate <= ttEvent.endDate {
+            let startOfDay = calendar.startOfDay(for: currentDate)
+            var endOfDay = calendar.date(bySettingHour: 23, minute: 59, second: 59, of: currentDate)!
+            
+            if endOfDay >= ttEvent.endDate {
+                endOfDay = ttEvent.endDate
+            }
+            
+            let newTTEvent = TTEvent(name: ttEvent.name, startDate: currentDate, endDate: endOfDay, isAllDay: ttEvent.isAllDay, createdBy: ttEvent.createdBy)
+
+            ttEvents.append(newTTEvent)
+            currentDate = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+        }
+        
+        return ttEvents
     }
     
     override func dayViewDidSelectEventView(_ eventView: EventView) {

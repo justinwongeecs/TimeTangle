@@ -96,7 +96,6 @@ class RoomsVC: UIViewController {
     
     @objc private func fetchRooms() {
         guard let currentUser = FirebaseManager.shared.currentUser else { return }
-        print("Rooms currentuser: \(currentUser)")
         roomsTable.backgroundView = nil
         self.rooms = []
         self.filterRooms = []
