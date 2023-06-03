@@ -233,9 +233,8 @@ class RoomOverviewCell: UITableViewCell {
         timeFormatter.amSymbol = "AM"
         timeFormatter.pmSymbol = "PM"
         
-        var roomNameAndTimeAttributedString = NSMutableAttributedString(string: "")
-        var attrs = [NSAttributedString.Key.font : UIFont.boldSystemFont(ofSize: 15)]
-        var boldString = NSMutableAttributedString(string: "\(event.name): ", attributes:attrs)
+        let attrs = [NSAttributedString.Key.font : UIFont.boldSystemFont(ofSize: 15)]
+        let boldString = NSMutableAttributedString(string: "\(event.name): ", attributes:attrs)
         
         let timeIntervalText = "\(timeFormatter.string(from: event.startDate)) - \(timeFormatter.string(from: event.endDate))"
         boldString.append(NSMutableAttributedString(string: timeIntervalText))

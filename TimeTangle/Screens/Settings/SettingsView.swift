@@ -308,6 +308,7 @@ struct SettingsProfileHeaderView: View {
                 TTSwiftUIProfileImageView(image: profileImage, size: 70)
                 VStack(alignment: .leading) {
                     Text(name)
+                        .lineLimit(2)
                         .foregroundColor(.primary)
                         .font(.title2.bold())
                     Text(username)
@@ -316,8 +317,8 @@ struct SettingsProfileHeaderView: View {
                         .foregroundColor(.secondary)
                 }
                 Spacer()
-                Image(systemName: "chevron.right")
-                    .foregroundColor(.gray)
+//                Image(systemName: "chevron.right")
+//                    .foregroundColor(.gray)
             }
             .padding(15)
         }

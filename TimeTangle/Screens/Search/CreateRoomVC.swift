@@ -17,7 +17,7 @@ class CreateRoomVC: UIViewController {
     
     private let usersQueueCountLabel = TTTitleLabel(textAlignment: .center, fontSize: 15)
     private let usersQueueTable = UITableView()
-    private let activityIndicator = UIActivityIndicatorView(style: .medium)
+    private var activityIndicator: TTActivityIndicatorView!
     private let createRoomButton = TTButton(backgroundColor: .systemGreen, title: "Create Room")
 
     override func viewDidLoad() {
@@ -54,25 +54,20 @@ class CreateRoomVC: UIViewController {
         self.present(joinRoomVC, animated: true)
     }
     
-    @objc private func fetchUpdatedUser() {
-        guard let currentUser = FirebaseManager.shared.currentUser else { return }
-        activityIndicator.startAnimating()
-        if !currentUser.friends.isEmpty  {
-            FirebaseManager.shared.fetchMultipleUsersDocumentData(with: currentUser.friends) { [weak self] result in
+    @objc private func fetchUpdatedUser() {   
+        if !usersQueueForRoomCreation.isEmpty {
+            activityIndicator.startAnimating()
+            activityIndicator.startAnimating()
+            FirebaseManager.shared.fetchMultipleUsersDocumentData(with: usersQueueForRoomCreation.map{ $0.username }) { [weak self] result in
                 self?.activityIndicator.stopAnimating()
-                guard let self = self else { return }
                 switch result {
-                case .success(let allFriends):
-                    self.allFriends = allFriends
-                    let usersQueueUsernames = self.usersQueueForRoomCreation.map{ $0.username }
-                    self.usersQueueForRoomCreation.append(contentsOf: allFriends.filter { usersQueueUsernames.contains($0.username) })
-                    self.refreshTableView()
+                case .success(let users):
+                    self?.usersQueueForRoomCreation = users
+                    self?.refreshTableView()
                 case .failure(let error):
-                    self.presentTTAlert(title: "Fetch Error", message: error.rawValue, buttonTitle: "OK")
+                    self?.presentTTAlert(title: "Fetch Error", message: error.rawValue, buttonTitle: "OK")
                 }
             }
-        } else {
-            activityIndicator.stopAnimating()
         }
     }
     
@@ -138,18 +133,19 @@ class CreateRoomVC: UIViewController {
     }
     
     private func configureActivityIndicator() {
-        activityIndicator.color = .lightGray
-        activityIndicator.center = CGPoint(x: usersQueueTable.bounds.width / 2, y: activityIndicator.bounds.height / 2)
-        activityIndicator.hidesWhenStopped = true
-        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
-        usersQueueTable.addSubview(activityIndicator)
-        
-        NSLayoutConstraint.activate([
-            activityIndicator.centerXAnchor.constraint(equalTo: usersQueueTable.centerXAnchor),
-            activityIndicator.centerYAnchor.constraint(equalTo: usersQueueTable.centerYAnchor),
-            activityIndicator.widthAnchor.constraint(equalToConstant: 20),
-            activityIndicator.heightAnchor.constraint(equalToConstant: 20)
-        ])
+        activityIndicator = TTActivityIndicatorView(containerView: usersQueueTable)
+//        activityIndicator.color = .lightGray
+//        activityIndicator.center = CGPoint(x: usersQueueTable.bounds.width / 2, y: activityIndicator.bounds.height / 2)
+//        activityIndicator.hidesWhenStopped = true
+//        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+//        usersQueueTable.addSubview(activityIndicator)
+//
+//        NSLayoutConstraint.activate([
+//            activityIndicator.centerXAnchor.constraint(equalTo: usersQueueTable.centerXAnchor),
+//            activityIndicator.centerYAnchor.constraint(equalTo: usersQueueTable.centerYAnchor),
+//            activityIndicator.widthAnchor.constraint(equalToConstant: 20),
+//            activityIndicator.heightAnchor.constraint(equalToConstant: 20)
+//        ])
     }
     
     private func configureCreateRoomButton() {
@@ -244,14 +240,12 @@ extension CreateRoomVC: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         //User tapped the Done button on the keyboard
         searchController.dismiss(animated: true, completion: nil)
-        searchBar.text = ""
     }
 }
 
 extension CreateRoomVC: UISearchControllerDelegate {
     func presentSearchController(_ searchController: UISearchController) {
         searchController.showsSearchResultsController = true
-        searchFriendsResultController.setAllFriends(with: allFriends)
     }
 }
 

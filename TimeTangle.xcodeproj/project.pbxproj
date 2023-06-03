@@ -35,7 +35,6 @@
 		E873BCD92964E4200015AE99 /* RoomAggregateResultVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E873BCD82964E4200015AE99 /* RoomAggregateResultVC.swift */; };
 		E873BCE4296693C80015AE99 /* TTCloseButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = E873BCE3296693C70015AE99 /* TTCloseButton.swift */; };
 		E873BCE72966A0DC0015AE99 /* FirebaseStorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E873BCE62966A0DC0015AE99 /* FirebaseStorageManager.swift */; };
-		E873BCE92968D5860015AE99 /* CreateAccountVCNib.xib in Resources */ = {isa = PBXBuildFile; fileRef = E873BCE82968D5860015AE99 /* CreateAccountVCNib.xib */; };
 		E873BCEB296904F50015AE99 /* RoomUserCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E873BCEA296904F50015AE99 /* RoomUserCell.swift */; };
 		E873BCF3297910330015AE99 /* RoomOverviewVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E873BCF2297910330015AE99 /* RoomOverviewVC.swift */; };
 		E893A25F2959611B004F7BC5 /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = E893A25E2959611B004F7BC5 /* FirebaseAppCheck */; };
@@ -60,6 +59,7 @@
 		E8B6BDC22A23216500DAFF04 /* TTRoomCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8B6BDC12A23216500DAFF04 /* TTRoomCodeView.swift */; };
 		E8B6BDC62A25B5CB00DAFF04 /* CreateRoomUserQueueCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8B6BDC52A25B5CB00DAFF04 /* CreateRoomUserQueueCell.swift */; };
 		E8B6BDC82A26B01900DAFF04 /* UISearchBar+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8B6BDC72A26B01900DAFF04 /* UISearchBar+Ext.swift */; };
+		E8B6BE122A2A88EA00DAFF04 /* TTActivityIndicatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8B6BE112A2A88EA00DAFF04 /* TTActivityIndicatorView.swift */; };
 		E8CEE2A12957956E000CD7FE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CEE2A02957956E000CD7FE /* AppDelegate.swift */; };
 		E8CEE2A32957956E000CD7FE /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CEE2A22957956E000CD7FE /* SceneDelegate.swift */; };
 		E8CEE2AA29579571000CD7FE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E8CEE2A929579571000CD7FE /* Assets.xcassets */; };
@@ -118,7 +118,6 @@
 		E873BCD82964E4200015AE99 /* RoomAggregateResultVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomAggregateResultVC.swift; sourceTree = "<group>"; };
 		E873BCE3296693C70015AE99 /* TTCloseButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTCloseButton.swift; sourceTree = "<group>"; };
 		E873BCE62966A0DC0015AE99 /* FirebaseStorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseStorageManager.swift; sourceTree = "<group>"; };
-		E873BCE82968D5860015AE99 /* CreateAccountVCNib.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CreateAccountVCNib.xib; sourceTree = "<group>"; };
 		E873BCEA296904F50015AE99 /* RoomUserCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomUserCell.swift; sourceTree = "<group>"; };
 		E873BCF2297910330015AE99 /* RoomOverviewVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomOverviewVC.swift; sourceTree = "<group>"; };
 		E893A26C2959859D004F7BC5 /* FriendsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsVC.swift; sourceTree = "<group>"; };
@@ -136,6 +135,7 @@
 		E8B6BDC12A23216500DAFF04 /* TTRoomCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTRoomCodeView.swift; sourceTree = "<group>"; };
 		E8B6BDC52A25B5CB00DAFF04 /* CreateRoomUserQueueCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateRoomUserQueueCell.swift; sourceTree = "<group>"; };
 		E8B6BDC72A26B01900DAFF04 /* UISearchBar+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UISearchBar+Ext.swift"; sourceTree = "<group>"; };
+		E8B6BE112A2A88EA00DAFF04 /* TTActivityIndicatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTActivityIndicatorView.swift; sourceTree = "<group>"; };
 		E8CEE29D2957956E000CD7FE /* TimeTangle.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TimeTangle.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8CEE2A02957956E000CD7FE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E8CEE2A22957956E000CD7FE /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -230,7 +230,6 @@
 			children = (
 				E8CEE2CD2957BF22000CD7FE /* CreateAccountVC.swift */,
 				E8CEE2C92957B03C000CD7FE /* LoginVC.swift */,
-				E873BCE82968D5860015AE99 /* CreateAccountVCNib.xib */,
 			);
 			path = Login;
 			sourceTree = "<group>";
@@ -363,6 +362,7 @@
 				E8B6BDC02A23213100DAFF04 /* Views */,
 				E8B6BDBF2A23211D00DAFF04 /* View Controllers */,
 				E865A7FD2A20718500F105AA /* Wiggle.swift */,
+				E8B6BE112A2A88EA00DAFF04 /* TTActivityIndicatorView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -521,7 +521,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				E8CEE2AD29579571000CD7FE /* LaunchScreen.storyboard in Resources */,
-				E873BCE92968D5860015AE99 /* CreateAccountVCNib.xib in Resources */,
 				E8CEE2AA29579571000CD7FE /* Assets.xcassets in Resources */,
 				E8D004AB2964056400907A64 /* RoomHistoryCell.xib in Resources */,
 				E8CEE2BD2957AAEC000CD7FE /* GoogleService-Info.plist in Resources */,
@@ -570,6 +569,7 @@
 				E8CFC22B295D3981006C23BE /* CreateRoomConfirmationVC.swift in Sources */,
 				E893A27A295A6D40004F7BC5 /* TTConstants.swift in Sources */,
 				E865A7A92A1C108A00F105AA /* TTEvent.swift in Sources */,
+				E8B6BE122A2A88EA00DAFF04 /* TTActivityIndicatorView.swift in Sources */,
 				E8188FCF2A15ED92005AA0BF /* SaveOrCancelIsland.swift in Sources */,
 				E8B6BDC62A25B5CB00DAFF04 /* CreateRoomUserQueueCell.swift in Sources */,
 				E84541B2295FADDC00CBB430 /* EventKitManager.swift in Sources */,

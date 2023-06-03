@@ -6,12 +6,12 @@
 //
 
 import UIKit
+import FirebaseFirestore
 
 class JoinRoomCodeTextField: UITextField {
     
     private var digitLabels = [UILabel]()
-    
-    var didEnterLastDigit: ((String) -> Void)?
+    private var enterCodeCompletion: (() -> Void)?
     
     private lazy var tapRecognizer: UITapGestureRecognizer = {
         let recognizer = UITapGestureRecognizer()
@@ -24,7 +24,8 @@ class JoinRoomCodeTextField: UITextField {
         configure()
     }
     
-    init(with slotCount: Int) {
+    init(with slotCount: Int, enterCodeCompletion: (() -> Void)?) {
+        self.enterCodeCompletion = enterCodeCompletion
         super.init(frame: .zero)
         configure(with: slotCount)
     }
@@ -52,9 +53,8 @@ class JoinRoomCodeTextField: UITextField {
     private func configureTextField() {
         tintColor = .clear
         textColor = .clear
-        keyboardType = .numberPad
         textContentType = .oneTimeCode
-        
+    
         addTarget(self, action: #selector(textDidChange), for: .editingChanged)
         delegate = self
     }
@@ -93,16 +93,19 @@ class JoinRoomCodeTextField: UITextField {
             
             if i < text.count {
                 let index = text.index(text.startIndex, offsetBy: i)
-                currentLabel.text = String(text[index])
+                currentLabel.text = String(text[index]).uppercased()
             } else {
                 currentLabel.text?.removeAll()
             }
         }
-        
-        if text.count == digitLabels.count {
-            //try to match
-            didEnterLastDigit?(text)
+    }
+    
+    private func getUserEnteredCode() -> String {
+        var userEnteredCode = ""
+        for digitLabel in digitLabels {
+            userEnteredCode += digitLabel.text ?? ""
         }
+        return userEnteredCode
     }
 }
 
@@ -110,6 +113,38 @@ extension JoinRoomCodeTextField: UITextFieldDelegate {
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         guard let characterCount = textField.text?.count else { return false }
-        return characterCount < digitLabels.count || string == ""
+        //check to see input only contains alphabets and numbers 
+        let allowedCharacters = CharacterSet.alphanumerics
+        let characterSet = CharacterSet(charactersIn: string)
+        return (characterCount < digitLabels.count || string == "") && (allowedCharacters.isSuperset(of: characterSet))
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        guard let currentUser = FirebaseManager.shared.currentUser else { return false }
+
+        let userEnteredCode = getUserEnteredCode()
+        if userEnteredCode.count == digitLabels.count {
+            textField.resignFirstResponder()
+            
+            let db = Firestore.firestore()
+            let batch = db.batch()
+            
+            let roomRef = db.collection(TTConstants.roomsCollection).document(userEnteredCode)
+            batch.updateData([
+                TTConstants.roomUsers: FieldValue.arrayUnion([currentUser.username])
+            ], forDocument: roomRef)
+            
+            let currentUserRef = db.collection(TTConstants.usersCollection).document(currentUser.username)
+            batch.updateData([
+                TTConstants.roomCodes: FieldValue.arrayUnion([userEnteredCode])
+            ], forDocument: currentUserRef)
+            
+            batch.commit() { [weak self] error in
+                if let _ = error, let enterCodeCompletion = self?.enterCodeCompletion {
+                    enterCodeCompletion()
+                }
+            }
+        }
+        return false
     }
 }

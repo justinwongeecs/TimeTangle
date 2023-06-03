@@ -35,7 +35,7 @@ class ProfileUsernameCell: UITableViewCell {
     
     func set(for user: TTUser) {
         self.user = user
-        usernameLabel.text = user.username
+        usernameLabel.text = user.getFullName()
     
         if let imageData = user.profilePictureData, let image = UIImage(data: imageData) {
             avatarImageView.setImage(to: image)

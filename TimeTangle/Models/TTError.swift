@@ -28,6 +28,7 @@ enum TTError: String, Error {
     case unableToUpdateRoom = "Unable to update room. Please try again."
     case unableToAddRoomHistory = "Unable to add room history."
     case unableToDeleteRoom = "Unable to delete room. Please try again."
+    case unableToJoinRoom = "Unable to join specified room. Please check if room code is correctly inputed."
     
     //MARK: - Firebase Storage
     case unableToGetImageMetadata = "Unable to get image metadata"

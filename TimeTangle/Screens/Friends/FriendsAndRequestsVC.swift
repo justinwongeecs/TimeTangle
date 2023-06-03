@@ -34,6 +34,7 @@ class FriendsAndRequestsVC: UIViewController {
     
     private let friendsSC = UISegmentedControl(items: ["My Friends", "Friend Requests"])
     private let table = UITableView()
+    private var activityIndicator: TTActivityIndicatorView!
     private var searchFriendsCountLabel: UILabel!
     private var tableTopConstraint: NSLayoutConstraint!
     
@@ -66,6 +67,7 @@ class FriendsAndRequestsVC: UIViewController {
         configureFriendsSC()
         configureSearchFriendsCountLabel()
         configureFriendsTable()
+        configureActivityIndicator()
     
         fetchFriends()
         reloadTable()
@@ -82,7 +84,9 @@ class FriendsAndRequestsVC: UIViewController {
         friendRequests = currentUser.friendRequests
         
         if !currentUser.friends.isEmpty {
+            activityIndicator.startAnimating()
             FirebaseManager.shared.fetchMultipleUsersDocumentData(with: currentUser.friends) { [weak self] result in
+                self?.activityIndicator.stopAnimating()
                 switch result {
                 case .success(let users):
                     self?.friends = users
@@ -111,11 +115,14 @@ class FriendsAndRequestsVC: UIViewController {
             
             if filteredFriends.isEmpty {
                 displaySearchCountLabel(isHidden: true)
-                showEmptyStateView(with: "No Friends Found", in: self.view)
             } else {
                 displaySearchCountLabel(isHidden: false)
                 updateSearchFriendsCountLabel(with: filteredFriends.count)
             }
+        }
+        
+        DispatchQueue.main.async {
+            self.reloadTable()
         }
     }
     
@@ -158,7 +165,7 @@ class FriendsAndRequestsVC: UIViewController {
         view.addSubview(table)
         table.backgroundColor = .systemBackground
         table.translatesAutoresizingMaskIntoConstraints = false
-        table.separatorStyle = .none
+        table.separatorStyle = .singleLine
         table.delegate = self
         table.dataSource = self
         
@@ -173,6 +180,10 @@ class FriendsAndRequestsVC: UIViewController {
             table.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -tableViewsPadding),
             table.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
+    }
+    
+    private func configureActivityIndicator() {
+        activityIndicator = TTActivityIndicatorView(containerView: table)
     }
     
     @objc private func toggleFriendsSC(sender: UISegmentedControl) {
@@ -261,6 +272,8 @@ extension FriendsAndRequestsVC: UITableViewDelegate, UITableViewDataSource {
         if friendsVCSegementedState == .myFriends  {
             let friend = filteredFriends[indexPath.section]
             let myFriendCell = table.dequeueReusableCell(withIdentifier: ProfileUsernameCell.reuseID) as! ProfileUsernameCell
+            myFriendCell.backgroundColor = .systemBackground
+            myFriendCell.layer.cornerRadius = 0
             myFriendCell.set(for: friend)
             return myFriendCell
         }
@@ -272,12 +285,8 @@ extension FriendsAndRequestsVC: UITableViewDelegate, UITableViewDataSource {
         return myFriendRequestCell
     }
     
-    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return 5.0
-    }
-    
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 50.0
+        return 60.0
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -286,12 +295,6 @@ extension FriendsAndRequestsVC: UITableViewDelegate, UITableViewDataSource {
         } else {
             return friendRequests.count
         }
-    }
-    
-    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-        let view: UIView = UIView.init(frame: CGRect.init(x: 0, y: 0, width: self.view.bounds.size.width, height: 10))
-        view.backgroundColor = .clear
-        return view
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {

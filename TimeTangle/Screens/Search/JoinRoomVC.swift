@@ -10,7 +10,7 @@ import UIKit
 class JoinRoomVC: TTModalCardVC {
     
     private let containerViewHeader = UIStackView()
-    private let codeTextField = JoinRoomCodeTextField(with: 6)
+    private var codeTextField: JoinRoomCodeTextField!
     private var headerLabel = TTTitleLabel(textAlignment: .center, fontSize: 18)
     
     private let padding: CGFloat = 30
@@ -31,6 +31,9 @@ class JoinRoomVC: TTModalCardVC {
     }
     
     private func configureCodeTextField() {
+        codeTextField = JoinRoomCodeTextField(with: 6) { [weak self] in
+            self?.presentTTAlert(title: "Cannot Add To Room", message: TTError.unableToJoinRoom.rawValue, buttonTitle: "OK")
+        }
         containerView.addSubview(codeTextField)
         codeTextField.translatesAutoresizingMaskIntoConstraints = false
         codeTextField.becomeFirstResponder()

@@ -14,6 +14,7 @@ protocol SearchFriendsResultControllerDelegate: AnyObject {
 class SearchFriendsResultController: UIViewController {
     
     private let searchFriendsResultTable = UITableView()
+    private var activityIndicator: TTActivityIndicatorView!
     
     private var allFriends = [TTUser]()
     private var filteredFriends = [TTUser]()
@@ -27,15 +28,31 @@ class SearchFriendsResultController: UIViewController {
         
         configureDismissEditingTapGestureRecognizer()
         configureSearchFriendsResultTable()
+        configureActivityIndicator()
+        
+        fetchAllFriends()
     }
     
-    func setAllFriends(with friends: [TTUser]) {
-        let usersInQueue = searchVCRef.getUsersQueueForRoomCreation()
-        let friendsNotInUsersQueue = friends.filter { !usersInQueue.map{ $0.username }.contains($0.username) }
-        allFriends = friendsNotInUsersQueue
-        filteredFriends = friendsNotInUsersQueue
+    func fetchAllFriends() {
+        guard let currentUser = FirebaseManager.shared.currentUser else { return }
         
-        reloadTable()
+        if !currentUser.friends.isEmpty {
+            activityIndicator.startAnimating()
+            FirebaseManager.shared.fetchMultipleUsersDocumentData(with: currentUser.friends) { [weak self] result in
+                self?.activityIndicator.stopAnimating()
+                guard let self = self else { return }
+                switch result {
+                case .success(let allFriends):
+                    let usersInQueue = searchVCRef.getUsersQueueForRoomCreation()
+                    let friendsNotInUsersQueue = allFriends.filter { !usersInQueue.map{ $0.username }.contains($0.username) }
+                    self.allFriends = friendsNotInUsersQueue
+                    self.filteredFriends = friendsNotInUsersQueue
+                    self.reloadTable()
+                case .failure(let error):
+                    self.presentTTAlert(title: "Fetch Error", message: error.rawValue, buttonTitle: "OK")
+                }
+            }
+        }
     }
     
     private func configureSearchFriendsResultTable() {
@@ -55,24 +72,28 @@ class SearchFriendsResultController: UIViewController {
         ])
     }
     
+    private func configureActivityIndicator() {
+        activityIndicator = TTActivityIndicatorView(containerView: searchFriendsResultTable)
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+    }
+    
     func search(with searchText: String) {
         if searchText.isEmpty {
             filteredFriends = allFriends
         } else {
-            filteredFriends = allFriends.filter { $0.username.contains(searchText) }
+            filteredFriends = allFriends.filter { $0.username.lowercased().contains(searchText.lowercased()) }
         }
         
         reloadTable()
     }
     
     private func reloadTable() {
-        removeEmptyStateView(in: view)
-        
         if filteredFriends.isEmpty {
             searchFriendsResultTable.isHidden = true
-            showEmptyStateView(with: "No Friends Found", in: view)
+            searchFriendsResultTable.backgroundView = TTEmptyStateView(message: "No Friends Found")
         } else {
             searchFriendsResultTable.isHidden = false
+            searchFriendsResultTable.backgroundView = nil
         }
         
         DispatchQueue.main.async {
@@ -110,7 +131,18 @@ extension SearchFriendsResultController: UITableViewDataSource, UITableViewDeleg
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedFilteredUser = filteredFriends[indexPath.row]
+        let selectedFilteredUser = filteredFriends[indexPath.section]
         suggestedSearchDelegate.didSelectSuggestedSearch(for: selectedFilteredUser)
+    }
+    
+    
+    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        let view: UIView = UIView.init(frame: CGRect.init(x: 0, y: 0, width: self.view.bounds.size.width, height: 5))
+        view.backgroundColor = .clear
+        return view
+    }
+    
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return 7.0
     }
 }
