@@ -14,11 +14,15 @@ struct SettingsMyProfileView: View {
     @State private var profileImage: UIImage?
     @State private var showChangeNameAlert = false
     @State private var showChangeUsernameAlert = false
+    @State private var showChangeEmailAlert = false
+    @State private var showChangePhoneNumberAlert = false
     @State private var showLogoutConfirmationAlert = false
     
     @State private var firstname = ""
     @State private var lastname = ""
     @State private var username = ""
+    @State private var email = ""
+    @State private var phoneNumber = ""
     
     @State private var imageSelection = [PhotosPickerItem]()
     
@@ -34,34 +38,7 @@ struct SettingsMyProfileView: View {
                 SettingGroup(id: "Name", header: "Name") {
                     SettingText(title: "\(firstname) \(lastname)")
                     SettingCustomView(id: "ChangeName") {
-                        Button(action: {
-                            showChangeNameAlert.toggle()
-                        }) {
-                            Text("Change Name")
-                                .leftAligned()
-                                .foregroundColor(.blue)
-                                .frame(maxWidth: .infinity)
-
-                        }
-                        .padding(15)
-                        .alert("Change Name", isPresented: $showChangeNameAlert) {
-                            TextField("First Name", text: $firstname)
-                            TextField("Last Name", text: $lastname)
-                            Button("OK", action: {
-                                guard let currentUser = FirebaseManager.shared.currentUser else { return }
-                                FirebaseManager.shared.updateUserData(for: currentUser.username, with: [
-                                    TTConstants.firstname: firstname.trimmingCharacters(in: .whitespacesAndNewlines),
-                                    TTConstants.lastname: lastname.trimmingCharacters(in: .whitespacesAndNewlines)
-                                ]) { error in
-                                    guard let error = error else { return }
-                                    ttError = error
-                                    showErrorAlert = true
-                                }
-                            })
-                            Button("Cancel", role: .cancel) {
-                                showChangeNameAlert.toggle()
-                            }
-                        }
+                        changeNameButton
                     }
                 }
                 
@@ -70,38 +47,24 @@ struct SettingsMyProfileView: View {
                     SettingText(title: username)
                 }
                 
-                SettingGroup(id: "Logout") {
+                SettingGroup(id: "Email", header: "Email") {
+                    SettingText(title: email == "" ? "No Email" : email, foregroundColor: email == "" ? .red : .black)
+                    SettingCustomView(id: "ChangeEmail") {
+                        changeEmailButton
+                    }
+                }
+                
+                SettingGroup(id: "Phone Number", header: "Phone Number") {
+                    SettingText(title: phoneNumber == "" ? "No Phone Number" : phoneNumber,
+                                foregroundColor: phoneNumber == "" ? .red : .black)
+                    SettingCustomView(id: "ChangePhoneNumber") {
+                        changePhoneNumberButton
+                    }
+                }
+                
+                SettingGroup(id: "Logout", backgroundColor: .red) {
                     SettingCustomView(id: "Logout") {
-                        HStack {
-                            Button(action: {
-                                showLogoutConfirmationAlert.toggle()
-                            }) {
-                                Text("Log Out")
-                                    .leftAligned()
-                                    .foregroundColor(.red)
-                                    .frame(maxWidth: .infinity)
-                            }
-                            .confirmationDialog("Confirm Logout", isPresented: $showLogoutConfirmationAlert) {
-                                Button("OK", action: {
-                                    FirebaseManager.shared.signOutUser { result in
-                                        switch result {
-                                        case .success(_):
-                                            break
-                                        case .failure(_):
-                                            ttError = TTError.unableToSignOutUser
-                                            showErrorAlert = true
-                                        }
-                                    }
-                                })
-                                Button("Cancel", role: .cancel) {
-                                    showLogoutConfirmationAlert.toggle()
-                                }
-                            } message: {
-                                Text("Are you sure you want to logout?")
-                            }
-                            Spacer()
-                        }
-                        .padding(15)
+                        logoutButton
                     }
                 }
             }
@@ -148,8 +111,130 @@ struct SettingsMyProfileView: View {
                 firstname = currentUser.firstname
                 lastname = currentUser.lastname
                 username = currentUser.username
+                email = currentUser.email
+                phoneNumber = currentUser.phoneNumber
             }
         }
+    }
+    
+    private var changeNameButton: some View {
+        Button(action: {
+            showChangeNameAlert.toggle()
+        }) {
+            Text("Change Name")
+                .leftAligned()
+                .frame(maxWidth: .infinity)
+
+        }
+        .tint(.green)
+        .padding(15)
+        .alert("Change Name", isPresented: $showChangeNameAlert) {
+            TextField("First Name", text: $firstname)
+            TextField("Last Name", text: $lastname)
+            Button("OK", action: {
+                guard let currentUser = FirebaseManager.shared.currentUser else { return }
+                FirebaseManager.shared.updateUserData(for: currentUser.username, with: [
+                    TTConstants.firstname: firstname.trimmingCharacters(in: .whitespacesAndNewlines),
+                    TTConstants.lastname: lastname.trimmingCharacters(in: .whitespacesAndNewlines)
+                ]) { error in
+                    guard let error = error else { return }
+                    ttError = error
+                    showErrorAlert = true
+                }
+            })
+            Button("Cancel", role: .cancel) {
+                showChangeNameAlert.toggle()
+            }
+        }
+    }
+    
+    private var changeEmailButton: some View {
+        Button(action: {
+            showChangeEmailAlert.toggle()
+        }) {
+            Text("Change Email")
+                .leftAligned()
+                .frame(maxWidth: .infinity)
+
+        }
+        .tint(.green)
+        .padding(15)
+        .alert("Change Email", isPresented: $showChangeEmailAlert) {
+            TextField("Email", text: $email)
+                .textCase(.lowercase)
+            Button("OK", action: {
+                guard let currentUser = FirebaseManager.shared.currentUser else { return }
+                FirebaseManager.shared.updateUserData(for: currentUser.username, with: [
+                    TTConstants.email: email.trimmingCharacters(in: .whitespacesAndNewlines)
+                ]) { error in
+                    guard let error = error else { return }
+                    ttError = error
+                    showErrorAlert = true
+                }
+            })
+            Button("Cancel", role: .cancel) {}
+        }
+    }
+    
+    private var changePhoneNumberButton: some View {
+        Button(action: {
+            showChangePhoneNumberAlert.toggle()
+        }) {
+            Text("Change Phone Number")
+                .leftAligned()
+                .frame(maxWidth: .infinity)
+
+        }
+        .tint(.green)
+        .padding(15)
+        .alert("Change Phone Number", isPresented: $showChangePhoneNumberAlert) {
+            TextField("📞", text: $phoneNumber)
+            Button("OK", action: {
+                guard let currentUser = FirebaseManager.shared.currentUser else { return }
+                FirebaseManager.shared.updateUserData(for: currentUser.username, with: [
+                    TTConstants.phoneNumber: phoneNumber.trimmingCharacters(in: .whitespacesAndNewlines)
+                ]) { error in
+                    guard let error = error else { return }
+                    ttError = error
+                    showErrorAlert = true
+                }
+            })
+            Button("Cancel", role: .cancel) {}
+        }
+    }
+    
+    private var logoutButton: some View {
+        HStack {
+            Button(action: {
+                showLogoutConfirmationAlert.toggle()
+            }) {
+                Text("Log Out")
+                    .frame(maxWidth: .infinity)
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(.white)
+                    .font(.system(size: 20).bold())
+            }
+            .confirmationDialog("Confirm Logout", isPresented: $showLogoutConfirmationAlert) {
+                Button("OK", action: {
+                    FirebaseManager.shared.signOutUser { result in
+                        switch result {
+                        case .success(_):
+                            break
+                        case .failure(_):
+                            ttError = TTError.unableToSignOutUser
+                            showErrorAlert = true
+                        }
+                    }
+                })
+                Button("Cancel", role: .cancel) {
+                    showLogoutConfirmationAlert.toggle()
+                }
+            } message: {
+                Text("Are you sure you want to logout?")
+            }
+            Spacer()
+        }
+        .padding(15)
     }
     
     private var profileImageView: some View {
@@ -157,41 +242,6 @@ struct SettingsMyProfileView: View {
             Spacer()
             TTSwiftUIProfileImageView(image: profileImage, size: 120)
             Spacer()
-        }
-    }
-    
-    //MARK: - Username Section
-    @SettingBuilder private var usernameSection: some Setting {
-        SettingGroup(id: "Username", header: "Username") {
-            SettingText(title: username)
-            SettingCustomView(id: "ChangeUsername") {
-                HStack {
-                    Button(action: {
-                        showChangeUsernameAlert.toggle()
-                    }) {
-                        Text("Change Username")
-                            .leftAligned()
-                            .foregroundColor(.blue)
-                            .frame(maxWidth: .infinity)
-                    }
-                    Spacer()
-                }
-                .padding(15)
-                .alert("Change Username", isPresented: $showChangeUsernameAlert) {
-                    TextField("Username", text: $username)
-                    Button("OK", action: {
-                        guard let currentUser = FirebaseManager.shared.currentUser else { return }
-                        FirebaseManager.shared.updateUserData(for: currentUser.username, with: [
-                            TTConstants.username: username
-                        ]) { error in
-                            guard error == nil else { return }
-                        }
-                    })
-                    Button("Cancel", role: .cancel) {
-                        showChangeUsernameAlert.toggle()
-                    }
-                }
-            }
         }
     }
     

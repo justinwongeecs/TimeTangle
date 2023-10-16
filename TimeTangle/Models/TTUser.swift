@@ -22,8 +22,11 @@ struct TTUser: Codable, Equatable {
     var friends: [String]
     var friendRequests: [TTFriendRequest]
     var roomCodes: [String]
-    var profilePictureURL: String?
     var profilePictureData: Data?
+    
+    //Contact Information
+    var phoneNumber: String = ""
+    var email: String = ""
     
     func getFullName() -> String {
         return "\(firstname) \(lastname)"

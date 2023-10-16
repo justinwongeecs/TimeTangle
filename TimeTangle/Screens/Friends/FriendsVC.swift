@@ -37,19 +37,37 @@ class FriendsVC: UIViewController {
     private func configureNavBar() {
         let addFriendButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addFriend))
         addFriendButton.tintColor = .systemGreen
-        
-        let editButton = editButtonItem
-        editButton.tintColor = .systemGreen
-        navigationItem.rightBarButtonItems = [editButton, addFriendButton]
+        navigationItem.rightBarButtonItem = addFriendButton
     }
     
     @objc private func addFriend() {
-        //show modal UI to add friend
-        let destVC = AddFriendVC()
-        destVC.delegate = friendsAndRequestsVC
-        destVC.friendsAndRequestsVCRef = friendsAndRequestsVC
-        let navController = UINavigationController(rootViewController: destVC)
-        present(navController, animated: true)
+        let ac = UIAlertController(title: "Enter Friend Username", message: nil, preferredStyle: .alert)
+        ac.view.tintColor = .systemGreen
+        ac.addTextField()
+        
+        let submitAction = UIAlertAction(title: "Send Request", style: .default) { [unowned ac] _ in
+            let friendUsername = ac.textFields![0].text ?? ""
+            
+            if friendUsername.isEmpty {
+                self.presentTTAlert(title: "Username Cannot Be Empty", message: "Please enter a valid username", buttonTitle: "OK")
+            } else {
+                FirebaseManager.shared.fetchUserDocumentData(with: friendUsername) { [weak self] result in
+                    guard let self = self else { return }
+                    switch result {
+                    case .success(let user):
+                        print(user)
+                        friendsAndRequestsVC.selectedUserToAddFriend(for: user)
+                    case .failure(let error):
+                        presentTTAlert(title: "Cannot Find User", message: error.localizedDescription, buttonTitle: "OK")
+                    }
+                }
+            }
+        }
+        
+        ac.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        ac.addAction(submitAction)
+        
+        present(ac, animated: true)
     }
     
     private func configureSearchArea() {

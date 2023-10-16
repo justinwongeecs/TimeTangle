@@ -12,14 +12,14 @@ typealias TTFriendRequestType = TTFriendRequest.TTFriendRequestType
 struct TTFriendRequest: Codable {
     var senderProfilePictureData: Data?
     var recipientProfilePictureData: Data?
-    var senderUsername: String
-    var recipientUsername: String
+    var senderName: String
+    var recipientName: String
     var requestType: TTFriendRequestType
     
     var dictionary: [String: Any] {
         return [
-            "senderUsername": senderUsername,
-            "recipientUsername": recipientUsername,
+            "senderName": senderName,
+            "recipientName": recipientName,
             "requestType": requestType.description,
             "recipientProfilePictureData": recipientProfilePictureData,
             "senderProfilePictureData": senderProfilePictureData

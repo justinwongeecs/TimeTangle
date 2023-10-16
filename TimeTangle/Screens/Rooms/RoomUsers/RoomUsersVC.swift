@@ -12,14 +12,16 @@ class RoomUsersVC: UIViewController {
     
     private var room: TTRoom!
     private var ttUsers = [TTUser]()
+    private var roomUsersCache = TTCache<String, TTUser>()
     private let activityIndicator = UIActivityIndicatorView(style: .medium)
     private let usersTableView = UITableView()
     private var usersNotVisible = [String]()
     
     weak var delegate: RoomUpdateDelegate? 
     
-    init(room: TTRoom, usersNotVisible: [String]) {
+    init(room: TTRoom, roomUsersCache: TTCache<String, TTUser>, usersNotVisible: [String]) {
         self.room = room
+        self.roomUsersCache = roomUsersCache
         self.usersNotVisible = usersNotVisible
         super.init(nibName: nil, bundle: nil)
     }
@@ -34,26 +36,45 @@ class RoomUsersVC: UIViewController {
         view.backgroundColor = .systemBackground
         configureActivityIndicator()
         configureUsersTableView()
-        fetchRoomTTUsers()
+        loadRoomUsers()
     }
     
     //Is this the best place to put this?
-    private func fetchRoomTTUsers() {
-        title = ""
+    private func loadRoomUsers() {
         activityIndicator.startAnimating()
-        FirebaseManager.shared.fetchMultipleUsersDocumentData(with: room.users) { [weak self] result in
-            self?.activityIndicator.stopAnimating()
+        
+        for username in room.users {
+            if let cachedUser = roomUsersCache[username] {
+                ttUsers.append(cachedUser)
+            } else {
+                fetchRoomTTUser(for: username)
+            }
+        }
+    
+        activityIndicator.stopAnimating()
+        updateVCTitle()
+    }
+    
+    private func fetchRoomTTUser(for username: String) {
+        print("Fetch room tt users")
+        activityIndicator.startAnimating()
+        FirebaseManager.shared.fetchUserDocumentData(with: username) { [weak self] result in
+            guard let self = self else { return }
+            
             switch result {
-            case .success(let ttUsers):
-                self?.ttUsers = ttUsers
-                self?.sortUsersByAdminAndName()
+            case .success(let ttUser):
+                self.ttUsers.append(ttUser)
+                for ttUser in ttUsers {
+                    self.roomUsersCache.insert(ttUser, forKey: ttUser.username)
+                }
+                self.sortUsersByAdminAndName()
             case .failure(let error):
-                self?.ttUsers = []
-                self?.presentTTAlert(title: "Fetch Error", message: error.rawValue, buttonTitle: "OK")
+                self.presentTTAlert(title: "Fetch Error", message: error.rawValue, buttonTitle: "OK")
             }
             DispatchQueue.main.async {
-                self?.usersTableView.reloadData()
-                self?.updateVCTitle()
+                self.usersTableView.reloadData()
+                self.updateVCTitle()
+                self.activityIndicator.stopAnimating()
             }
         }
     }
@@ -82,7 +103,7 @@ class RoomUsersVC: UIViewController {
         usersTableView.register(RoomUserCell.self, forCellReuseIdentifier: RoomUserCell.reuseID)
         
         NSLayoutConstraint.activate([
-            usersTableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
+            usersTableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             usersTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
             usersTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
             usersTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
@@ -264,6 +285,7 @@ extension RoomUsersVC: RoomUserCellDelegate {
             guard let self = self else { return }
             if let ttUsersIndex = self.ttUsers.firstIndex(of: user) {
                 self.ttUsers.remove(at: ttUsersIndex)
+                self.roomUsersCache.removeValue(forKey: user.username)
                 DispatchQueue.main.async {
                     self.updateVCTitle()
                     self.usersTableView.reloadData()

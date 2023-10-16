@@ -19,6 +19,10 @@ private struct RoomOverviewSection {
     var events: [TTEvent]
 }
 
+protocol RoomOverviewCellDelegate: AnyObject {
+    func didSelectInterval(for event: TTEvent?)
+}
+
 class RoomOverviewVC: UIViewController {
     
     private var room: TTRoom!
@@ -27,6 +31,8 @@ class RoomOverviewVC: UIViewController {
     private var notVisibleMembers = [String]()
     private var timesTableView: UITableView!
     private var currentFilterMode: RoomOverviewFilterType = .all
+    
+    private var selectedInterval: TTEvent?
     
     init(room: TTRoom, notVisibleMembers: [String], openIntervals: [TTEvent]) {
         self.room = room
@@ -42,6 +48,8 @@ class RoomOverviewVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationController?.navigationBar.tintColor = .systemGreen
+        
         configureNavigationBarItems()
         configureVC()
         configureTimesTable()
@@ -152,6 +160,7 @@ class RoomOverviewVC: UIViewController {
     
     private func configureTimesTable() {
         timesTableView = UITableView()
+        timesTableView.separatorStyle = .none
         timesTableView.translatesAutoresizingMaskIntoConstraints = false
         timesTableView.dataSource = self
         timesTableView.delegate = self
@@ -164,14 +173,13 @@ class RoomOverviewVC: UIViewController {
             timesTableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             timesTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: padding),
             timesTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -padding),
-            timesTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            timesTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -padding)
         ])
     }
 }
 
 //MARK: - RoomOverviewVC TableView Delegates
 extension RoomOverviewVC: UITableViewDelegate, UITableViewDataSource {
-    
     func numberOfSections(in tableView: UITableView) -> Int {
         return filteredRoomSummarySections.count
     }
@@ -204,19 +212,32 @@ extension RoomOverviewVC: UITableViewDelegate, UITableViewDataSource {
         
         let section = filteredRoomSummarySections[indexPath.section]
         let event = section.events[indexPath.row]
-        cell.set(for: event)
+        cell.set(for: event, selectedInterval: selectedInterval)
+        cell.roomOverviewCellDelegate = self
 
         return cell
     }
 }
 
+extension RoomOverviewVC: RoomOverviewCellDelegate {
+    func didSelectInterval(for event: TTEvent?) {
+        selectedInterval = event
+        timesTableView.reloadData()
+    }
+}
+
 //MARK: - RoomOverviewCell
 class RoomOverviewCell: UITableViewCell {
-    
     static let reuseID = "RoomOverviewCell"
+    
+    private var event: TTEvent?
+    private var isCellSelected = false
     
     private var createdByUserLabel = UILabel()
     private var roomNameAndTimeLabel = UILabel()
+    private var selectedIntervalImageView = UIImageView()
+    
+    weak var roomOverviewCellDelegate: RoomOverviewCellDelegate?
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -227,7 +248,9 @@ class RoomOverviewCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func set(for event: TTEvent) {
+    func set(for event: TTEvent, selectedInterval: TTEvent?) {
+        self.event = event
+        
         let timeFormatter = DateFormatter()
         timeFormatter.dateFormat = "h:mm a"
         timeFormatter.amSymbol = "AM"
@@ -241,7 +264,7 @@ class RoomOverviewCell: UITableViewCell {
         roomNameAndTimeLabel.attributedText = boldString
         
         //configure cell based on event.createdBy
-        if event.createdBy != "TimeTangle" {
+        if event.isCreatedByUser {
             roomNameAndTimeLabel.textColor = .systemRed
             createdByUserLabel.isHidden = false
             createdByUserLabel.text = event.createdBy
@@ -250,6 +273,12 @@ class RoomOverviewCell: UITableViewCell {
             roomNameAndTimeLabel.textColor = .systemGreen
             createdByUserLabel.isHidden = true
             backgroundColor = .systemGreen.withAlphaComponent(0.15)
+        }
+        
+        if selectedInterval == event {
+            selectedIntervalImageView.isHidden = false
+        } else {
+            selectedIntervalImageView.isHidden = true
         }
     }
     
@@ -262,8 +291,11 @@ class RoomOverviewCell: UITableViewCell {
         createdByUserLabel.translatesAutoresizingMaskIntoConstraints = false
         
         backgroundColor = .clear
-        isUserInteractionEnabled = false
         selectionStyle = .none
+        isUserInteractionEnabled = false
+        
+        let onTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(selectInterval))
+        addGestureRecognizer(onTapGestureRecognizer)
         
         let vStackView = UIStackView()
         vStackView.axis = .vertical
@@ -285,12 +317,31 @@ class RoomOverviewCell: UITableViewCell {
         vStackView.addArrangedSubview(createdByUserLabel)
         vStackView.addSubview(hStackView)
         
+        selectedIntervalImageView.image = UIImage(systemName: "checkmark.circle.fill")
+        selectedIntervalImageView.tintColor = .systemGreen
+        selectedIntervalImageView.translatesAutoresizingMaskIntoConstraints = false
+        selectedIntervalImageView.isHidden = true
+        addSubview(selectedIntervalImageView)
+        
         NSLayoutConstraint.activate([
-            vStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10),
+            vStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -50),
             vStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10),
             vStackView.topAnchor.constraint(equalTo: topAnchor, constant: 10),
-            vStackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -10)
+            vStackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -10),
+            
+            selectedIntervalImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
+            selectedIntervalImageView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10),
+            selectedIntervalImageView.widthAnchor.constraint(equalToConstant: 25),
+            selectedIntervalImageView.heightAnchor.constraint(equalToConstant: 25)
         ])
+    }
+    
+    @objc private func selectInterval() {
+        guard let event = event, let delegate = roomOverviewCellDelegate else { return }
+        
+        if !event.isCreatedByUser {
+            delegate.didSelectInterval(for: event)
+        }
     }
 }
 

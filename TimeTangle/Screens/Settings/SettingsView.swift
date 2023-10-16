@@ -43,6 +43,7 @@ struct SettingsView: View {
                     }
                 }
             }
+            .tint(.green)
             .onAppear {
                 size = geo.size
             }.onChange(of: geo.size) { newSize in

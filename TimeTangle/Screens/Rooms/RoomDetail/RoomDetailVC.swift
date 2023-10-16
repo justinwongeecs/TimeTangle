@@ -32,6 +32,7 @@ class RoomDetailVC: UIViewController {
     private var roomOverviewVC: RoomOverviewVC!
     private var confirmRoomChangesContainerView: UIView!
     private var saveOrCancelIsland: SaveOrCancelIsland!
+    private var roomUsersCache = TTCache<String, TTUser>()
     
     private var originalRoomState: TTRoom!
     private var openIntervals = [TTEvent]()
@@ -57,7 +58,6 @@ class RoomDetailVC: UIViewController {
         configureNavigationBarItems()
         configureRoomAggregateResultView()
         configureSaveOrCancelIsland()
-//        configureAdminEnability()
         updateView()
     }
     
@@ -84,6 +84,7 @@ class RoomDetailVC: UIViewController {
     //MARK: - NavigationBarItems
     private func configureNavigationBarItems() {
         view.backgroundColor = .systemBackground
+        navigationController?.navigationBar.tintColor = .systemGreen
         
         let infoButton = UIBarButtonItem(image: UIImage(systemName: "info.circle"), style: .plain, target: self, action: #selector(clickedOnViewResultButton))
         
@@ -214,15 +215,21 @@ class RoomDetailVC: UIViewController {
     @objc private func syncUserCalendar() {
         //Fetch current user's events within room time frame
         let ekManager = EventKitManager()
-        let userEventsWithinRoomRange = ekManager.getUserTTEvents(from: room.startingDate, to: room.endingDate)
+        let userEventsWithinRoomRangeSet = Set(ekManager.getUserTTEvents(from: room.startingDate, to: room.endingDate))
+        let currRoomEventsSet = Set(room.events)
+        let unionRoomEvents = Array(currRoomEventsSet.union(userEventsWithinRoomRangeSet))
 
-        for userEvent in userEventsWithinRoomRange {
-            if !room.events.contains(userEvent) {
-                room.events.append(userEvent)
+        room.events = unionRoomEvents
+        updateRoomAggregateVC()
+        //TODO: - Update Firebase Room Events
+        FirebaseManager.shared.updateRoom(for: room.code, with: [
+            TTConstants.roomEvents: unionRoomEvents
+        ]) { error in
+            if let error = error  {
+                self.presentTTAlert(title: "Cannot Sync Calendar", message: error.localizedDescription, buttonTitle: "OK")
             }
         }
-        updateRoomAggregateVC()
-        updateSaveOrCancelIsland()
+//        saveOrCancelIsland.present()
     }
     
     private func showRoomSettingsVC() {
@@ -280,7 +287,7 @@ class RoomDetailVC: UIViewController {
     }
 
     private func updateSaveOrCancelIsland() {
-        if room == originalRoomState{
+        if room == originalRoomState {
             //Dismiss
             saveOrCancelIsland.dismiss()
         } else if room != originalRoomState {
@@ -293,7 +300,7 @@ class RoomDetailVC: UIViewController {
     
     //push new view controller to display list of members view
     @IBAction func clickedUsersCountButton(_ sender: UIButton) {
-        roomUsersVC = RoomUsersVC(room: room, usersNotVisible: usersNotVisible)
+        roomUsersVC = RoomUsersVC(room: room, roomUsersCache: roomUsersCache, usersNotVisible: usersNotVisible)
         roomUsersVC.delegate = self 
         navigationController?.pushViewController(roomUsersVC, animated: true)
     }

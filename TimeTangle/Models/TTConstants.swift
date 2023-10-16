@@ -22,6 +22,8 @@ struct TTConstants {
     static let roomCodes = "roomCodes"
     static let profilePictureURL = "profilePictureURL"
     static let profilePictureData = "profilePictureData"
+    static let email = "email"
+    static let phoneNumber = "phoneNumber"
     
     //TTFriendRequest
     static let recipientUsername = "recipientUsername"

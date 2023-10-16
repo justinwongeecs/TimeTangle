@@ -127,7 +127,6 @@ class RoomUserCell: ProfileUsernameCell {
         menuButton.translatesAutoresizingMaskIntoConstraints = false
         addSubview(menuButton)
         
-        
         let menu: UIMenu!
         var uiActions = [UIAction]()
         let symbolConfig = UIImage.SymbolConfiguration(scale: .large)
@@ -138,12 +137,12 @@ class RoomUserCell: ProfileUsernameCell {
                 self?.delegate?.roomUserCellDidToggleAdmin(for: user)
         }
         
-        let revokeAdminUIAction = UIAction(title: "Revoke Admin", image: UIImage(systemName: "person.crop.circle.badge.xmark", withConfiguration: symbolConfig)) { [weak self] action in
+        let revokeAdminUIAction = UIAction(title: "Revoke Admin", image: UIImage(systemName: "person.crop.circle.badge.xmark", withConfiguration: symbolConfig), attributes: .destructive) { [weak self] action in
             guard let user = self?.user else { return }
             self?.delegate?.roomUserCellDidToggleAdmin(for: user)
         }
         
-        let removeUserUIAction = UIAction(title: "Remove User", image: UIImage(systemName: "person.badge.minus", withConfiguration: symbolConfig)) { [weak self] action in
+        let removeUserUIAction = UIAction(title: "Remove User", image: UIImage(systemName: "person.badge.minus", withConfiguration: symbolConfig), attributes: .destructive) { [weak self] action in
             guard let user = self?.user else { return }
             self?.delegate?.roomUserCellDidRemoveUser(for: user)
         }

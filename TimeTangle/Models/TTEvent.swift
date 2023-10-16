@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct TTEvent: Codable, Equatable {
+struct TTEvent: Codable, Equatable, Hashable {
     var name: String
     var startDate: Date
     var endDate: Date
@@ -33,5 +33,11 @@ struct TTEvent: Codable, Equatable {
     
     func getDateInterval() -> DateInterval {
         return DateInterval(start: self.startDate, end: self.endDate)
+    }
+}
+
+extension TTEvent {
+    var isCreatedByUser: Bool {
+        self.createdBy != "TimeTangle"
     }
 }

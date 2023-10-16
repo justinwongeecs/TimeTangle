@@ -54,14 +54,14 @@ class FriendRequestCell: UITableViewCell {
             if let recipientUserImageData = friendRequest.recipientProfilePictureData, let image = UIImage(data: recipientUserImageData) {
                 avatarImageView.setImage(to: image)
             }
-            usernameLabel.text = friendRequest.recipientUsername
+            usernameLabel.text = friendRequest.recipientName
             friendRequestTypeLabel.textColor = .secondaryLabel
             buttonsStackView.isHidden = true
         case .receiving:
             if let senderUserImageData = friendRequest.senderProfilePictureData, let image = UIImage(data: senderUserImageData) {
                 avatarImageView.setImage(to: image)
             }
-            usernameLabel.text = friendRequest.senderUsername
+            usernameLabel.text = friendRequest.senderName
             //remove friendReqeustTypeLabel because we will show accept or decline buttons instead
             friendRequestTypeLabel.removeFromSuperview()
         case .accepted:
@@ -76,9 +76,11 @@ class FriendRequestCell: UITableViewCell {
         addSubview(usernameLabel)
         addSubview(friendRequestTypeLabel)
         
-        backgroundColor = .secondarySystemBackground
+        backgroundColor = .systemGreen.withAlphaComponent(0.2)
         layer.cornerRadius = 10
-        selectionStyle = .none 
+        layer.borderWidth = 1
+        layer.borderColor = UIColor.systemGreen.cgColor
+        selectionStyle = .none
         
         let padding: CGFloat = 12
         
@@ -148,7 +150,7 @@ class FriendRequestCell: UITableViewCell {
         
         //add appropriate friends to both the sender and recipient, remove friend requests from both
         let newRecipientData = [
-            TTConstants.friends: FieldValue.arrayUnion([friendRequest.senderUsername]),
+            TTConstants.friends: FieldValue.arrayUnion([friendRequest.senderName]),
             TTConstants.friendRequests: FieldValue.arrayRemove([friendRequest.dictionary])
         ]
         
@@ -157,12 +159,12 @@ class FriendRequestCell: UITableViewCell {
         print("Sender Friend Request Dic: \(senderFriendRequestDict.dictionary)")
         
         let newSenderData = [
-            TTConstants.friends: FieldValue.arrayUnion([friendRequest.recipientUsername]),
+            TTConstants.friends: FieldValue.arrayUnion([friendRequest.recipientName]),
             TTConstants.friendRequests: FieldValue.arrayRemove([senderFriendRequestDict.dictionary])
         ]
         
         //update friendRequests and friends field for both sender and recipient
-        for (username, newData) in [(friendRequest.recipientUsername, newRecipientData), (friendRequest.senderUsername, newSenderData)] {
+        for (username, newData) in [(friendRequest.recipientName, newRecipientData), (friendRequest.senderName, newSenderData)] {
             FirebaseManager.shared.updateUserData(for: username, with: newData) { [weak self] error in
                 guard let error = error else {  self?.delegate.clickedFriendRequestActionButton(result: .success(()))
                     return
@@ -182,7 +184,7 @@ class FriendRequestCell: UITableViewCell {
         ]
         
         //update friendRequests field for both sender and recipient
-        for username in [friendRequest.senderUsername, friendRequest.recipientUsername] {
+        for username in [friendRequest.senderName, friendRequest.recipientName] {
             FirebaseManager.shared.updateUserData(for: username, with: newRecipientData) { [weak self] error in
                 guard let error = error else {
                     self?.delegate.clickedFriendRequestActionButton(result: .success(()))

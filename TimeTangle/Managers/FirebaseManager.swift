@@ -204,7 +204,6 @@ class FirebaseManager {
     }
     
     //MARK: - Firestore Room
-    
     func listenToCurrentUserRooms() {
         guard let currentUserRoomCodes = currentUser?.roomCodes, currentUserRoomCodes.count > 0 else { return }
         print("CurrentUserRoomCodes: \(currentUser?.roomCodes)")

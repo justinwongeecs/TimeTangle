@@ -33,8 +33,10 @@ class ProfileUsernameCell: UITableViewCell {
         update()
     }
     
-    func set(for user: TTUser) {
+    func set(for user: TTUser, backgroundColor: UIColor? = .secondarySystemBackground) {
         self.user = user
+        self.backgroundColor = backgroundColor
+        
         usernameLabel.text = user.getFullName()
     
         if let imageData = user.profilePictureData, let image = UIImage(data: imageData) {
@@ -45,7 +47,6 @@ class ProfileUsernameCell: UITableViewCell {
     }
     
     private func configureCell() {
-        backgroundColor = .secondarySystemBackground
         layer.cornerRadius = 10
         selectionStyle = .none
         clipsToBounds = true

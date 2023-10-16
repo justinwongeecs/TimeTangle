@@ -170,6 +170,7 @@ struct RoomSettingsView: View {
                 config.hostingController?.presentTTAlert(title: "Setting Error", message: ttError?.rawValue ?? "No Message", buttonTitle: "OK")
             }
         }
+        .tint(.green)
     }
     
     //MARK: - MinimumNumberofUsersPicker
