@@ -1,5 +1,5 @@
 //
-//  CreateRoomVC.swift
+//  CreateGroupVC.swift
 //  TimeTangle
 //
 //  Created by Justin Wong on 12/24/22.
@@ -7,27 +7,26 @@
 
 import UIKit
 
-class CreateRoomVC: UIViewController {
+class CreateGroupVC: UIViewController {
     
     private var allFriends = [TTUser]()
-    private var usersQueueForRoomCreation = [TTUser]()
+    private var usersQueueCache = TTCache<String, TTUser>()
+    private var usersQueueForGroupCreation = [TTUser]()
     
     private var searchController: UISearchController!
     private var searchFriendsResultController: SearchFriendsResultController!
     
     private let usersQueueCountLabel = TTTitleLabel(textAlignment: .center, fontSize: 15)
     private let usersQueueTable = UITableView()
-    private var activityIndicator: TTActivityIndicatorView!
-    private let createRoomButton = TTButton(backgroundColor: .systemGreen, title: "Create Room")
+    private let createGroupButton = TTButton(backgroundColor: .systemGreen, title: "Create Group")
 
     override func viewDidLoad() {
         super.viewDidLoad()
         configureViewController()
         configureSearchController()
         configureUsersQueueCountLabel()
-        configureCreateRoomButton()
+        configureCreateGroupButton()
         configureTableView()
-        configureActivityIndicator()
         createDismissKeyboardTapGesture()
         
         addCurrentUser()
@@ -36,33 +35,30 @@ class CreateRoomVC: UIViewController {
     
     private func configureViewController() {
         view.backgroundColor = .systemBackground
-        title = "Create Room"
+        title = "Create Group"
         navigationController?.navigationBar.prefersLargeTitles = true
         
-        //Join Room Button
-        let joinRoomButton = UIBarButtonItem(image: UIImage(systemName: "ipad.and.arrow.forward"), style: .plain, target: self, action: #selector(joinRoom))
-        joinRoomButton.tintColor = .systemGreen
-        navigationItem.rightBarButtonItem = joinRoomButton
+        //Join Group Button
+        let joinGroupButton = UIBarButtonItem(image: UIImage(systemName: "ipad.and.arrow.forward"), style: .plain, target: self, action: #selector(joinGroup))
+        joinGroupButton.tintColor = .systemGreen
+        navigationItem.rightBarButtonItem = joinGroupButton
     }
     
-    @objc private func joinRoom() {
-        let joinRoomVC = JoinRoomVC() { [weak self] in
+    @objc private func joinGroup() {
+        let joinGroupVC = JoinGroupVC() { [weak self] in
             self?.dismiss(animated: true)
         }
-        joinRoomVC.modalPresentationStyle = .overFullScreen
-        joinRoomVC.modalTransitionStyle = .crossDissolve
-        self.present(joinRoomVC, animated: true)
+        joinGroupVC.modalPresentationStyle = .overFullScreen
+        joinGroupVC.modalTransitionStyle = .crossDissolve
+        self.present(joinGroupVC, animated: true)
     }
     
     @objc private func fetchUpdatedUser() {   
-        if !usersQueueForRoomCreation.isEmpty {
-            activityIndicator.startAnimating()
-            activityIndicator.startAnimating()
-            FirebaseManager.shared.fetchMultipleUsersDocumentData(with: usersQueueForRoomCreation.map{ $0.username }) { [weak self] result in
-                self?.activityIndicator.stopAnimating()
+        if !usersQueueForGroupCreation.isEmpty {
+            FirebaseManager.shared.fetchMultipleUsersDocumentData(with: usersQueueForGroupCreation.map{ $0.username }) { [weak self] result in
                 switch result {
                 case .success(let users):
-                    self?.usersQueueForRoomCreation = users
+                    self?.usersQueueForGroupCreation = users
                     self?.refreshTableView()
                 case .failure(let error):
                     self?.presentTTAlert(title: "Fetch Error", message: error.rawValue, buttonTitle: "OK")
@@ -72,7 +68,7 @@ class CreateRoomVC: UIViewController {
     }
     
     private func configureSearchController() {
-        searchFriendsResultController = SearchFriendsResultController()
+        searchFriendsResultController = SearchFriendsResultController(usersInQueueCache: usersQueueCache)
        
         searchController = UISearchController(searchResultsController: searchFriendsResultController)
         
@@ -90,6 +86,7 @@ class CreateRoomVC: UIViewController {
         
         searchController.searchBar.placeholder = "Search for a friend"
         searchController.searchBar.isTranslucent = true 
+        searchController.searchBar.tintColor = .systemGreen
         
         searchFriendsResultController.suggestedSearchDelegate = self
         searchFriendsResultController.searchVCRef = self
@@ -110,7 +107,7 @@ class CreateRoomVC: UIViewController {
     }
     
     private func updateUsersQueueCountLabel() {
-        usersQueueCountLabel.text = "\(self.usersQueueForRoomCreation.count) Participant\(self.usersQueueForRoomCreation.count > 1 ? "s" : "")"
+        usersQueueCountLabel.text = "\(self.usersQueueForGroupCreation.count) Participant\(self.usersQueueForGroupCreation.count > 1 ? "s" : "")"
     }
     
     private func configureTableView() {
@@ -122,57 +119,41 @@ class CreateRoomVC: UIViewController {
         usersQueueTable.delegate = self
         usersQueueTable.dataSource = self
         
-        usersQueueTable.register(CreateRoomUserQueueCell.self, forCellReuseIdentifier: CreateRoomUserQueueCell.getReuseID())
+        usersQueueTable.register(CreateGroupUserQueueCell.self, forCellReuseIdentifier: CreateGroupUserQueueCell.getReuseID())
         
         NSLayoutConstraint.activate([
             usersQueueTable.topAnchor.constraint(equalTo: usersQueueCountLabel.bottomAnchor, constant: 10),
             usersQueueTable.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
             usersQueueTable.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
-            usersQueueTable.bottomAnchor.constraint(equalTo: createRoomButton.topAnchor, constant: -10)
+            usersQueueTable.bottomAnchor.constraint(equalTo: createGroupButton.topAnchor, constant: -10)
         ])
     }
     
-    private func configureActivityIndicator() {
-        activityIndicator = TTActivityIndicatorView(containerView: usersQueueTable)
-//        activityIndicator.color = .lightGray
-//        activityIndicator.center = CGPoint(x: usersQueueTable.bounds.width / 2, y: activityIndicator.bounds.height / 2)
-//        activityIndicator.hidesWhenStopped = true
-//        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
-//        usersQueueTable.addSubview(activityIndicator)
-//
-//        NSLayoutConstraint.activate([
-//            activityIndicator.centerXAnchor.constraint(equalTo: usersQueueTable.centerXAnchor),
-//            activityIndicator.centerYAnchor.constraint(equalTo: usersQueueTable.centerYAnchor),
-//            activityIndicator.widthAnchor.constraint(equalToConstant: 20),
-//            activityIndicator.heightAnchor.constraint(equalToConstant: 20)
-//        ])
-    }
-    
-    private func configureCreateRoomButton() {
-        view.addSubview(createRoomButton)
-        createRoomButton.addTarget(self, action: #selector(createRoom), for: .touchUpInside)
+    private func configureCreateGroupButton() {
+        view.addSubview(createGroupButton)
+        createGroupButton.addTarget(self, action: #selector(createGroup), for: .touchUpInside)
         
         NSLayoutConstraint.activate([
-            createRoomButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
-            createRoomButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 50),
-            createRoomButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -50),
-            createRoomButton.heightAnchor.constraint(equalToConstant: 50)
+            createGroupButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+            createGroupButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 50),
+            createGroupButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -50),
+            createGroupButton.heightAnchor.constraint(equalToConstant: 50)
         ])
     }
     
-    @objc private func createRoom() {
-        let createRoomConfirmationVC = CreateRoomConfirmationVC(users: usersQueueForRoomCreation) { [weak self] in
+    @objc private func createGroup() {
+        let createGroupConfirmationVC = CreateGroupConfirmationVC(users: usersQueueForGroupCreation) { [weak self] in
             self?.dismiss(animated: true)
         }
-        createRoomConfirmationVC.modalPresentationStyle = .overFullScreen
-        createRoomConfirmationVC.modalTransitionStyle = .crossDissolve
-        createRoomConfirmationVC.createRoomConfirmationDelegate = self
-        self.present(createRoomConfirmationVC, animated: true)
+        createGroupConfirmationVC.modalPresentationStyle = .overFullScreen
+        createGroupConfirmationVC.modalTransitionStyle = .crossDissolve
+        createGroupConfirmationVC.createGroupConfirmationDelegate = self
+        self.present(createGroupConfirmationVC, animated: true)
     }
     
     private func addCurrentUser() {
         guard let currentUser = FirebaseManager.shared.currentUser else { return }
-        usersQueueForRoomCreation.append(currentUser)
+        usersQueueForGroupCreation.append(currentUser)
         refreshTableView()
     }
     
@@ -183,19 +164,19 @@ class CreateRoomVC: UIViewController {
         }
     }
     
-    func getUsersQueueForRoomCreation() -> [TTUser] {
-        return usersQueueForRoomCreation
+    func getUsersQueueForGroupCreation() -> [TTUser] {
+        return usersQueueForGroupCreation
     }
 }
 
 //MARK: - Delegates
-extension CreateRoomVC: UITableViewDataSource, UITableViewDelegate {
+extension CreateGroupVC: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = usersQueueTable.dequeueReusableCell(withIdentifier: CreateRoomUserQueueCell.getReuseID()) as! CreateRoomUserQueueCell
-        let userInQueue = usersQueueForRoomCreation[indexPath.section]
+        let cell = usersQueueTable.dequeueReusableCell(withIdentifier: CreateGroupUserQueueCell.getReuseID()) as! CreateGroupUserQueueCell
+        let userInQueue = usersQueueForGroupCreation[indexPath.section]
         cell.set(for: userInQueue) {
             if userInQueue.username != FirebaseManager.shared.currentUser?.username {
-                self.usersQueueForRoomCreation.remove(at: indexPath.section)
+                self.usersQueueForGroupCreation.remove(at: indexPath.section)
                 self.usersQueueTable.beginUpdates()
                 self.usersQueueTable.deleteSections([indexPath.section], with: .fade)
                 self.usersQueueTable.endUpdates()
@@ -210,7 +191,7 @@ extension CreateRoomVC: UITableViewDataSource, UITableViewDelegate {
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        return usersQueueForRoomCreation.count
+        return usersQueueForGroupCreation.count
     }
     
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
@@ -220,19 +201,19 @@ extension CreateRoomVC: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return 7.0
+        return TTConstants.defaultCellHeaderAndFooterHeight
     }
     
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return 7.0
+        return TTConstants.defaultCellHeaderAndFooterHeight
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 50.0
+        return TTConstants.defaultCellHeight
     }
 }
 
-extension CreateRoomVC: UISearchBarDelegate {
+extension CreateGroupVC: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         searchFriendsResultController.search(with: searchText)
     }
@@ -243,26 +224,26 @@ extension CreateRoomVC: UISearchBarDelegate {
     }
 }
 
-extension CreateRoomVC: UISearchControllerDelegate {
+extension CreateGroupVC: UISearchControllerDelegate {
     func presentSearchController(_ searchController: UISearchController) {
         searchController.showsSearchResultsController = true
     }
 }
 
-extension CreateRoomVC: SearchFriendsResultControllerDelegate {
+extension CreateGroupVC: SearchFriendsResultControllerDelegate {
     func didSelectSuggestedSearch(for user: TTUser) {
         searchController.showsSearchResultsController = false
         searchController.dismiss(animated: true, completion: nil)
         
-        usersQueueForRoomCreation.append(user)
+        usersQueueForGroupCreation.append(user)
         refreshTableView()
         updateUsersQueueCountLabel()
     }
 }
 
-extension CreateRoomVC: CreateRoomConfirmationVCDelegate {
-    func didSuccessfullyCreateRoom() {
-        usersQueueForRoomCreation = []
+extension CreateGroupVC: CreateGroupConfirmationVCDelegate {
+    func didSuccessfullyCreateGroup() {
+        usersQueueForGroupCreation = []
         addCurrentUser()
         updateUsersQueueCountLabel()
         dismiss(animated: true)

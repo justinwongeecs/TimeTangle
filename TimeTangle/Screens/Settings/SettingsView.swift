@@ -12,7 +12,7 @@ import Setting
 class SettingsViewModel: ObservableObject {
     @AppStorage(SettingsConstants.allowNotifications) var allowNotifications = true
     @AppStorage(SettingsConstants.friendsDiscoverability) var friendsDiscoverability = true
-    @AppStorage(SettingsConstants.timePeriodToDeleteRoomsIndex) var timePeriodToDeleteRoomsIndex = 0
+    @AppStorage(SettingsConstants.timePeriodToDeleteGroupsIndex) var timePeriodToDeleteGroupsIndex = 0
     @AppStorage(SettingsConstants.appearanceIndex) var appearanceIndex = 0
     @AppStorage(SettingsConstants.automaticallyPullsFromCalendar) var automaticallyPullsFromCalendar = true
     @AppStorage(SettingsConstants.subscriptionPlanIsFree) var subscriptionPlanIsFree = true 
@@ -61,14 +61,14 @@ struct SettingsView: View {
             
             SettingGroup {
                 SettingCustomView {
-                    SettingPicker(title: "Delete Rooms After Ending Date", choices: [
+                    SettingPicker(title: "Delete Groups After Ending Date", choices: [
                         "1 Week",
                         "1 Month",
                         "6 Months",
                         "1 Year",
                         "Never"
-                    ], selectedIndex: $model.timePeriodToDeleteRoomsIndex)
-                    Text("If specified, rooms will be deleted after a period of inactivity")
+                    ], selectedIndex: $model.timePeriodToDeleteGroupsIndex)
+                    Text("If specified, groups will be deleted after a period of inactivity")
                         .font(.system(size: 13))
                         .foregroundColor(.secondary)
                         .padding(15)

@@ -1,5 +1,5 @@
 //
-//  TTRoomCodeView.swift
+//  TTGroupCodeView.swift
 //  TimeTangle
 //
 //  Created by Justin Wong on 5/27/23.
@@ -7,8 +7,8 @@
 
 import UIKit
 
-class TTRoomCodeView: UIView {
-    private let roomCodeLabel = TTBodyLabel(textAlignment: .center)
+class TTGroupCodeView: UIView {
+    private let groupCodeLabel = TTBodyLabel(textAlignment: .center)
     private let codeText: String!
     
     required init(codeText: String) {
@@ -27,17 +27,17 @@ class TTRoomCodeView: UIView {
         layer.masksToBounds = true
         layer.cornerRadius = 16
         
-        roomCodeLabel.font = UIFont.boldSystemFont(ofSize: 50)
-        roomCodeLabel.text = codeText
-        addSubview(roomCodeLabel)
+        groupCodeLabel.font = UIFont.boldSystemFont(ofSize: 50)
+        groupCodeLabel.text = codeText
+        addSubview(groupCodeLabel)
         
         let padding: CGFloat = 10
         
         NSLayoutConstraint.activate([
-            roomCodeLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
-            roomCodeLabel.topAnchor.constraint(equalTo: topAnchor, constant: padding),
-            roomCodeLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: padding),
-            roomCodeLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -padding),
+            groupCodeLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
+            groupCodeLabel.topAnchor.constraint(equalTo: topAnchor, constant: padding),
+            groupCodeLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: padding),
+            groupCodeLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -padding),
         ])
     }
 }

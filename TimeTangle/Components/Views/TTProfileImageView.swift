@@ -23,7 +23,7 @@ class TTProfileImageView: UIView {
     
     var showBorder: Bool = false {
         didSet {
-            updateBorder()
+            updateImageViewBorderColor()
         }
     }
     
@@ -47,6 +47,20 @@ class TTProfileImageView: UIView {
         configureProfileImageView()
     }
     
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        updateImageViewBorderColor()
+    }
+    
+    private func updateImageViewBorderColor() {
+        if showBorder {
+            if traitCollection.userInterfaceStyle == .dark {
+                profileImageView.layer.borderColor = UIColor.white.cgColor
+            } else {
+                profileImageView.layer.borderColor = UIColor.gray.cgColor
+            }
+        }
+    }
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -59,6 +73,7 @@ class TTProfileImageView: UIView {
     
         profileImageView = UIImageView(frame: profileImageOuterView.bounds)
         profileImageView.tintColor = .lightGray
+        profileImageView.layer.borderWidth = 1
         profileImageOuterView.addSubview(profileImageView)
         
         profileImageActivityIndicator.color = .white
@@ -99,11 +114,6 @@ class TTProfileImageView: UIView {
             profileImageOuterView.layer.shadowRadius = 13
             profileImageOuterView.layer.shadowPath = UIBezierPath(roundedRect: profileImageOuterView.bounds, cornerRadius: profileImageView.frame.size.width / 2).cgPath
         }
-    }
-    
-    private func updateBorder() {
-        profileImageView.layer.borderWidth = 5.0
-        profileImageView.layer.borderColor = UIColor.lightGray.cgColor
     }
     
     //MARK: - Public Methods

@@ -1,5 +1,5 @@
 //
-//  RoomUsersVC.swift
+//  GroupUsersVC.swift
 //  TimeTangle
 //
 //  Created by Justin Wong on 1/2/23.
@@ -8,20 +8,20 @@
 import UIKit
 import FirebaseFirestore
 
-class RoomUsersVC: UIViewController {
+class GroupUsersVC: UIViewController {
     
-    private var room: TTRoom!
+    private var group: TTGroup!
     private var ttUsers = [TTUser]()
-    private var roomUsersCache = TTCache<String, TTUser>()
+    private var groupUsersCache = TTCache<String, TTUser>()
     private let activityIndicator = UIActivityIndicatorView(style: .medium)
     private let usersTableView = UITableView()
     private var usersNotVisible = [String]()
     
-    weak var delegate: RoomUpdateDelegate? 
+    weak var delegate: GroupUpdateDelegate? 
     
-    init(room: TTRoom, roomUsersCache: TTCache<String, TTUser>, usersNotVisible: [String]) {
-        self.room = room
-        self.roomUsersCache = roomUsersCache
+    init(group: TTGroup, groupUsersCache: TTCache<String, TTUser>, usersNotVisible: [String]) {
+        self.group = group
+        self.groupUsersCache = groupUsersCache
         self.usersNotVisible = usersNotVisible
         super.init(nibName: nil, bundle: nil)
     }
@@ -36,18 +36,18 @@ class RoomUsersVC: UIViewController {
         view.backgroundColor = .systemBackground
         configureActivityIndicator()
         configureUsersTableView()
-        loadRoomUsers()
+        loadGroupUsers()
     }
     
     //Is this the best place to put this?
-    private func loadRoomUsers() {
+    private func loadGroupUsers() {
         activityIndicator.startAnimating()
         
-        for username in room.users {
-            if let cachedUser = roomUsersCache[username] {
+        for username in group.users {
+            if let cachedUser = groupUsersCache[username] {
                 ttUsers.append(cachedUser)
             } else {
-                fetchRoomTTUser(for: username)
+                fetchGroupTTUser(for: username)
             }
         }
     
@@ -55,8 +55,8 @@ class RoomUsersVC: UIViewController {
         updateVCTitle()
     }
     
-    private func fetchRoomTTUser(for username: String) {
-        print("Fetch room tt users")
+    private func fetchGroupTTUser(for username: String) {
+        print("Fetch group tt users")
         activityIndicator.startAnimating()
         FirebaseManager.shared.fetchUserDocumentData(with: username) { [weak self] result in
             guard let self = self else { return }
@@ -65,7 +65,7 @@ class RoomUsersVC: UIViewController {
             case .success(let ttUser):
                 self.ttUsers.append(ttUser)
                 for ttUser in ttUsers {
-                    self.roomUsersCache.insert(ttUser, forKey: ttUser.username)
+                    self.groupUsersCache.insert(ttUser, forKey: ttUser.username)
                 }
                 self.sortUsersByAdminAndName()
             case .failure(let error):
@@ -100,7 +100,7 @@ class RoomUsersVC: UIViewController {
         usersTableView.separatorStyle = .none
         usersTableView.delegate = self
         usersTableView.dataSource = self
-        usersTableView.register(RoomUserCell.self, forCellReuseIdentifier: RoomUserCell.reuseID)
+        usersTableView.register(GroupUserCell.self, forCellReuseIdentifier: GroupUserCell.reuseID)
         
         NSLayoutConstraint.activate([
             usersTableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -114,7 +114,7 @@ class RoomUsersVC: UIViewController {
         //Need to create a copy to avoid "simultaneous access error"
         var users = ttUsers
         users.sort(by: {
-            self.room.doesContainsAdmin(for: $0.username) && !self.room.doesContainsAdmin(for: $1.username)
+            self.group.doesContainsAdmin(for: $0.username) && !self.group.doesContainsAdmin(for: $1.username)
         })
         ttUsers = users
     }
@@ -124,7 +124,7 @@ class RoomUsersVC: UIViewController {
     }
 }
 
-extension RoomUsersVC: UITableViewDelegate, UITableViewDataSource {
+extension GroupUsersVC: UITableViewDelegate, UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
         return ttUsers.count
     }
@@ -134,9 +134,9 @@ extension RoomUsersVC: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = usersTableView.dequeueReusableCell(withIdentifier: RoomUserCell.reuseID) as! RoomUserCell
+        let cell = usersTableView.dequeueReusableCell(withIdentifier: GroupUserCell.reuseID) as! GroupUserCell
         let user = ttUsers[indexPath.section]
-        cell.set(for: user, usersNotVisible: usersNotVisible, room: room)
+        cell.set(for: user, usersNotVisible: usersNotVisible, group: group)
         cell.delegate = self
         return cell
     }
@@ -156,7 +156,7 @@ extension RoomUsersVC: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 60.0
+        return TTConstants.defaultCellHeight
     }
     
     override func setEditing(_ editing: Bool, animated: Bool) {
@@ -171,23 +171,23 @@ extension RoomUsersVC: UITableViewDelegate, UITableViewDataSource {
         
         let removeAction = UIAlertAction(title: "Remove", style: .destructive) { [weak self] _ in
             guard let self = self else { return }
-            let newRoomData = [
-                TTConstants.roomUsers:
+            let newGroupData = [
+                TTConstants.groupUsers:
                     FieldValue.arrayRemove([username])
             ]
             
-            if let removeIndex = room.users.firstIndex(of: username), let delegate = delegate {
-                room.users.remove(at: removeIndex)
-                delegate.roomDidUpdate(for: room)
+            if let removeIndex = group.users.firstIndex(of: username), let delegate = delegate {
+                group.users.remove(at: removeIndex)
+                delegate.groupDidUpdate(for: group)
             }
             
-            FirebaseManager.shared.updateRoom(for: self.room.code, with: newRoomData) { [weak self] error in
+            FirebaseManager.shared.updateGroup(for: self.group.code, with: newGroupData) { [weak self] error in
                 guard let self = self else { return }
                 if let error = error {
-                    self.presentTTAlert(title: "Cannot update room", message: error.rawValue, buttonTitle: "OK")
+                    self.presentTTAlert(title: "Cannot update group", message: error.rawValue, buttonTitle: "OK")
                 } else {
                     FirebaseManager.shared.updateUserData(for: username, with: [
-                        TTConstants.roomCodes: FieldValue.arrayRemove([self.room.code])
+                        TTConstants.groupCodes: FieldValue.arrayRemove([self.group.code])
                     ]) { [weak self] error in
                         if let error = error {
                             self?.presentTTAlert(title: "Cannot update user", message: error.rawValue, buttonTitle: "OK")
@@ -214,7 +214,7 @@ extension RoomUsersVC: UITableViewDelegate, UITableViewDataSource {
     private func toggleUserAdminAccess(for username: String, completion: @escaping((Bool) -> Void)) {
         //Show Confirmation Alert
         
-        let isUserAdmin = room.doesContainsAdmin(for: username)
+        let isUserAdmin = group.doesContainsAdmin(for: username)
         let alertController: UIAlertController!
         
         if !isUserAdmin {
@@ -225,27 +225,27 @@ extension RoomUsersVC: UITableViewDelegate, UITableViewDataSource {
         
         let okAction = UIAlertAction(title: "OK", style: .default) { [weak self] _ in
             guard let self = self else { return }
-            let newRoomData = isUserAdmin ? [
-                TTConstants.roomAdmins: FieldValue.arrayRemove([username])
+            let newGroupData = isUserAdmin ? [
+                TTConstants.groupAdmins: FieldValue.arrayRemove([username])
             ] : [
-                TTConstants.roomAdmins: FieldValue.arrayUnion([username])
+                TTConstants.groupAdmins: FieldValue.arrayUnion([username])
             ]
             
             if isUserAdmin {
-                if let removeIndex = room.admins.firstIndex(of: username) {
-                    room.admins.remove(at: removeIndex)
+                if let removeIndex = group.admins.firstIndex(of: username) {
+                    group.admins.remove(at: removeIndex)
                 }
                 
             } else {
-                room.admins.append(username)
+                group.admins.append(username)
             }
             
-            //RoomUpdateDelegate to update RoomDetailVC's room
+            //GroupUpdateDelegate to update GroupDetailVC's group
             if let delegate = delegate {
-                delegate.roomDidUpdate(for: room)
+                delegate.groupDidUpdate(for: group)
             }
             
-            FirebaseManager.shared.updateRoom(for: self.room.code, with: newRoomData) { [weak self] error in
+            FirebaseManager.shared.updateGroup(for: self.group.code, with: newGroupData) { [weak self] error in
                 guard error == nil else { return }
                 self?.sortUsersByAdminAndName()
                 completion(true)
@@ -265,13 +265,13 @@ extension RoomUsersVC: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
-//MARK: - RoomUserCellDelegate
-extension RoomUsersVC: RoomUserCellDelegate {
-    func roomUserCellVisibilityDidChange(for user: TTUser) {
-        delegate?.roomUserVisibilityDidUpdate(for: user.username)
+//MARK: - GroupUserCellDelegate
+extension GroupUsersVC: GroupUserCellDelegate {
+    func groupUserCellVisibilityDidChange(for user: TTUser) {
+        delegate?.groupUserVisibilityDidUpdate(for: user.username)
     }
     
-    func roomUserCellDidToggleAdmin(for user: TTUser) {
+    func groupUserCellDidToggleAdmin(for user: TTUser) {
         toggleUserAdminAccess(for: user.username) { [weak self] _ in
             guard let self = self else { return }
             DispatchQueue.main.async {
@@ -280,12 +280,12 @@ extension RoomUsersVC: RoomUserCellDelegate {
         }
     }
     
-    func roomUserCellDidRemoveUser(for user: TTUser) {
+    func groupUserCellDidRemoveUser(for user: TTUser) {
         removeUser(for: user.username) { [weak self] _ in
             guard let self = self else { return }
             if let ttUsersIndex = self.ttUsers.firstIndex(of: user) {
                 self.ttUsers.remove(at: ttUsersIndex)
-                self.roomUsersCache.removeValue(forKey: user.username)
+                self.groupUsersCache.removeValue(forKey: user.username)
                 DispatchQueue.main.async {
                     self.updateVCTitle()
                     self.usersTableView.reloadData()

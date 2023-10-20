@@ -1,27 +1,28 @@
 //
-//  TTRoom.swift
+//  TTGroup.swift
 //  TimeTangle
 //
 //  Created by Justin Wong on 12/26/22.
 //
 
 import Foundation
+import FirebaseFirestore
 
-typealias TTRoomEditType = TTRoomEdit.TTRoomEditType
-typealias TTRoomEditDifference = TTRoomEdit.TTRoomEditDifference
+typealias TTGroupEditType = TTGroupEdit.TTGroupEditType
+typealias TTGroupEditDifference = TTGroupEdit.TTGroupEditDifference
 
-struct TTRoom: Codable, Equatable {
+struct TTGroup: Codable, Equatable, Hashable {
     var name: String
     var users: [String]
     var code: String //A 5 letter Code
     var startingDate: Date
     var endingDate: Date
-    var histories: [TTRoomEdit]
+    var histories: [TTGroupEdit]
     var events: [TTEvent]
     var admins: [String]
-    var setting: TTRoomSetting
+    var setting: TTGroupSetting
     
-    static func == (lhs: TTRoom, rhs: TTRoom) -> Bool {
+    static func == (lhs: TTGroup, rhs: TTGroup) -> Bool {
         return lhs.users == rhs.users &&
         lhs.code == rhs.code &&
         lhs.startingDate == rhs.startingDate &&
@@ -34,12 +35,12 @@ struct TTRoom: Codable, Equatable {
     }
 }
 
-//MARK: - TTRoomEdit
-struct TTRoomEdit: Codable {
+//MARK: - TTGroupEdit
+struct TTGroupEdit: Codable, Hashable {
     var author: String
     var createdDate: Date
-    var editDifference: TTRoomEditDifference
-    var editType: TTRoomEditType
+    var editDifference: TTGroupEditDifference
+    var editType: TTGroupEditType
     
     var dictionary: [String: Any] {
          return [
@@ -50,13 +51,13 @@ struct TTRoomEdit: Codable {
          ]
     }
     
-    struct TTRoomEditDifference: Codable {
+    struct TTGroupEditDifference: Codable, Hashable {
         var before: String?
         var after: String?
     }
     
-    enum TTRoomEditType: String {
-        case addedUserToRoom 
+    enum TTGroupEditType: String, Hashable {
+        case addedUserToGroup
         case changedStartingDate
         case changedEndingDate
         case none
@@ -64,7 +65,7 @@ struct TTRoomEdit: Codable {
         var description: String {
             get {
                 switch self {
-                case .addedUserToRoom: return "addedUserToRoom"
+                case .addedUserToGroup: return "addedUserToGroup"
                 case .changedStartingDate: return "changedStartingDate"
                 case .changedEndingDate: return "changedEndingDate"
                 case .none: return "none"
@@ -72,10 +73,10 @@ struct TTRoomEdit: Codable {
             }
         }
         
-        static func getTTRoomEditType(editType: String) -> TTRoomEditType {
+        static func getTTGroupEditType(editType: String) -> TTGroupEditType {
             switch editType {
-            case "addedUserToRoom":
-                return .addedUserToRoom
+            case "addedUserToGroup":
+                return .addedUserToGroup
             case "changedStartingDate":
                 return .changedStartingDate
             case "changedEndingDate":
@@ -87,11 +88,11 @@ struct TTRoomEdit: Codable {
     }
 }
 
-extension TTRoomEditType: Codable {
+extension TTGroupEditType: Codable {
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         let rawValue = try container.decode(String.self)
-        self = TTRoomEditType.getTTRoomEditType(editType: rawValue)
+        self = TTGroupEditType.getTTGroupEditType(editType: rawValue)
     }
     
     func encode(to encoder: Encoder) throws {
@@ -100,12 +101,17 @@ extension TTRoomEditType: Codable {
     }
 }
 
-//MARK: - TTRoomSetting
-struct TTRoomSetting: Codable {
+//MARK: - TTGroupSetting
+struct TTGroupSetting: Codable, Hashable {
     var minimumNumOfUsers: Int
     var maximumNumOfUsers: Int
     var boundedStartDate: Date
     var boundedEndDate: Date
-    var lockRoomChanges: Bool
-    var allowRoomJoin: Bool
+    var lockGroupChanges: Bool
+    var allowGroupJoin: Bool
+}
+
+struct TTGroupModification {
+    var group: TTGroup
+    var modificationType: DocumentChangeType
 }

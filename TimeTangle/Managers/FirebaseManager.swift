@@ -16,7 +16,7 @@ class FirebaseManager {
     private let db = Firestore.firestore()
     private let ekManager = EventKitManager()
     private var handle: AuthStateDidChangeListenerHandle?
-    private var currentUserRoomsListener: ListenerRegistration?
+    private var currentUserGroupsListener: ListenerRegistration?
     private let sceneWindow = (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.window
     private let notificationCenter = NotificationCenter.default
     
@@ -34,7 +34,7 @@ class FirebaseManager {
                         self?.currentUser = user
                         self?.goToSearchScreen()
                         self?.listenToCurrentUser()
-                        self?.listenToCurrentUserRooms()
+                        self?.listenToCurrentUserGroups()
                     case .failure(_):
                         print("failure")
                     }
@@ -58,8 +58,8 @@ class FirebaseManager {
                 let currentUserData = try document.data(as: TTUser.self)
                 self?.currentUser = currentUserData
                 //Is this the right way to do this lol? 
-                self?.currentUserRoomsListener?.remove()
-                self?.listenToCurrentUserRooms()
+                self?.currentUserGroupsListener?.remove()
+                self?.listenToCurrentUserGroups()
                 self?.broadcastUpdatedUser()
             } catch {
                 print("Can't listen to current user")
@@ -203,55 +203,57 @@ class FirebaseManager {
         }
     }
     
-    //MARK: - Firestore Room
-    func listenToCurrentUserRooms() {
-        guard let currentUserRoomCodes = currentUser?.roomCodes, currentUserRoomCodes.count > 0 else { return }
-        print("CurrentUserRoomCodes: \(currentUser?.roomCodes)")
+    //MARK: - Firestore Group
+    func listenToCurrentUserGroups() {
+        guard let currentUserGroupCodes = currentUser?.groupCodes, currentUserGroupCodes.count > 0 else { return }
 
-        currentUserRoomsListener = db.collection(TTConstants.roomsCollection).whereField(TTConstants.roomCode, in: currentUserRoomCodes).addSnapshotListener { [weak self] querySnapshot, error in
-            guard let documents = querySnapshot?.documents else {
+        currentUserGroupsListener = db.collection(TTConstants.groupsCollection).whereField(TTConstants.groupCode, in: currentUserGroupCodes).addSnapshotListener { [weak self] querySnapshot, error in
+            guard let documents = querySnapshot?.documentChanges else {
                 print("Error fetching doucments")
                 return
             }
-
-            print("Room documents: \(documents.map{ $0["code"]})")
-
-            do {
-                let roomsData = try documents.map { try $0.data(as: TTRoom.self)}
-                self?.notificationCenter.post(name: .updatedCurrentUserRooms, object: roomsData)
-                print(roomsData)
-                print("send updated rooms notification ")
-            } catch {
-                //Error get roomsData
+            
+            var groupModifications = [TTGroupModification]()
+            
+            documents.forEach { diff in
+                do {
+                    let modifiedGroup = try diff.document.data(as: TTGroup.self)
+                    groupModifications.append(TTGroupModification(group: modifiedGroup, modificationType: diff.type))
+                    print("send updated groups notification ")
+                } catch {
+                    //Error get groupsData
+                }
             }
+            
+            self?.notificationCenter.post(name: .updatedCurrentUserGroups, object: groupModifications)
         }
     }
     
-    func createRoom(for room: TTRoom, completed: @escaping(Result<Void, TTError>) -> Void) {
+    func createGroup(for group: TTGroup, completed: @escaping(Result<Void, TTError>) -> Void) {
         do {
-            try db.collection(TTConstants.roomsCollection).document(room.code).setData(from: room)
+            try db.collection(TTConstants.groupsCollection).document(group.code).setData(from: group)
             completed(.success(()))
         } catch {
             //TODO: Catch Firestore Error
-            completed(.failure(.unableToCreateRoom))
+            completed(.failure(.unableToCreateGroup))
         }
     }
     
-    func fetchRoom(for roomCode: String, completed: @escaping(Result<TTRoom, TTError>) -> Void) {
-        let roomDocRef = db.collection(TTConstants.roomsCollection).document(roomCode)
-        roomDocRef.getDocument(as: TTRoom.self) { result in
+    func fetchGroup(for groupCode: String, completed: @escaping(Result<TTGroup, TTError>) -> Void) {
+        let groupDocRef = db.collection(TTConstants.groupsCollection).document(groupCode)
+        groupDocRef.getDocument(as: TTGroup.self) { result in
             switch result {
-            case .success(let room):
-                completed(.success(room))
+            case .success(let group):
+                completed(.success(group))
             case .failure(let error):
-                print("Fetch room error: \(error)")
-                completed(.failure(.unableToFetchRoom))
+                print("Fetch group error: \(error)")
+                completed(.failure(.unableToFetchGroup))
             }
         }
     }
     
-    func updateRoom(for roomCode: String, with fields: [String: Any], completed: @escaping(TTError?) -> Void) {
-        db.collection(TTConstants.roomsCollection).document(roomCode).updateData(fields) { error in
+    func updateGroup(for groupCode: String, with fields: [String: Any], completed: @escaping(TTError?) -> Void) {
+        db.collection(TTConstants.groupsCollection).document(groupCode).updateData(fields) { error in
             //TODO: Manage Firebase errors appropriately
             completed(nil)
             if let _ = error {
@@ -261,10 +263,10 @@ class FirebaseManager {
         }
     }
     
-    func deleteRoom(for roomCode: String, completed: @escaping(TTError?) -> Void) {
-        db.collection(TTConstants.roomsCollection).document(roomCode).delete() { err in
+    func deleteGroup(for groupCode: String, completed: @escaping(TTError?) -> Void) {
+        db.collection(TTConstants.groupsCollection).document(groupCode).delete() { err in
             if let _ = err {
-                completed(TTError.unableToDeleteRoom)
+                completed(TTError.unableToDeleteGroup)
             } else {
                 completed(nil)
             }
@@ -321,7 +323,7 @@ class FirebaseManager {
             "username": username,
             "friends": [],
             "friendRequests": [],
-            "roomCodes": []
+            "groupCodes": []
         ]) { err in
             if let _ = err {
                 completed(.failure(.unableToCreateFirestoreAssociatedUser))
@@ -376,7 +378,7 @@ class FirebaseManager {
     func createTabbar() -> UITabBarController {
         let tabbar = UITabBarController()
         UITabBar.appearance().tintColor = .systemGreen
-        tabbar.viewControllers = [createRoomNC(), createRoomsNC(), createFriendsNC(), createSettingsNC()]
+        tabbar.viewControllers = [createGroupNC(), createGroupsNC(), createFriendsNC(), createSettingsNC()]
         tabbar.tabBar.isTranslucent = true
         tabbar.tabBar.backgroundImage = UIImage()
         tabbar.tabBar.shadowImage = UIImage() // add this if you want remove tabBar separator
@@ -393,18 +395,18 @@ class FirebaseManager {
         return tabbar
     }
     
-    private func createRoomNC() -> UINavigationController {
-        let searchVC = CreateRoomVC()
-        searchVC.title = "Create Room"
-        searchVC.tabBarItem = UITabBarItem(title: "Create Room", image: UIImage(systemName: "door.left.hand.open"), tag: 0)
+    private func createGroupNC() -> UINavigationController {
+        let searchVC = CreateGroupVC()
+        searchVC.title = "Create Group"
+        searchVC.tabBarItem = UITabBarItem(title: "Create Group", image: UIImage(systemName: "door.left.hand.open"), tag: 0)
         return UINavigationController(rootViewController: searchVC)
     }
     
-    private func createRoomsNC() -> UINavigationController {
-        let roomsVC = RoomsVC()
-        roomsVC.title = "Rooms"
-        roomsVC.tabBarItem = UITabBarItem(title: "Rooms", image: UIImage(systemName: "server.rack"), tag: 1)
-        return UINavigationController(rootViewController: roomsVC)
+    private func createGroupsNC() -> UINavigationController {
+        let groupsVC = GroupsVC()
+        groupsVC.title = "Groups"
+        groupsVC.tabBarItem = UITabBarItem(title: "Groups", image: UIImage(systemName: "rectangle.on.rectangle"), tag: 1)
+        return UINavigationController(rootViewController: groupsVC)
     }
     
     private func createFriendsNC() -> UINavigationController {
@@ -414,7 +416,6 @@ class FirebaseManager {
     }
     
     private func createSettingsNC() -> UINavigationController {
-        let config = Configuration()
         let settingsVC = TTHostingController(rootView: SettingsView())
         settingsVC.tabBarItem = UITabBarItem(title: "Settings", image: UIImage(systemName: "gearshape"), tag: 3)
         return UINavigationController(rootViewController: settingsVC)

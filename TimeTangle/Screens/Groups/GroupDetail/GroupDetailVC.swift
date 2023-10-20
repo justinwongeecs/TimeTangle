@@ -1,5 +1,5 @@
 //
-//  RoomDetailVC.swift
+//  GroupDetailVC.swift
 //  TimeTangle
 //
 //  Created by Justin Wong on 12/30/22.
@@ -9,43 +9,43 @@ import UIKit
 import CalendarKit
 import FirebaseFirestore
 
-protocol RoomUpdateDelegate: AnyObject {
-    func roomDidUpdate(for room: TTRoom)
-    func roomUserVisibilityDidUpdate(for username: String)
+protocol GroupUpdateDelegate: AnyObject {
+    func groupDidUpdate(for group: TTGroup)
+    func groupUserVisibilityDidUpdate(for username: String)
 }
 
-extension RoomUpdateDelegate {
-    func roomUserVisibilityDidUpdate(for username: String) {}
+extension GroupUpdateDelegate {
+    func groupUserVisibilityDidUpdate(for username: String) {}
 }
 
-class RoomDetailVC: UIViewController {
+class GroupDetailVC: UIViewController {
     
     @IBOutlet weak var usersCountButton: UIButton!
     @IBOutlet weak var startingDatePicker: UIDatePicker!
     @IBOutlet weak var endingDatePicker: UIDatePicker!
     @IBOutlet weak var aggregateResultView: UIView!
     
-    private var roomAggregateVC: RoomAggregateResultVC!
-    private var roomUsersVC: RoomUsersVC!
-    private var room: TTRoom!
-    private var roomHistoryVC: RoomHistoryVC!
-    private var roomOverviewVC: RoomOverviewVC!
-    private var confirmRoomChangesContainerView: UIView!
+    private var groupAggregateVC: GroupAggregateResultVC!
+    private var groupUsersVC: GroupUsersVC!
+    private var group: TTGroup!
+    private var groupHistoryVC: GroupHistoryVC!
+    private var groupOverviewVC: GroupOverviewVC!
+    private var confirmGroupChangesContainerView: UIView!
     private var saveOrCancelIsland: SaveOrCancelIsland!
-    private var roomUsersCache = TTCache<String, TTUser>()
+    private var groupUsersCache = TTCache<String, TTUser>()
     
-    private var originalRoomState: TTRoom!
+    private var originalGroupState: TTGroup!
     private var openIntervals = [TTEvent]()
-    private var isPresentingRoomChangesView: Bool = false
+    private var isPresentingGroupChangesView: Bool = false
     
     //filters displaying users
     var usersNotVisible = [String]()
     
-    init(room: TTRoom, nibName: String) {
+    init(group: TTGroup, nibName: String) {
         super.init(nibName: nibName, bundle: nil)
-        self.room = room
-        title = "\(room.name)"
-        originalRoomState = room
+        self.group = group
+        title = "\(group.name)"
+        originalGroupState = group
     }
     
     required init?(coder: NSCoder) {
@@ -56,7 +56,7 @@ class RoomDetailVC: UIViewController {
         super.viewDidLoad()
         navigationController?.navigationBar.prefersLargeTitles = false
         configureNavigationBarItems()
-        configureRoomAggregateResultView()
+        configureGroupAggregateResultView()
         configureSaveOrCancelIsland()
         updateView()
     }
@@ -68,7 +68,7 @@ class RoomDetailVC: UIViewController {
     
 //    private func configureAdminEnability() {
 //        guard let currentUser = FirebaseManager.shared.currentUser else { return }
-//        if !room.doesContainsAdmin(for: currentUser.username) {
+//        if !group.doesContainsAdmin(for: currentUser.username) {
 //            startingDatePicker.isEnabled = false
 //            startingDatePicker.isUserInteractionEnabled = false
 //            endingDatePicker.isEnabled = false
@@ -88,13 +88,13 @@ class RoomDetailVC: UIViewController {
         
         let infoButton = UIBarButtonItem(image: UIImage(systemName: "info.circle"), style: .plain, target: self, action: #selector(clickedOnViewResultButton))
         
-        let roomMoreMenu = UIMenu(title: "", children: [
+        let groupMoreMenu = UIMenu(title: "", children: [
             UIAction(title: "Add User", image: UIImage(systemName: "person.badge.plus")) { [weak self] action in
                 self?.showAddUserModal()
             },
             
-            UIAction(title: "Show Room History", image: UIImage(systemName: "clock")) { [weak self] action in
-                self?.showRoomHistoryVC()
+            UIAction(title: "Show Group History", image: UIImage(systemName: "clock")) { [weak self] action in
+                self?.showGroupHistoryVC()
             },
             
             UIAction(title: "Sync Calendar", image: UIImage(systemName: "calendar")) { [weak self] action in
@@ -110,12 +110,12 @@ class RoomDetailVC: UIViewController {
                 }
             },
             
-            UIAction(title: "Room Settings", image: UIImage(systemName: "gear")) { [weak self] action in
-                self?.showRoomSettingsVC()
+            UIAction(title: "Group Settings", image: UIImage(systemName: "gear")) { [weak self] action in
+                self?.showGroupSettingsVC()
             }
         ])
         
-        let sortButton = UIBarButtonItem(image: UIImage(systemName: "ellipsis"), primaryAction: nil, menu: roomMoreMenu)
+        let sortButton = UIBarButtonItem(image: UIImage(systemName: "ellipsis"), primaryAction: nil, menu: groupMoreMenu)
         
         infoButton.tintColor = .systemGreen
         sortButton.tintColor = .systemGreen
@@ -123,14 +123,14 @@ class RoomDetailVC: UIViewController {
         navigationItem.rightBarButtonItems = [sortButton, infoButton]
     }
     
-    private func configureRoomAggregateResultView() {
-        roomAggregateVC = RoomAggregateResultVC(room: room, usersNotVisible: usersNotVisible)
-        roomAggregateVC.roomAggregateResultDelegate = self
-        add(childVC: roomAggregateVC, to: aggregateResultView)
+    private func configureGroupAggregateResultView() {
+        groupAggregateVC = GroupAggregateResultVC(group: group, usersNotVisible: usersNotVisible)
+        groupAggregateVC.groupAggregateResultDelegate = self
+        add(childVC: groupAggregateVC, to: aggregateResultView)
     }
     
     @objc private func showAddUserModal() {
-        let destVC = AddUsersModalVC(room: room) { [weak self] in
+        let destVC = AddUsersModalVC(group: group) { [weak self] in
             guard let self = self else { return }
             self.dismiss(animated: true)
         } addUserCompletionHandler: { [weak self] username in
@@ -143,26 +143,26 @@ class RoomDetailVC: UIViewController {
     }
     
     private func addUserCompletionHandler(username: String) {
-        let updatedRoomFields = [
-            TTConstants.roomUsers: FieldValue.arrayUnion([username])
+        let updatedGroupFields = [
+            TTConstants.groupUsers: FieldValue.arrayUnion([username])
         ]
         
-        FirebaseManager.shared.updateRoom(for: self.room.code, with: updatedRoomFields) { [weak self] error in
+        FirebaseManager.shared.updateGroup(for: self.group.code, with: updatedGroupFields) { [weak self] error in
             guard let self = self else { return }
             
             if let error = error {
-                self.presentTTAlert(title: "Error updating room", message: error.rawValue, buttonTitle: "Ok")
+                self.presentTTAlert(title: "Error updating group", message: error.rawValue, buttonTitle: "Ok")
             } else {
-                //update added user roomcodes field
+                //update added user groupcodes field
                 FirebaseManager.shared.updateUserData(for: username, with: [
-                    TTConstants.roomCodes: FieldValue.arrayUnion([self.room.code])
+                    TTConstants.groupCodes: FieldValue.arrayUnion([self.group.code])
                 ]) { [weak self] error in
                     if let error = error {
-                        self?.presentTTAlert(title: "Cannot add user to room", message: error.rawValue, buttonTitle: "OK")
+                        self?.presentTTAlert(title: "Cannot add user to group", message: error.rawValue, buttonTitle: "OK")
                     } else {
-                        //add to room edit history
-                        self?.addRoomHistory(of: .addedUserToRoom, before: nil, after: username)
-                        self?.room.users.append(username)
+                        //add to group edit history
+                        self?.addGroupHistory(of: .addedUserToGroup, before: nil, after: username)
+                        self?.group.users.append(username)
 
                         DispatchQueue.main.async {
                             self?.updateView()
@@ -176,31 +176,31 @@ class RoomDetailVC: UIViewController {
         }
     }
     
-    @objc private func showRoomHistoryVC() {
-        roomHistoryVC = RoomHistoryVC(room: room)
-        navigationController?.pushViewController(roomHistoryVC, animated: true)
+    @objc private func showGroupHistoryVC() {
+        groupHistoryVC = GroupHistoryVC(group: group)
+        navigationController?.pushViewController(groupHistoryVC, animated: true)
     }
     
-    private func renameRoom() {
-        let alertController = UIAlertController(title: "Rename Room", message: nil, preferredStyle: .alert)
+    private func renameGroup() {
+        let alertController = UIAlertController(title: "Rename Group", message: nil, preferredStyle: .alert)
         
         alertController.addTextField { [weak self] textField in
             guard let self = self else { return }
-            textField.placeholder = "\(self.room.name)"
+            textField.placeholder = "\(self.group.name)"
         }
         
         let okAction = UIAlertAction(title: "OK", style: .default) { [weak self] _ in
             guard let self = self else { return }
             
-            if let newRoomName = alertController.textFields?.first?.text {
-                FirebaseManager.shared.updateRoom(for: self.room.code, with: [
-                    TTConstants.roomName: newRoomName
+            if let newGroupName = alertController.textFields?.first?.text {
+                FirebaseManager.shared.updateGroup(for: self.group.code, with: [
+                    TTConstants.groupName: newGroupName
                 ]) { [weak self] error in
                     guard let error = error else {
-                        self?.title = newRoomName.trimmingCharacters(in: .whitespacesAndNewlines)
+                        self?.title = newGroupName.trimmingCharacters(in: .whitespacesAndNewlines)
                         return
                     }
-                    self?.presentTTAlert(title: "Fetch Room Error", message: error.rawValue, buttonTitle: "OK")
+                    self?.presentTTAlert(title: "Fetch Group Error", message: error.rawValue, buttonTitle: "OK")
                 }
             }
         }
@@ -213,17 +213,17 @@ class RoomDetailVC: UIViewController {
     }
     
     @objc private func syncUserCalendar() {
-        //Fetch current user's events within room time frame
+        //Fetch current user's events within group time frame
         let ekManager = EventKitManager()
-        let userEventsWithinRoomRangeSet = Set(ekManager.getUserTTEvents(from: room.startingDate, to: room.endingDate))
-        let currRoomEventsSet = Set(room.events)
-        let unionRoomEvents = Array(currRoomEventsSet.union(userEventsWithinRoomRangeSet))
+        let userEventsWithinGroupRangeSet = Set(ekManager.getUserTTEvents(from: group.startingDate, to: group.endingDate))
+        let currGroupEventsSet = Set(group.events)
+        let unionGroupEvents = Array(currGroupEventsSet.union(userEventsWithinGroupRangeSet))
 
-        room.events = unionRoomEvents
-        updateRoomAggregateVC()
-        //TODO: - Update Firebase Room Events
-        FirebaseManager.shared.updateRoom(for: room.code, with: [
-            TTConstants.roomEvents: unionRoomEvents
+        group.events = unionGroupEvents
+        updateGroupAggregateVC()
+        //TODO: - Update Firebase Group Events
+        FirebaseManager.shared.updateGroup(for: group.code, with: [
+            TTConstants.groupEvents: unionGroupEvents
         ]) { error in
             if let error = error  {
                 self.presentTTAlert(title: "Cannot Sync Calendar", message: error.localizedDescription, buttonTitle: "OK")
@@ -232,29 +232,29 @@ class RoomDetailVC: UIViewController {
 //        saveOrCancelIsland.present()
     }
     
-    private func showRoomSettingsVC() {
+    private func showGroupSettingsVC() {
         let config = Configuration()
-        let roomSettingsView = RoomSettingsView(room: room, config: config) { [weak self] newRoom in
-            self?.room = newRoom
+        let groupSettingsView = GroupSettingsView(group: group, config: config) { [weak self] newGroup in
+            self?.group = newGroup
             DispatchQueue.main.async {
                 self?.updateView()
             }
         } popUIViewController: { [weak self] in
             self?.navigationController?.popViewController(animated: true)
         }
-        let roomSettingsHostingController = TTHostingController(rootView: roomSettingsView)
-        config.hostingController = roomSettingsHostingController
-        present(roomSettingsHostingController, animated: true)
+        let groupSettingsHostingController = TTHostingController(rootView: groupSettingsView)
+        config.hostingController = groupSettingsHostingController
+        present(groupSettingsHostingController, animated: true)
     }
 
-    @objc private func refreshRoom() {
-        //Update Room Code, Starting and Ending Dates
+    @objc private func refreshGroup() {
+        //Update Group Code, Starting and Ending Dates
         let updateFields = [
-            TTConstants.roomStartingDate: startingDatePicker.date,
-            TTConstants.roomEndingDate: endingDatePicker.date
+            TTConstants.groupStartingDate: startingDatePicker.date,
+            TTConstants.groupEndingDate: endingDatePicker.date
         ]
         
-        FirebaseManager.shared.updateRoom(for: room.code, with: updateFields) { [weak self] error in
+        FirebaseManager.shared.updateGroup(for: group.code, with: updateFields) { [weak self] error in
             guard let error = error else { return }
             self?.presentTTAlert(title: "Cannot change starting date", message: error.rawValue, buttonTitle: "Ok")
         }
@@ -262,22 +262,22 @@ class RoomDetailVC: UIViewController {
     
     @objc func clickedOnViewResultButton(_ sender: UIButton) {
         //show summary view
-        roomOverviewVC = RoomOverviewVC(room: room, notVisibleMembers: usersNotVisible, openIntervals: openIntervals)
-        navigationController?.pushViewController(roomOverviewVC, animated: true)
+        groupOverviewVC = GroupOverviewVC(group: group, notVisibleMembers: usersNotVisible, openIntervals: openIntervals)
+        navigationController?.pushViewController(groupOverviewVC, animated: true)
     }
     
     private func updateView() {
-        title = room.name
-        usersCountButton.setTitle("\(room.users.count) \(room.users.count > 1 ? "Members" : "Member")", for: .normal)
-        startingDatePicker.date = room.startingDate
-        startingDatePicker.isEnabled = !room.setting.lockRoomChanges
-        startingDatePicker.minimumDate = room.setting.boundedStartDate
-        startingDatePicker.maximumDate = room.setting.boundedEndDate
+        title = group.name
+        usersCountButton.setTitle("\(group.users.count) \(group.users.count > 1 ? "Members" : "Member")", for: .normal)
+        startingDatePicker.date = group.startingDate
+        startingDatePicker.isEnabled = !group.setting.lockGroupChanges
+        startingDatePicker.minimumDate = group.setting.boundedStartDate
+        startingDatePicker.maximumDate = group.setting.boundedEndDate
         
-        endingDatePicker.date = room.endingDate
-        endingDatePicker.isEnabled = !room.setting.lockRoomChanges
-        endingDatePicker.minimumDate = room.setting.boundedStartDate
-        endingDatePicker.maximumDate = room.setting.boundedEndDate 
+        endingDatePicker.date = group.endingDate
+        endingDatePicker.isEnabled = !group.setting.lockGroupChanges
+        endingDatePicker.minimumDate = group.setting.boundedStartDate
+        endingDatePicker.maximumDate = group.setting.boundedEndDate 
     }
     
     private func configureSaveOrCancelIsland() {
@@ -287,10 +287,10 @@ class RoomDetailVC: UIViewController {
     }
 
     private func updateSaveOrCancelIsland() {
-        if room == originalRoomState {
+        if group == originalGroupState {
             //Dismiss
             saveOrCancelIsland.dismiss()
-        } else if room != originalRoomState {
+        } else if group != originalGroupState {
             //Present
             saveOrCancelIsland.present()
         }
@@ -300,9 +300,9 @@ class RoomDetailVC: UIViewController {
     
     //push new view controller to display list of members view
     @IBAction func clickedUsersCountButton(_ sender: UIButton) {
-        roomUsersVC = RoomUsersVC(room: room, roomUsersCache: roomUsersCache, usersNotVisible: usersNotVisible)
-        roomUsersVC.delegate = self 
-        navigationController?.pushViewController(roomUsersVC, animated: true)
+        groupUsersVC = GroupUsersVC(group: group, groupUsersCache: groupUsersCache, usersNotVisible: usersNotVisible)
+        groupUsersVC.delegate = self 
+        navigationController?.pushViewController(groupUsersVC, animated: true)
     }
     
     @IBAction func startingDateChanged(_ sender: UIDatePicker) {
@@ -311,12 +311,12 @@ class RoomDetailVC: UIViewController {
             //dismiss UIDatePickerContainerViewController
             dismiss(animated: true)
             presentTTAlert(title: "Invalid Starting Date", message: "Starting date cannot be after ending date", buttonTitle: "Ok")
-            sender.date = room.startingDate
+            sender.date = group.startingDate
             return
         }
-        room.startingDate = sender.date
+        group.startingDate = sender.date
       
-        updateRoomAggregateVC()
+        updateGroupAggregateVC()
         updateSaveOrCancelIsland()
     }
     
@@ -326,66 +326,66 @@ class RoomDetailVC: UIViewController {
             //dismiss UIDatePickerContainerViewController
             dismiss(animated: true)
             presentTTAlert(title: "Invalid Ending Date", message: "Ending date cannot be before starting date", buttonTitle: "Ok")
-            sender.date = room.endingDate
+            sender.date = group.endingDate
             return
         }
-        room.endingDate = sender.date
+        group.endingDate = sender.date
 
-        updateRoomAggregateVC()
+        updateGroupAggregateVC()
         updateSaveOrCancelIsland()
     }
     
     
-    //Should be triggered after every room edit
-    private func addRoomHistory(of editType: TTRoomEditType, before: String?, after: String?) {
+    //Should be triggered after every group edit
+    private func addGroupHistory(of editType: TTGroupEditType, before: String?, after: String?) {
 
         guard let currentUserUsername = FirebaseManager.shared.currentUser?.username else { return }
-        let editDifference = TTRoomEditDifference(before: before, after: after)
-        let newRoomEdit = TTRoomEdit(author: currentUserUsername, createdDate: Date(), editDifference: editDifference, editType: editType)
-        room.histories.append(newRoomEdit)
+        let editDifference = TTGroupEditDifference(before: before, after: after)
+        let newGroupEdit = TTGroupEdit(author: currentUserUsername, createdDate: Date(), editDifference: editDifference, editType: editType)
+        group.histories.append(newGroupEdit)
         do {
-            let newRoomHistory = try room.histories.arrayByAppending(newRoomEdit).map{ try Firestore.Encoder().encode($0) }
-            FirebaseManager.shared.updateRoom(for: room.code, with: [
-                TTConstants.roomHistories: newRoomHistory
+            let newGroupHistory = try group.histories.arrayByAppending(newGroupEdit).map{ try Firestore.Encoder().encode($0) }
+            FirebaseManager.shared.updateGroup(for: group.code, with: [
+                TTConstants.groupHistories: newGroupHistory
             ]) { [weak self] error in
                 guard let error = error else { return }
-                self?.presentTTAlert(title: "Cannot add room history", message: error.rawValue, buttonTitle: "Ok")
+                self?.presentTTAlert(title: "Cannot add group history", message: error.rawValue, buttonTitle: "Ok")
             }
         } catch {
             //Do error catching here
-            presentTTAlert(title: "Cannot add room history", message: TTError.unableToAddRoomHistory.rawValue, buttonTitle: "Ok")
+            presentTTAlert(title: "Cannot add group history", message: TTError.unableToAddGroupHistory.rawValue, buttonTitle: "Ok")
         }
     }
     
-    private func updateRoomAggregateVC() {
-        //filter and or add to room.events so that between startDate and endDate
-        room.events = room.events.filter { $0.startDate >= startingDatePicker.date && $0.endDate <= endingDatePicker.date }
-        roomAggregateVC.setView(usersNotVisible: usersNotVisible, room: room)
+    private func updateGroupAggregateVC() {
+        //filter and or add to group.events so that between startDate and endDate
+        group.events = group.events.filter { $0.startDate >= startingDatePicker.date && $0.endDate <= endingDatePicker.date }
+        groupAggregateVC.setView(usersNotVisible: usersNotVisible, group: group)
     }
     
     //MARK: - Getters and Setters
-    public func setRoomHistories(with histories: [TTRoomEdit]) {
-        room.histories = histories
+    public func setGroupHistories(with histories: [TTGroupEdit]) {
+        group.histories = histories
     }
 }
 
 //MARK: - Delegates
 
-extension RoomDetailVC: RoomAggregateResultVCDelegate {
+extension GroupDetailVC: GroupAggregateResultVCDelegate {
     func updatedAggregateResultVC(ttEvents: [TTEvent]) {
         openIntervals = ttEvents
     }
 }
 
-extension RoomDetailVC: RoomUpdateDelegate {
-    func roomDidUpdate(for room: TTRoom) {
-        self.room = room
+extension GroupDetailVC: GroupUpdateDelegate {
+    func groupDidUpdate(for group: TTGroup) {
+        self.group = group
         updateView()
-        updateRoomAggregateVC()
+        updateGroupAggregateVC()
         updateSaveOrCancelIsland()
     }
     
-    func roomUserVisibilityDidUpdate(for username: String) {
+    func groupUserVisibilityDidUpdate(for username: String) {
         if usersNotVisible.contains(username) {
             if let removeIndex = usersNotVisible.firstIndex(of: username) {
                 usersNotVisible.remove(at: removeIndex)
@@ -393,38 +393,38 @@ extension RoomDetailVC: RoomUpdateDelegate {
         } else {
             usersNotVisible.append(username)
         }
-       updateRoomAggregateVC()
+       updateGroupAggregateVC()
     }
 }
 
-extension RoomDetailVC: SaveOrCancelIslandDelegate {
+extension GroupDetailVC: SaveOrCancelIslandDelegate {
     func didCancelIsland() {
-        room = originalRoomState
+        group = originalGroupState
         updateView()
-        updateRoomAggregateVC()
+        updateGroupAggregateVC()
     }
     
     func didSaveIsland() {
-        if !room.setting.lockRoomChanges {
+        if !group.setting.lockGroupChanges {
             
-            let previousStartingDate = originalRoomState.startingDate
-            let previousEndingDate = originalRoomState.endingDate
+            let previousStartingDate = originalGroupState.startingDate
+            let previousEndingDate = originalGroupState.endingDate
             
-            FirebaseManager.shared.updateRoom(for: room.code, with: [
-                TTConstants.roomStartingDate: room.startingDate,
-                TTConstants.roomEndingDate: room.endingDate,
-                TTConstants.roomEvents: room.events.map { $0.dictionary }
+            FirebaseManager.shared.updateGroup(for: group.code, with: [
+                TTConstants.groupStartingDate: group.startingDate,
+                TTConstants.groupEndingDate: group.endingDate,
+                TTConstants.groupEvents: group.events.map { $0.dictionary }
             ]) { [weak self] error in
                 guard let self = self else { return }
                 guard let error = error  else {
                     let dateFormat = "MMM d y, h:mm a"
                     
-                    if room.startingDate != previousStartingDate {
-                        self.addRoomHistory(of: .changedStartingDate, before: previousStartingDate.formatted(with: dateFormat), after: self.room.startingDate.formatted(with: dateFormat))
+                    if group.startingDate != previousStartingDate {
+                        self.addGroupHistory(of: .changedStartingDate, before: previousStartingDate.formatted(with: dateFormat), after: self.group.startingDate.formatted(with: dateFormat))
                     }
                     
-                    if room.endingDate != previousEndingDate {
-                        self.addRoomHistory(of: .changedEndingDate, before: previousEndingDate.formatted(with: dateFormat), after: self.room.endingDate.formatted(with: dateFormat))
+                    if group.endingDate != previousEndingDate {
+                        self.addGroupHistory(of: .changedEndingDate, before: previousEndingDate.formatted(with: dateFormat), after: self.group.endingDate.formatted(with: dateFormat))
                     }
             
                     DispatchQueue.main.async {
@@ -435,7 +435,7 @@ extension RoomDetailVC: SaveOrCancelIslandDelegate {
                 self.presentTTAlert(title: "Cannot change ending date", message: error.rawValue, buttonTitle: "Ok")
             }
         } else {
-            presentTTAlert(title: "Cannot Save Room", message: "Room setting \"Lock Room Changes\" is set to true. This room cannot be edited", buttonTitle: "OK")
+            presentTTAlert(title: "Cannot Save Group", message: "Group setting \"Lock Group Changes\" is set to true. This group cannot be edited", buttonTitle: "OK")
         }
     }
 }

@@ -9,20 +9,20 @@ import UIKit
 
 class AddUsersModalVC: TTModalCardVC {
     
-    private let room: TTRoom!
+    private let group: TTGroup!
     
     private var friends = [TTUser]()
     private var filteredFriends = [TTUser]()
     
     private let containerViewHeader = UIStackView()
-    private var roomCodeView: TTRoomCodeView!
+    private var groupCodeView: TTGroupCodeView!
     private let friendsSearchBar = UISearchBar()
     private let filteredFriendsTableView = UITableView()
 
     private var addUserCompletionHandler: (String) -> Void
     
-    init(room: TTRoom, closeButtonClosure: @escaping () -> Void, addUserCompletionHandler: @escaping (String) -> Void) {
-        self.room = room
+    init(group: TTGroup, closeButtonClosure: @escaping () -> Void, addUserCompletionHandler: @escaping (String) -> Void) {
+        self.group = group
         self.addUserCompletionHandler = addUserCompletionHandler
         super.init(closeButtonClosure: closeButtonClosure)
     }
@@ -30,7 +30,7 @@ class AddUsersModalVC: TTModalCardVC {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureContainerViewHeader()
-        configureRoomCodeView()
+        configureGroupCodeView()
         configureFriendsSearchBar()
         configureFilteredFriendsTableView()
         NotificationCenter.default.addObserver(self, selector: #selector(fetchUpdatedUser), name: .updatedUser, object: nil)
@@ -51,7 +51,7 @@ class AddUsersModalVC: TTModalCardVC {
         containerViewHeader.axis = .horizontal
     
         let headerLabel = TTTitleLabel(textAlignment: .center, fontSize: 18)
-        headerLabel.text = "Add Friend To Room"
+        headerLabel.text = "Add Friend To Group"
         headerLabel.font = UIFont.boldSystemFont(ofSize: 20)
         
         let closeButton = TTCloseButton()
@@ -68,16 +68,16 @@ class AddUsersModalVC: TTModalCardVC {
         ])
     }
     
-    private func configureRoomCodeView() {
-        roomCodeView = TTRoomCodeView(codeText: room.code)
-        roomCodeView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(roomCodeView)
+    private func configureGroupCodeView() {
+        groupCodeView = TTGroupCodeView(codeText: group.code)
+        groupCodeView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(groupCodeView)
         
         NSLayoutConstraint.activate([
-            roomCodeView.topAnchor.constraint(equalTo: containerViewHeader.bottomAnchor, constant: 10),
-            roomCodeView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 80),
-            roomCodeView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -80),
-            roomCodeView.heightAnchor.constraint(equalToConstant: 50)
+            groupCodeView.topAnchor.constraint(equalTo: containerViewHeader.bottomAnchor, constant: 10),
+            groupCodeView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 80),
+            groupCodeView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -80),
+            groupCodeView.heightAnchor.constraint(equalToConstant: 50)
         ])
     }
     
@@ -89,7 +89,7 @@ class AddUsersModalVC: TTModalCardVC {
         friendsSearchBar.delegate = self
         
         NSLayoutConstraint.activate([
-            friendsSearchBar.topAnchor.constraint(equalTo: roomCodeView.bottomAnchor, constant: 10),
+            friendsSearchBar.topAnchor.constraint(equalTo: groupCodeView.bottomAnchor, constant: 10),
             friendsSearchBar.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 10),
             friendsSearchBar.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -10),
             friendsSearchBar.heightAnchor.constraint(equalToConstant: 50)
@@ -115,11 +115,11 @@ class AddUsersModalVC: TTModalCardVC {
     }
     
     private func reloadVC() {
-        if !room.setting.allowRoomJoin {
-            filteredFriendsTableView.backgroundView = TTEmptyStateView(message: "Cannot add user. Room setting \"Allow Room Join\" is toggled off", fontSize: 15)
+        if !group.setting.allowGroupJoin {
+            filteredFriendsTableView.backgroundView = TTEmptyStateView(message: "Cannot add user. Group setting \"Allow Group Join\" is toggled off", fontSize: 15)
             friendsSearchBar.disableSearchBar()
-        } else if room.setting.maximumNumOfUsers == room.users.count {
-            filteredFriendsTableView.backgroundView = TTEmptyStateView(message: "Cannot add user. Reached room setting \"Maximum Users\" of \(room.setting.maximumNumOfUsers)", fontSize: 15)
+        } else if group.setting.maximumNumOfUsers == group.users.count {
+            filteredFriendsTableView.backgroundView = TTEmptyStateView(message: "Cannot add user. Reached group setting \"Maximum Users\" of \(group.setting.maximumNumOfUsers)", fontSize: 15)
             friendsSearchBar.disableSearchBar()
         } else if filteredFriends.count == 0 {
             filteredFriendsTableView.backgroundView = TTEmptyStateView(message: "No Friends Available")
@@ -142,14 +142,14 @@ class AddUsersModalVC: TTModalCardVC {
     }
     
     private func fetchFriends() {
-        if room.setting.allowRoomJoin {
+        if group.setting.allowGroupJoin {
             guard let friends = FirebaseManager.shared.currentUser?.friends else { return }
-            let filteredFriendsNotAddedToRoom = friends.filter{ !room.users.contains($0) }
+            let filteredFriendsNotAddedToGroup = friends.filter{ !group.users.contains($0) }
             
             self.friends = []
             filteredFriends = []
             
-            for friendUsername in filteredFriendsNotAddedToRoom {
+            for friendUsername in filteredFriendsNotAddedToGroup {
                 print("Friend username: \(friendUsername)")
                 FirebaseManager.shared.fetchUserDocumentData(with: friendUsername) { [weak self] result in
                     switch result {
@@ -208,7 +208,7 @@ extension AddUsersModalVC: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 50.0
+        return TTConstants.defaultCellHeight
     }
     
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {

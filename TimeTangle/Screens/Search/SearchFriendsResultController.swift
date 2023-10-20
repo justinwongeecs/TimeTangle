@@ -18,9 +18,10 @@ class SearchFriendsResultController: UIViewController {
     
     private var allFriends = [TTUser]()
     private var filteredFriends = [TTUser]()
+    private var usersInQueueCache: TTCache<String, TTUser>!
     
     weak var suggestedSearchDelegate: SearchFriendsResultControllerDelegate!
-    weak var searchVCRef: CreateRoomVC!
+    weak var searchVCRef: CreateGroupVC!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -29,29 +30,60 @@ class SearchFriendsResultController: UIViewController {
         configureDismissEditingTapGestureRecognizer()
         configureSearchFriendsResultTable()
         configureActivityIndicator()
-        
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
         fetchAllFriends()
+    }
+    
+    init(usersInQueueCache: TTCache<String, TTUser>) {
+        super.init(nibName: nil, bundle: nil)
+        self.usersInQueueCache = usersInQueueCache
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     func fetchAllFriends() {
         guard let currentUser = FirebaseManager.shared.currentUser else { return }
         
-        if !currentUser.friends.isEmpty {
-            activityIndicator.startAnimating()
-            FirebaseManager.shared.fetchMultipleUsersDocumentData(with: currentUser.friends) { [weak self] result in
-                self?.activityIndicator.stopAnimating()
-                guard let self = self else { return }
-                switch result {
-                case .success(let allFriends):
-                    let usersInQueue = searchVCRef.getUsersQueueForRoomCreation()
-                    let friendsNotInUsersQueue = allFriends.filter { !usersInQueue.map{ $0.username }.contains($0.username) }
-                    self.allFriends = friendsNotInUsersQueue
-                    self.filteredFriends = friendsNotInUsersQueue
-                    self.reloadTable()
-                case .failure(let error):
-                    self.presentTTAlert(title: "Fetch Error", message: error.rawValue, buttonTitle: "OK")
+        activityIndicator.startAnimating()
+        allFriends.removeAll()
+        filteredFriends.removeAll()
+        
+        for friendUsername in currentUser.friends {
+            if let cachedFriend = usersInQueueCache.value(forKey: friendUsername) {
+                validateFriend(for: cachedFriend)
+            } else {
+                activityIndicator.startAnimating()
+                FirebaseManager.shared.fetchUserDocumentData(with: friendUsername) { [weak self] result in
+                    self?.activityIndicator.stopAnimating()
+                    guard let self = self else { return }
+                    switch result {
+                    case .success(let fetchedFriend):
+                        validateFriend(for: fetchedFriend)
+                        usersInQueueCache.insert(fetchedFriend, forKey: fetchedFriend.username )
+                    case .failure(let error):
+                        self.presentTTAlert(title: "Fetch Error", message: error.rawValue, buttonTitle: "OK")
+                    }
                 }
             }
+        }
+        activityIndicator.stopAnimating()
+    }
+    
+    private func validateFriend(for friend: TTUser) {
+        let usersInQueueUsernames = searchVCRef.getUsersQueueForGroupCreation().getUsernames()
+        
+        if !usersInQueueUsernames.contains(friend.username) {
+            allFriends.append(friend)
+            filteredFriends.append(friend)
+        }
+        
+        DispatchQueue.main.async {
+            self.reloadTable()
         }
     }
     
@@ -65,7 +97,7 @@ class SearchFriendsResultController: UIViewController {
         searchFriendsResultTable.separatorStyle = .none
         
         NSLayoutConstraint.activate([
-            searchFriendsResultTable.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
+            searchFriendsResultTable.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             searchFriendsResultTable.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
             searchFriendsResultTable.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
             searchFriendsResultTable.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
@@ -89,10 +121,8 @@ class SearchFriendsResultController: UIViewController {
     
     private func reloadTable() {
         if filteredFriends.isEmpty {
-            searchFriendsResultTable.isHidden = true
             searchFriendsResultTable.backgroundView = TTEmptyStateView(message: "No Friends Found")
         } else {
-            searchFriendsResultTable.isHidden = false
             searchFriendsResultTable.backgroundView = nil
         }
         
@@ -118,7 +148,7 @@ extension SearchFriendsResultController: UITableViewDataSource, UITableViewDeleg
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 50.0
+        return TTConstants.defaultCellHeight
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

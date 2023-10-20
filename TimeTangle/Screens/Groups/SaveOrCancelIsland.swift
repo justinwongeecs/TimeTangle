@@ -14,8 +14,8 @@ protocol SaveOrCancelIslandDelegate: AnyObject {
 
 class SaveOrCancelIsland: UIView {
     
-    private var confirmRoomChangesContainerView = UIView()
-    private var isPresentingRoomChangesView: Bool = false
+    private var confirmGroupChangesContainerView = UIView()
+    private var isPresentingGroupChangesView: Bool = false
     private var parentVC: UIViewController!
     
     weak var delegate: SaveOrCancelIslandDelegate?
@@ -44,21 +44,21 @@ class SaveOrCancelIsland: UIView {
         let screenSize = UIScreen.main.bounds.size
         outerContainerView.translatesAutoresizingMaskIntoConstraints = false
         
-        let roomChangesStackView = UIStackView()
-        roomChangesStackView.axis = .horizontal
-        roomChangesStackView.distribution = .fillProportionally
-        roomChangesStackView.translatesAutoresizingMaskIntoConstraints = false
+        let groupChangesStackView = UIStackView()
+        groupChangesStackView.axis = .horizontal
+        groupChangesStackView.distribution = .fillProportionally
+        groupChangesStackView.translatesAutoresizingMaskIntoConstraints = false
         
-        confirmRoomChangesContainerView.frame = CGRect(x: 0, y: screenSize.height, width: screenSize.width, height: 50 + innerPadding)
-        confirmRoomChangesContainerView.addSubview(outerContainerView)
-        parentVC.view.addSubview(confirmRoomChangesContainerView)
+        confirmGroupChangesContainerView.frame = CGRect(x: 0, y: screenSize.height, width: screenSize.width, height: 50 + innerPadding)
+        confirmGroupChangesContainerView.addSubview(outerContainerView)
+        parentVC.view.addSubview(confirmGroupChangesContainerView)
         outerContainerView.layer.cornerRadius = 10.0
         outerContainerView.layer.masksToBounds = true
         outerContainerView.layer.shadowColor = UIColor.gray.cgColor
         outerContainerView.layer.shadowOffset = CGSize.zero
         outerContainerView.layer.shadowOpacity = 1.0
         outerContainerView.layer.shadowRadius = 7.0
-        outerContainerView.addSubview(roomChangesStackView)
+        outerContainerView.addSubview(groupChangesStackView)
         
         let blurEffect: UIBlurEffect!
         if traitCollection.userInterfaceStyle == .light {
@@ -68,7 +68,7 @@ class SaveOrCancelIsland: UIView {
         }
      
         let blurView = UIVisualEffectView(effect: blurEffect)
-        blurView.frame = confirmRoomChangesContainerView.bounds
+        blurView.frame = confirmGroupChangesContainerView.bounds
         blurView.autoresizingMask = .flexibleWidth
         outerContainerView.insertSubview(blurView, at: 0)
 
@@ -91,19 +91,19 @@ class SaveOrCancelIsland: UIView {
         saveButton.setTitleColor(.white, for: .normal)
         saveButton.addTarget(self, action: #selector(save), for: .touchUpInside)
         
-        roomChangesStackView.addArrangedSubview(closeButton)
-        roomChangesStackView.addArrangedSubview(saveButton)
+        groupChangesStackView.addArrangedSubview(closeButton)
+        groupChangesStackView.addArrangedSubview(saveButton)
 
         NSLayoutConstraint.activate([
-            outerContainerView.leadingAnchor.constraint(equalTo: confirmRoomChangesContainerView.leadingAnchor, constant: outerPadding),
-            outerContainerView.trailingAnchor.constraint(equalTo: confirmRoomChangesContainerView.trailingAnchor, constant:  -outerPadding),
-            outerContainerView.topAnchor.constraint(equalTo: confirmRoomChangesContainerView.topAnchor),
-            outerContainerView.bottomAnchor.constraint(equalTo: confirmRoomChangesContainerView.bottomAnchor),
+            outerContainerView.leadingAnchor.constraint(equalTo: confirmGroupChangesContainerView.leadingAnchor, constant: outerPadding),
+            outerContainerView.trailingAnchor.constraint(equalTo: confirmGroupChangesContainerView.trailingAnchor, constant:  -outerPadding),
+            outerContainerView.topAnchor.constraint(equalTo: confirmGroupChangesContainerView.topAnchor),
+            outerContainerView.bottomAnchor.constraint(equalTo: confirmGroupChangesContainerView.bottomAnchor),
             
-            roomChangesStackView.topAnchor.constraint(equalTo: outerContainerView.topAnchor, constant: innerPadding),
-            roomChangesStackView.leadingAnchor.constraint(equalTo: outerContainerView.leadingAnchor, constant: innerPadding),
-            roomChangesStackView.trailingAnchor.constraint(equalTo: outerContainerView.trailingAnchor, constant: -innerPadding),
-            roomChangesStackView.bottomAnchor.constraint(equalTo: outerContainerView.bottomAnchor, constant: -innerPadding),
+            groupChangesStackView.topAnchor.constraint(equalTo: outerContainerView.topAnchor, constant: innerPadding),
+            groupChangesStackView.leadingAnchor.constraint(equalTo: outerContainerView.leadingAnchor, constant: innerPadding),
+            groupChangesStackView.trailingAnchor.constraint(equalTo: outerContainerView.trailingAnchor, constant: -innerPadding),
+            groupChangesStackView.bottomAnchor.constraint(equalTo: outerContainerView.bottomAnchor, constant: -innerPadding),
         ])
     }
     
@@ -122,30 +122,30 @@ class SaveOrCancelIsland: UIView {
     }
     
     public func dismiss() {
-        if isPresentingRoomChangesView {
+        if isPresentingGroupChangesView {
             let screenSize = UIScreen.main.bounds.size
             
             UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1.0, initialSpringVelocity: 1.0, options: .curveEaseInOut) {
-                self.confirmRoomChangesContainerView.frame = CGRect(x: 0, y: screenSize.height, width: screenSize.width, height: 60)
+                self.confirmGroupChangesContainerView.frame = CGRect(x: 0, y: screenSize.height, width: screenSize.width, height: 60)
             }
-            isPresentingRoomChangesView = false
+            isPresentingGroupChangesView = false
         }
     }
     
     public func present() {
-        if !isPresentingRoomChangesView {
+        if !isPresentingGroupChangesView {
             let screenSize = UIScreen.main.bounds.size
             guard let parentVC = parentViewController, let tabBarController = parentVC.tabBarController else { return }
             let tabBarHeight = tabBarController.tabBar.frame.size.height
             
             UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1.0, initialSpringVelocity: 1.0, options: .curveEaseInOut) {
-                self.confirmRoomChangesContainerView.frame = CGRect(x: 0, y: screenSize.height - tabBarHeight * 2, width: screenSize.width, height: 60)
+                self.confirmGroupChangesContainerView.frame = CGRect(x: 0, y: screenSize.height - tabBarHeight * 2, width: screenSize.width, height: 60)
             }
-            isPresentingRoomChangesView = true
+            isPresentingGroupChangesView = true
         }
     }
     
     public func isPresenting() -> Bool {
-        return isPresentingRoomChangesView
+        return isPresentingGroupChangesView
     }
 }

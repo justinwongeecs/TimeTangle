@@ -201,7 +201,6 @@ class FriendsAndRequestsVC: UIViewController {
         switch friendsVCSegementedState {
         case .myFriends:
             if filteredFriends.isEmpty {
-                searchBar.disableSearchBar()
                 table.backgroundView = TTEmptyStateView(message: "No Friends Available")
             } else {
                 searchBar.enableSearchBar()
@@ -234,7 +233,7 @@ class FriendsAndRequestsVC: UIViewController {
             self.searchFriendsCountLabel.isHidden = isHidden
         }
         
-        //update roomsTable top constraint
+        //update groupsTable top constraint
         if isHidden {
             UIView.animate(withDuration: 0.35) { [weak self] in
                 guard let self = self else { return }
@@ -331,7 +330,7 @@ extension FriendsAndRequestsVC: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 60.0
+        return TTConstants.defaultCellHeight
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {

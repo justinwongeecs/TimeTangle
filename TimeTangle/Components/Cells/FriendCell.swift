@@ -22,17 +22,13 @@ class FriendCell: ProfileUsernameCell {
         super.init(coder: coder)
     }
     
-    override func set(for user: TTUser, backgroundColor: UIColor? = .secondarySystemBackground) {
+    override func set(for user: TTUser, backgroundColor: UIColor? = TTConstants.defaultCellColor) {
         super.set(for: user, backgroundColor: backgroundColor)
         self.friend = user
         configureCell()
     }
     
     private func configureCell() {
-        backgroundColor = .systemGreen.withAlphaComponent(0.2)
-        layer.cornerRadius = 10
-        selectionStyle = .none
-        
         guard let friend = friend else { return }
         
         var moreButtonActions = [UIAction]()
@@ -60,8 +56,8 @@ class FriendCell: ProfileUsernameCell {
         }, at: moreButtonActions.count)
     
         let moreButton = UIButton(type: .custom)
-        moreButton.setImage(UIImage(systemName: "ellipsis"), for: .normal)
-        moreButton.tintColor = .systemGreen
+        moreButton.setImage(UIImage(systemName: "ellipsis.circle.fill", withConfiguration: UIImage.SymbolConfiguration(scale: .large)), for: .normal)
+        moreButton.tintColor = .systemGreen.withAlphaComponent(0.8)
         moreButton.menu = UIMenu(children: moreButtonActions)
         moreButton.showsMenuAsPrimaryAction = true
         moreButton.translatesAutoresizingMaskIntoConstraints = false
@@ -70,8 +66,8 @@ class FriendCell: ProfileUsernameCell {
         NSLayoutConstraint.activate([
             moreButton.centerYAnchor.constraint(equalTo: centerYAnchor),
             moreButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
-            moreButton.widthAnchor.constraint(equalToConstant: 20),
-            moreButton.heightAnchor.constraint(equalToConstant: 20)
+            moreButton.widthAnchor.constraint(equalToConstant: 30),
+            moreButton.heightAnchor.constraint(equalToConstant: 30)
         ])
     }
     
@@ -112,7 +108,7 @@ class FriendCell: ProfileUsernameCell {
         emailComposeVC.setToRecipients([friend.email])
         emailComposeVC.setSubject("Hello 👋!")
         
-        if let parentVC = parentViewController as? FriendsAndRequestsVC {
+        if parentViewController is FriendsAndRequestsVC {
             emailComposeVC.present(emailComposeVC, animated: true)
         }
     }

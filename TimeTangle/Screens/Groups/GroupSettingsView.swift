@@ -1,5 +1,5 @@
 //
-//  RoomSettingsView.swift
+//  GroupSettingsView.swift
 //  TimeTangle
 //
 //  Created by Justin Wong on 5/26/23.
@@ -9,53 +9,53 @@ import SwiftUI
 import Setting
 import FirebaseFirestore
 
-struct RoomSettingsView: View {
+struct GroupSettingsView: View {
     @Environment(\.dismiss) var dismiss
     var config: Configuration 
-    @State var room: TTRoom!
-    private(set) var updateClosure: (TTRoom) -> Void
+    @State var group: TTGroup!
+    private(set) var updateClosure: (TTGroup) -> Void
     private var popUIViewController: () -> Void
     
     @State private var ttError: TTError? = nil
     @State private var showErrorAlert = false
-    @State private var showChangeRoomNameAlert = false
-    @State private var showDeleteRoomConfirmation = false
-    @State private var showLeaveRoomConfirmation = false
+    @State private var showChangeGroupNameAlert = false
+    @State private var showDeleteGroupConfirmation = false
+    @State private var showLeaveGroupConfirmation = false
     
-    @State private var newRoomNameText = ""
+    @State private var newGroupNameText = ""
     @State private var minimumNumberOfUsersIndex = 0
     @State private var maximumNumberOfUsersIndex = 0
     @State private var boundedStartDate = Date()
     @State private var boundedEndDate = Date()
-    @State private var lockRoomChanges = false
-    @State private var allowRoomJoin = true
+    @State private var lockGroupChanges = false
+    @State private var allowGroupJoin = true
     
-    init(room: TTRoom, config: Configuration, updateClosure: @escaping (TTRoom) -> Void, popUIViewController: @escaping() -> Void) {
-        _room = State(initialValue: room)
+    init(group: TTGroup, config: Configuration, updateClosure: @escaping (TTGroup) -> Void, popUIViewController: @escaping() -> Void) {
+        _group = State(initialValue: group)
         self.config = config 
         self.updateClosure = updateClosure
         self.popUIViewController = popUIViewController
-        _newRoomNameText = State(initialValue: room.name)
-        _minimumNumberOfUsersIndex = State(initialValue: room.setting.minimumNumOfUsers - 2)
-        _maximumNumberOfUsersIndex = State(initialValue: room.setting.maximumNumOfUsers - 2)
-        _boundedStartDate = State(initialValue: room.setting.boundedStartDate)
-        _boundedEndDate = State(initialValue: room.setting.boundedEndDate)
-        _lockRoomChanges = State(initialValue: room.setting.lockRoomChanges)
-        _allowRoomJoin = State(initialValue: room.setting.allowRoomJoin)
+        _newGroupNameText = State(initialValue: group.name)
+        _minimumNumberOfUsersIndex = State(initialValue: group.setting.minimumNumOfUsers - 2)
+        _maximumNumberOfUsersIndex = State(initialValue: group.setting.maximumNumOfUsers - 2)
+        _boundedStartDate = State(initialValue: group.setting.boundedStartDate)
+        _boundedEndDate = State(initialValue: group.setting.boundedEndDate)
+        _lockGroupChanges = State(initialValue: group.setting.lockGroupChanges)
+        _allowGroupJoin = State(initialValue: group.setting.allowGroupJoin)
     }
     
     var body: some View {
         NavigationStack {
             SettingStack(isSearchable: false, embedInNavigationStack: true) {
-                SettingPage(title: "\(room.name) Settings", navigationTitleDisplayMode: .inline) {
-                    SettingGroup(id: "Change Room Name Button", header: "Room Name") {
-                        SettingText(title: "\(newRoomNameText)")
-                        SettingCustomView(id: "Change Room Name Button") {
+                SettingPage(title: "\(group.name) Settings", navigationTitleDisplayMode: .inline) {
+                    SettingGroup(id: "Change Group Name Button", header: "Group Name") {
+                        SettingText(title: "\(newGroupNameText)")
+                        SettingCustomView(id: "Change Group Name Button") {
                             Button(action: {
-                                showChangeRoomNameAlert.toggle()
+                                showChangeGroupNameAlert.toggle()
                             }) {
                                 HStack {
-                                    Text("Change Room Name")
+                                    Text("Change Group Name")
                                     Image(systemName: "square.and.pencil")
                                 }
                                 .foregroundColor(.green)
@@ -63,13 +63,13 @@ struct RoomSettingsView: View {
                                 .frame(maxWidth: .infinity)
                             }
                             .padding(15)
-                            .alert("Change Room Name", isPresented: $showChangeRoomNameAlert) {
-                                TextField("Room Name", text: $newRoomNameText)
+                            .alert("Change Group Name", isPresented: $showChangeGroupNameAlert) {
+                                TextField("Group Name", text: $newGroupNameText)
                                 Button("OK", action: {
-                                    newRoomNameText = newRoomNameText.trimmingCharacters(in: .whitespacesAndNewlines)
+                                    newGroupNameText = newGroupNameText.trimmingCharacters(in: .whitespacesAndNewlines)
                                 })
                                 Button("Cancel", role: .cancel) {
-                                    showChangeRoomNameAlert.toggle()
+                                    showChangeGroupNameAlert.toggle()
                                 }
                             }
                         }
@@ -95,17 +95,17 @@ struct RoomSettingsView: View {
                         }
                     }
                     
-                    SettingGroup(id: "Room Settings", header: "Room Settings") {
-                        lockRoomChangesButton
-                        enableRoomJoinToggle
+                    SettingGroup(id: "Group Settings", header: "Group Settings") {
+                        lockGroupChangesButton
+                        enableGroupJoinToggle
                     }
                     
-                    SettingGroup(id: "Delete Room Button") {
-                        deleteRoomButton
+                    SettingGroup(id: "Delete Group Button") {
+                        deleteGroupButton
                     }
                     
-                    SettingGroup(id: "Leave Room Button") {
-                        leaveRoomButton
+                    SettingGroup(id: "Leave Group Button") {
+                        leaveGroupButton
                     }
                 }
             }
@@ -187,20 +187,20 @@ struct RoomSettingsView: View {
         ], selectedIndex: $maximumNumberOfUsersIndex, choicesConfiguration: .init(pickerDisplayMode: .menu))
     }
     
-    //MARK: - LockRoomChangesButton
-    @SettingBuilder private var lockRoomChangesButton: some Setting {
-        SettingCustomView(id: "Lock Unlock Room Changes Button") {
+    //MARK: - LockGroupChangesButton
+    @SettingBuilder private var lockGroupChangesButton: some Setting {
+        SettingCustomView(id: "Lock Unlock Group Changes Button") {
             VStack {
                 HStack {
-                    Text("Lock Room Changes: ")
+                    Text("Lock Group Changes: ")
                     Spacer()
                     Button(action: {
                         withAnimation {
-                            lockRoomChanges.toggle()
+                            lockGroupChanges.toggle()
                         }
                     }) {
                         HStack {
-                            if lockRoomChanges {
+                            if lockGroupChanges {
                                 Text("Locked")
                                 Image(systemName: "lock.fill")
                             } else {
@@ -210,12 +210,12 @@ struct RoomSettingsView: View {
                         .bold()
                         .foregroundColor(.white)
                         .padding(8)
-                        .background(lockRoomChanges ? .red : .green)
+                        .background(lockGroupChanges ? .red : .green)
                         .cornerRadius(10)
                     }
                 }
                 
-                Text("When locked, room can ONLY be edited by users with Admin access level")
+                Text("When locked, group can ONLY be edited by users with Admin access level")
                     .font(.system(size: 13))
                     .foregroundColor(.secondary)
             }
@@ -223,83 +223,83 @@ struct RoomSettingsView: View {
         }
     }
     
-    //MARK: - EnableRoomJoinToggle
-    @SettingBuilder private var enableRoomJoinToggle: some Setting {
-        SettingToggle(title: "Allow Room Join", isOn: $allowRoomJoin)
+    //MARK: - EnableGroupJoinToggle
+    @SettingBuilder private var enableGroupJoinToggle: some Setting {
+        SettingToggle(title: "Allow Group Join", isOn: $allowGroupJoin)
     }
     
-    //MARK: - DeleteRoomButton
-    @SettingBuilder private var deleteRoomButton: some Setting {
+    //MARK: - DeleteGroupButton
+    @SettingBuilder private var deleteGroupButton: some Setting {
         SettingCustomView {
             Button(action: {
-                showDeleteRoomConfirmation.toggle()
+                showDeleteGroupConfirmation.toggle()
             }) {
-                Text("Delete Room")
+                Text("Delete Group")
                     .foregroundColor(.red)
                     .leftAligned()
                     .frame(maxWidth: .infinity)
             }
             .padding(15)
-            .alert(isPresented: $showDeleteRoomConfirmation) {
-                Alert(title: Text("Confirm Delete Room"),
-                      message: Text("Are you sure you want to delete \(room.name)?"),
+            .alert(isPresented: $showDeleteGroupConfirmation) {
+                Alert(title: Text("Confirm Delete Group"),
+                      message: Text("Are you sure you want to delete \(group.name)?"),
                       primaryButton: .cancel(),
-                      secondaryButton: .default(Text("OK")) { deleteRoom() })
+                      secondaryButton: .default(Text("OK")) { deleteGroup() })
             }
         }
     }
     
-    //MARK: - LeaveRoomButton
-    @SettingBuilder private var leaveRoomButton: some Setting {
+    //MARK: - LeaveGroupButton
+    @SettingBuilder private var leaveGroupButton: some Setting {
         SettingCustomView {
             Button(action: {
-                showLeaveRoomConfirmation.toggle()
+                showLeaveGroupConfirmation.toggle()
             }) {
-                Text("Leave Room")
+                Text("Leave Group")
                     .foregroundColor(.red)
                     .leftAligned()
                     .frame(maxWidth: .infinity)
             }
             .padding(15)
-            .alert(isPresented: $showLeaveRoomConfirmation) {
-                Alert(title: Text("Confirm Leaving Room"),
-                      message: Text("Are you sure you want to leave \(room.name)?"),
+            .alert(isPresented: $showLeaveGroupConfirmation) {
+                Alert(title: Text("Confirm Leaving Group"),
+                      message: Text("Are you sure you want to leave \(group.name)?"),
                       primaryButton: .cancel(),
-                      secondaryButton: .default(Text("OK")) { leaveRoom() })
+                      secondaryButton: .default(Text("OK")) { leaveGroup() })
             }
         }
     }
     
     //MARK: - Save
     private func saveToFirestore() {
-        FirebaseManager.shared.updateRoom(for: room.code, with: [
-            TTConstants.roomName: newRoomNameText,
-            TTConstants.roomSettingMinimumNumOfUsers: minimumNumberOfUsersIndex + 2,
-            TTConstants.roomSettingMaximumNumOfUsers: maximumNumberOfUsersIndex + 2,
-            TTConstants.roomSettingBoundedStartDate: boundedStartDate,
-            TTConstants.roomSettingBoundedEndDate: boundedEndDate,
-            TTConstants.roomSettingLockRoomChanges: lockRoomChanges,
-            TTConstants.roomSettingAllowRoomJoin: allowRoomJoin,
-            TTConstants.roomStartingDate: boundedStartDate > room.startingDate ? boundedStartDate : room.startingDate,
-            TTConstants.roomEndingDate: room.endingDate > boundedEndDate ? boundedEndDate : room.endingDate
+        FirebaseManager.shared.updateGroup(for: group.code, with: [
+            TTConstants.groupName: newGroupNameText,
+            TTConstants.groupSettingMinimumNumOfUsers: minimumNumberOfUsersIndex + 2,
+            TTConstants.groupSettingMaximumNumOfUsers: maximumNumberOfUsersIndex + 2,
+            TTConstants.groupSettingBoundedStartDate: boundedStartDate,
+            TTConstants.groupSettingBoundedEndDate: boundedEndDate,
+            TTConstants.groupSettingLockGroupChanges: lockGroupChanges,
+            TTConstants.groupSettingAllowGroupJoin: allowGroupJoin,
+            TTConstants.groupStartingDate: boundedStartDate > group.startingDate ? boundedStartDate : group.startingDate,
+            TTConstants.groupEndingDate: group.endingDate > boundedEndDate ? boundedEndDate : group.endingDate
         ]) { error in
             guard let error = error else {
-                let newRoomSettings = TTRoomSetting(minimumNumOfUsers: minimumNumberOfUsersIndex + 2,
+                let newGroupSettings = TTGroupSetting(minimumNumOfUsers: minimumNumberOfUsersIndex + 2,
                                                     maximumNumOfUsers: maximumNumberOfUsersIndex + 2,
                                                     boundedStartDate: boundedStartDate,
                                                     boundedEndDate: boundedEndDate,
-                                                    lockRoomChanges: lockRoomChanges,
-                                                    allowRoomJoin: allowRoomJoin)
-                let newRoom = TTRoom(name: newRoomNameText,
-                                     users: room.users,
-                                     code: room.code,
-                                     startingDate: boundedStartDate > room.startingDate ? boundedStartDate : room.startingDate,
-                                     endingDate: room.endingDate > boundedEndDate ? boundedEndDate : room.endingDate,
-                                     histories: room.histories,
-                                     events: room.events,
-                                     admins: room.admins,
-                                     setting: newRoomSettings)
-                updateClosure(newRoom)
+                                                    lockGroupChanges: lockGroupChanges,
+                                                    allowGroupJoin: allowGroupJoin)
+                let newGroup = TTGroup(name: newGroupNameText,
+                                     users: group.users,
+                                     code: group.code,
+                                     startingDate: boundedStartDate > group.startingDate ? boundedStartDate : group.startingDate,
+                                     endingDate: group.endingDate > boundedEndDate ? boundedEndDate : group.endingDate,
+                                     histories: group.histories,
+                                     events: group.events,
+                                     admins: group.admins,
+                                     setting: newGroupSettings)
+                updateClosure(newGroup)
                 dismiss()
                 return
             }
@@ -319,14 +319,14 @@ struct RoomSettingsView: View {
         showErrorAlert = false
     }
     
-    private func deleteRoom() {
-        FirebaseManager.shared.deleteRoom(for: room.code) { error in
+    private func deleteGroup() {
+        FirebaseManager.shared.deleteGroup(for: group.code) { error in
             if let err = error {
                 showError(for: err)
             } else {
-                for username in room.users {
+                for username in group.users {
                     FirebaseManager.shared.updateUserData(for: username, with: [
-                        TTConstants.roomCodes: FieldValue.arrayRemove([room.code])
+                        TTConstants.groupCodes: FieldValue.arrayRemove([group.code])
                     ]) { error in
                         if let err = error {
                             ttError = err
@@ -341,17 +341,17 @@ struct RoomSettingsView: View {
         }
     }
     
-    private func leaveRoom() {
+    private func leaveGroup() {
         guard let currentUser = FirebaseManager.shared.currentUser else { return }
         
-        FirebaseManager.shared.updateRoom(for: room.code, with: [
-            TTConstants.roomUsers: FieldValue.arrayRemove([currentUser.username])
+        FirebaseManager.shared.updateGroup(for: group.code, with: [
+            TTConstants.groupUsers: FieldValue.arrayRemove([currentUser.username])
         ]) { error in
             if let err = error {
                 showError(for: err)
             } else {
                 FirebaseManager.shared.updateUserData(for: currentUser.username, with: [
-                    TTConstants.roomCodes: FieldValue.arrayRemove([room.code])
+                    TTConstants.groupCodes: FieldValue.arrayRemove([group.code])
                 ]) { error in
                     if let err = error {
                         ttError = err
@@ -366,10 +366,10 @@ struct RoomSettingsView: View {
     }
 }
 
-struct RoomSettingsView_Previews: PreviewProvider {
+struct GroupSettingsView_Previews: PreviewProvider {
     static let configuration = Configuration()
-    static let room = TTRoom(name: "Meeting 1", users: [], code: "ABCDE", startingDate: Date(), endingDate: Date(), histories: [], events: [], admins: [], setting: TTRoomSetting(minimumNumOfUsers: 2, maximumNumOfUsers: 10, boundedStartDate: Date(), boundedEndDate: Date(), lockRoomChanges: false, allowRoomJoin: true))
+    static let group = TTGroup(name: "Meeting 1", users: [], code: "ABCDE", startingDate: Date(), endingDate: Date(), histories: [], events: [], admins: [], setting: TTGroupSetting(minimumNumOfUsers: 2, maximumNumOfUsers: 10, boundedStartDate: Date(), boundedEndDate: Date(), lockGroupChanges: false, allowGroupJoin: true))
     static var previews: some View {
-        RoomSettingsView(room: room, config: configuration, updateClosure: {_ in }, popUIViewController: {})
+        GroupSettingsView(group: group, config: configuration, updateClosure: {_ in }, popUIViewController: {})
     }
 }

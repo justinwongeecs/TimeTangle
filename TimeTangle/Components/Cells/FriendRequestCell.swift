@@ -76,7 +76,7 @@ class FriendRequestCell: UITableViewCell {
         addSubview(usernameLabel)
         addSubview(friendRequestTypeLabel)
         
-        backgroundColor = .systemGreen.withAlphaComponent(0.2)
+        backgroundColor = TTConstants.defaultCellColor.withAlphaComponent(0.3)
         layer.cornerRadius = 10
         layer.borderWidth = 1
         layer.borderColor = UIColor.systemGreen.cgColor

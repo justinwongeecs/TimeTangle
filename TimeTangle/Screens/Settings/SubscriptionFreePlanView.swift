@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SubscriptionFreePlanView: View {
-    private let roomsCount = FirebaseManager.shared.currentUser?.roomCodes.count
+    private let groupsCount = FirebaseManager.shared.currentUser?.groupCodes.count
     
     var body: some View {
         VStack {
@@ -18,15 +18,15 @@ struct SubscriptionFreePlanView: View {
             
             Spacer()
             
-            if roomsCount != nil {
-                Text("Room Limit:")
+            if groupsCount != nil {
+                Text("Group Limit:")
                     .font(.title.bold())
                     .foregroundColor(.gray)
                 HStack {
-                    Text("\(roomsCount!)")
+                    Text("\(groupsCount!)")
                         .font(.system(size: 40).bold())
                         .foregroundColor(.red)
-                    Text("/5 Rooms")
+                    Text("/5 Groups")
                         .font(.system(size: 20).bold())
                         .foregroundColor(.gray)
                 }

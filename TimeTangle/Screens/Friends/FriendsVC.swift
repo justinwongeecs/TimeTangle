@@ -75,6 +75,7 @@ class FriendsVC: UIViewController {
         searchBarField.delegate = self
         searchBarField.autocorrectionType = .no
         searchBarField.searchBarStyle = .minimal
+        searchBarField.tintColor = .systemGreen
         searchBarField.translatesAutoresizingMaskIntoConstraints = false
         searchBarField.placeholder = "Search for friend"
         searchBarField.autocapitalizationType = .none

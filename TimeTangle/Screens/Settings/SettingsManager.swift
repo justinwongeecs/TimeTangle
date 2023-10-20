@@ -11,7 +11,7 @@ struct SettingsConstants {
     static let allowNotifications = "AllowNotifications"
     static let friendsDiscoverability = "FriendsDiscoverability"
     static let deleteAccount = "DeleteAccount"
-    static let timePeriodToDeleteRoomsIndex = "TimePeriodToDeleteRoomsIndex"
+    static let timePeriodToDeleteGroupsIndex = "TimePeriodToDeleteGroupsIndex"
     static let appearanceIndex = "AppearanceIndex"
     static let automaticallyPullsFromCalendar = "AutomaticallyPullsFromCalendar"
     static let subscriptionPlanIsFree = "SubscriptionPlanIsFree"

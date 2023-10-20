@@ -1,5 +1,5 @@
 //
-//  CreateRoomUserQueueCell.swift
+//  CreateGroupUserQueueCell.swift
 //  TimeTangle
 //
 //  Created by Justin Wong on 5/29/23.
@@ -7,14 +7,13 @@
 
 import UIKit
 
-class CreateRoomUserQueueCell: ProfileUsernameCell {
+class CreateGroupUserQueueCell: ProfileUsernameCell {
     
     private let deleteButton = UIButton(type: .custom)
     private var deleteCompletionHandler: (() -> Void)?
-    private let deleteButtonWidthAndHeight: CGFloat = 25
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: CreateRoomUserQueueCell.getReuseID())
+        super.init(style: style, reuseIdentifier: CreateGroupUserQueueCell.getReuseID())
         configureCell()
     }
     
@@ -33,14 +32,15 @@ class CreateRoomUserQueueCell: ProfileUsernameCell {
     }
     
     static func getReuseID() -> String {
-        return "CreateRoomUserQueueCell"
+        return "CreateGroupUserQueueCell"
     }
     
     private func configureCell() {
-        let symbolConfig = UIImage.SymbolConfiguration(pointSize: deleteButtonWidthAndHeight)
+        let deleteButtonWidthAndHeight: CGFloat = 30
+        let symbolConfig = UIImage.SymbolConfiguration(pointSize: 30)
         let deleteIcon = UIImage(systemName: "xmark.circle.fill", withConfiguration: symbolConfig)
         deleteButton.setImage(deleteIcon, for: .normal)
-        deleteButton.tintColor = .systemRed.withAlphaComponent(0.7)
+        deleteButton.tintColor = .systemRed
         deleteButton.addTarget(self, action: #selector(didPressDeleteButton), for: .touchUpInside)
         deleteButton.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(deleteButton)

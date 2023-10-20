@@ -25,10 +25,10 @@ struct SubscriptionProPlanView: View {
                 .font(.system(size: 20).bold())
             
             Group {
-                SubscriptionBulletPoint(text: "Unlimited rooms")
+                SubscriptionBulletPoint(text: "Unlimited groups")
                 SubscriptionBulletPoint(text: "Create custom preset friend groups")
-                SubscriptionBulletPoint(text: "Manage room admin users")
-                SubscriptionBulletPoint(text: "Lock & unlock rooms")
+                SubscriptionBulletPoint(text: "Manage group admin users")
+                SubscriptionBulletPoint(text: "Lock & unlock groups")
                 SubscriptionBulletPoint(text: "Additional personalized settings")
                 SubscriptionBulletPoint(text: "View detailed user profiles")
                 SubscriptionBulletPoint(text: "Enhanced visibility & privacy features")

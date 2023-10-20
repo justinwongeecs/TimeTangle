@@ -1,5 +1,5 @@
 //
-//  JoinRoomCodeTextField.swift
+//  JoinGroupCodeTextField.swift
 //  TimeTangle
 //
 //  Created by Justin Wong on 12/28/22.
@@ -8,7 +8,7 @@
 import UIKit
 import FirebaseFirestore
 
-class JoinRoomCodeTextField: UITextField {
+class JoinGroupCodeTextField: UITextField {
     
     private var digitLabels = [UILabel]()
     private var enterCodeCompletion: (() -> Void)?
@@ -109,7 +109,7 @@ class JoinRoomCodeTextField: UITextField {
     }
 }
 
-extension JoinRoomCodeTextField: UITextFieldDelegate {
+extension JoinGroupCodeTextField: UITextFieldDelegate {
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         guard let characterCount = textField.text?.count else { return false }
@@ -129,14 +129,14 @@ extension JoinRoomCodeTextField: UITextFieldDelegate {
             let db = Firestore.firestore()
             let batch = db.batch()
             
-            let roomRef = db.collection(TTConstants.roomsCollection).document(userEnteredCode)
+            let groupRef = db.collection(TTConstants.groupsCollection).document(userEnteredCode)
             batch.updateData([
-                TTConstants.roomUsers: FieldValue.arrayUnion([currentUser.username])
-            ], forDocument: roomRef)
+                TTConstants.groupUsers: FieldValue.arrayUnion([currentUser.username])
+            ], forDocument: groupRef)
             
             let currentUserRef = db.collection(TTConstants.usersCollection).document(currentUser.username)
             batch.updateData([
-                TTConstants.roomCodes: FieldValue.arrayUnion([userEnteredCode])
+                TTConstants.groupCodes: FieldValue.arrayUnion([userEnteredCode])
             ], forDocument: currentUserRef)
             
             batch.commit() { [weak self] error in

@@ -1,5 +1,5 @@
 //
-//  RoomUserCell.swift
+//  GroupUserCell.swift
 //  TimeTangle
 //
 //  Created by Justin Wong on 1/6/23.
@@ -7,24 +7,24 @@
 
 import UIKit
 
-protocol RoomUserCellDelegate: AnyObject {
-    func roomUserCellDidToggleAdmin(for user: TTUser)
-    func roomUserCellDidRemoveUser(for user: TTUser)
-    func roomUserCellVisibilityDidChange(for user: TTUser)
+protocol GroupUserCellDelegate: AnyObject {
+    func groupUserCellDidToggleAdmin(for user: TTUser)
+    func groupUserCellDidRemoveUser(for user: TTUser)
+    func groupUserCellVisibilityDidChange(for user: TTUser)
 }
 
-class RoomUserCell: ProfileUsernameCell {
-    static let reuseId = "RoomUserCell"
+class GroupUserCell: ProfileUsernameCell {
+    static let reuseId = "GroupUserCell"
     
     //Eventually save this setting for the session
-    private var room: TTRoom?
+    private var group: TTGroup?
     private var user: TTUser?
     private var isUserVisible: Bool = true
     private let adminIndicatorView = UIImageView()
     private let visibilityButton = UIButton(type: .custom)
     private let menuButton = UIButton(type: .custom)
     
-    weak var delegate: RoomUserCellDelegate?
+    weak var delegate: GroupUserCellDelegate?
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -38,9 +38,9 @@ class RoomUserCell: ProfileUsernameCell {
         super.init(coder: coder)
     }
     
-    func set(for user: TTUser, usersNotVisible: [String], room: TTRoom) {
+    func set(for user: TTUser, usersNotVisible: [String], group: TTGroup) {
         super.set(for: user)
-        self.room = room
+        self.group = group
         self.user = user
         
         if usersNotVisible.contains(user.username) {
@@ -53,17 +53,15 @@ class RoomUserCell: ProfileUsernameCell {
         displayCorrectVisibilityButton()
         
         guard let currentUser = FirebaseManager.shared.currentUser else { return }
-        print("Room: \(room), current user username: \(currentUser.username)")
-        print("room")
-        if room.admins.contains(currentUser.username) {
+        if group.admins.contains(currentUser.username) {
             configureMenuButton()
         }
     }
     
     func updateAdminIndicator(for user: TTUser) {
-        guard let room = room else { return }
+        guard let group = group else { return }
         
-        if room.doesContainsAdmin(for: user.username) {
+        if group.doesContainsAdmin(for: user.username) {
             adminIndicatorView.tintColor = .systemPurple
         } else {
             adminIndicatorView.tintColor = .clear
@@ -114,13 +112,13 @@ class RoomUserCell: ProfileUsernameCell {
         isUserVisible.toggle()
         displayCorrectVisibilityButton()
         if let delegate = delegate, let user = user {
-            delegate.roomUserCellVisibilityDidChange(for: user)
+            delegate.groupUserCellVisibilityDidChange(for: user)
         }
     }
     
     //MARK: - Menu Button
     private func configureMenuButton() {
-        guard let room = room, let user = user, let currentUser = FirebaseManager.shared.currentUser else { return }
+        guard let group = group, let user = user, let currentUser = FirebaseManager.shared.currentUser else { return }
         
         menuButton.setImage(UIImage(systemName: "ellipsis"), for: .normal)
         menuButton.tintColor = .lightGray
@@ -134,23 +132,23 @@ class RoomUserCell: ProfileUsernameCell {
         let grantAdminUIAction = UIAction(title: "Grant Admin", image: UIImage(systemName: "person.crop.circle.badge.checkmark", withConfiguration: symbolConfig)) { [weak self] action in
                 guard let user = self?.user else { return }
               
-                self?.delegate?.roomUserCellDidToggleAdmin(for: user)
+                self?.delegate?.groupUserCellDidToggleAdmin(for: user)
         }
         
         let revokeAdminUIAction = UIAction(title: "Revoke Admin", image: UIImage(systemName: "person.crop.circle.badge.xmark", withConfiguration: symbolConfig), attributes: .destructive) { [weak self] action in
             guard let user = self?.user else { return }
-            self?.delegate?.roomUserCellDidToggleAdmin(for: user)
+            self?.delegate?.groupUserCellDidToggleAdmin(for: user)
         }
         
         let removeUserUIAction = UIAction(title: "Remove User", image: UIImage(systemName: "person.badge.minus", withConfiguration: symbolConfig), attributes: .destructive) { [weak self] action in
             guard let user = self?.user else { return }
-            self?.delegate?.roomUserCellDidRemoveUser(for: user)
+            self?.delegate?.groupUserCellDidRemoveUser(for: user)
         }
         
-        if user.username == currentUser.username && room.doesContainsAdmin(for: currentUser.username) {
+        if user.username == currentUser.username && group.doesContainsAdmin(for: currentUser.username) {
             uiActions.append(revokeAdminUIAction)
         } else {
-            if room.doesContainsAdmin(for: user.username) {
+            if group.doesContainsAdmin(for: user.username) {
                 uiActions.append(contentsOf: [revokeAdminUIAction, removeUserUIAction])
             } else {
                 uiActions.append(contentsOf: [grantAdminUIAction, removeUserUIAction])

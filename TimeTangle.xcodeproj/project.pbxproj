@@ -15,10 +15,11 @@
 		E8188FD32A1751D5005AA0BF /* CalendarModalCardVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8188FD22A1751D5005AA0BF /* CalendarModalCardVC.swift */; };
 		E8188FDD2A18811A005AA0BF /* Event+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8188FDC2A18811A005AA0BF /* Event+Ext.swift */; };
 		E81D25062A145217003C65C5 /* UILabel+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E81D25052A145217003C65C5 /* UILabel+Ext.swift */; };
+		E83146662AE0F6D700A5B250 /* GroupViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E83146652AE0F6D700A5B250 /* GroupViewCell.swift */; };
 		E83D878E2AAB82B600C4113C /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = E83D878D2AAB82B600C4113C /* GoogleService-Info.plist */; };
-		E84541AF295F818B00CBB430 /* RoomDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84541AE295F818B00CBB430 /* RoomDetailVC.swift */; };
+		E84541AF295F818B00CBB430 /* GroupDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84541AE295F818B00CBB430 /* GroupDetailVC.swift */; };
 		E84541B2295FADDC00CBB430 /* EventKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84541B1295FADDC00CBB430 /* EventKitManager.swift */; };
-		E84541B5295FC17500CBB430 /* RoomDetailNib.xib in Resources */ = {isa = PBXBuildFile; fileRef = E84541B4295FC17500CBB430 /* RoomDetailNib.xib */; };
+		E84541B5295FC17500CBB430 /* GroupDetailNib.xib in Resources */ = {isa = PBXBuildFile; fileRef = E84541B4295FC17500CBB430 /* GroupDetailNib.xib */; };
 		E865A7A92A1C108A00F105AA /* TTEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A7A82A1C108A00F105AA /* TTEvent.swift */; };
 		E865A7AD2A1C80C800F105AA /* TTProfileImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A7AC2A1C80C800F105AA /* TTProfileImageView.swift */; };
 		E865A7E52A1F432A00F105AA /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A7E42A1F432900F105AA /* SettingsManager.swift */; };
@@ -33,11 +34,11 @@
 		E865A8022A207A7600F105AA /* SubscriptionFreePlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A8012A207A7600F105AA /* SubscriptionFreePlanView.swift */; };
 		E865A8042A207D7A00F105AA /* View+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A8032A207D7A00F105AA /* View+Ext.swift */; };
 		E873BCD72964D99A0015AE99 /* CalendarKit in Frameworks */ = {isa = PBXBuildFile; productRef = E873BCD62964D99A0015AE99 /* CalendarKit */; };
-		E873BCD92964E4200015AE99 /* RoomAggregateResultVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E873BCD82964E4200015AE99 /* RoomAggregateResultVC.swift */; };
+		E873BCD92964E4200015AE99 /* GroupAggregateResultVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E873BCD82964E4200015AE99 /* GroupAggregateResultVC.swift */; };
 		E873BCE4296693C80015AE99 /* TTCloseButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = E873BCE3296693C70015AE99 /* TTCloseButton.swift */; };
 		E873BCE72966A0DC0015AE99 /* FirebaseStorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E873BCE62966A0DC0015AE99 /* FirebaseStorageManager.swift */; };
 		E873BCEB296904F50015AE99 /* RoomUserCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E873BCEA296904F50015AE99 /* RoomUserCell.swift */; };
-		E873BCF3297910330015AE99 /* RoomOverviewVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E873BCF2297910330015AE99 /* RoomOverviewVC.swift */; };
+		E873BCF3297910330015AE99 /* GroupOverviewVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E873BCF2297910330015AE99 /* GroupOverviewVC.swift */; };
 		E873C4632ADBC08000FB8ED6 /* TTCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = E873C4622ADBC08000FB8ED6 /* TTCache.swift */; };
 		E88A6CFF2ADD0FB300DE38A6 /* FriendCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E88A6CFE2ADD0FB300DE38A6 /* FriendCell.swift */; };
 		E893A25F2959611B004F7BC5 /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = E893A25E2959611B004F7BC5 /* FirebaseAppCheck */; };
@@ -54,8 +55,9 @@
 		E893A277295A62EF004F7BC5 /* FriendsAndRequestsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E893A276295A62EF004F7BC5 /* FriendsAndRequestsVC.swift */; };
 		E893A27A295A6D40004F7BC5 /* TTConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E893A279295A6D40004F7BC5 /* TTConstants.swift */; };
 		E893A27C295A7564004F7BC5 /* FriendRequestCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E893A27B295A7564004F7BC5 /* FriendRequestCell.swift */; };
-		E893A27E295A8793004F7BC5 /* TTRoom.swift in Sources */ = {isa = PBXBuildFile; fileRef = E893A27D295A8793004F7BC5 /* TTRoom.swift */; };
-		E8B6BDBA2A21D25F00DAFF04 /* RoomSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8B6BDB92A21D25F00DAFF04 /* RoomSettingsView.swift */; };
+		E893A27E295A8793004F7BC5 /* TTGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = E893A27D295A8793004F7BC5 /* TTGroup.swift */; };
+		E89AE6012AE23BEC00BDC454 /* Array+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E89AE6002AE23BEC00BDC454 /* Array+Ext.swift */; };
+		E8B6BDBA2A21D25F00DAFF04 /* GroupSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8B6BDB92A21D25F00DAFF04 /* GroupSettingsView.swift */; };
 		E8B6BDBC2A22916E00DAFF04 /* TTSwiftUIAlertView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8B6BDBB2A22916E00DAFF04 /* TTSwiftUIAlertView.swift */; };
 		E8B6BDBE2A2299C000DAFF04 /* UIApplication+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8B6BDBD2A2299C000DAFF04 /* UIApplication+Ext.swift */; };
 		E8B6BDC22A23216500DAFF04 /* TTRoomCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8B6BDC12A23216500DAFF04 /* TTRoomCodeView.swift */; };
@@ -86,10 +88,10 @@
 		E8CFC227295D0836006C23BE /* JoinRoomVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CFC226295D0836006C23BE /* JoinRoomVC.swift */; };
 		E8CFC229295D371D006C23BE /* TTModalCardVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CFC228295D371D006C23BE /* TTModalCardVC.swift */; };
 		E8CFC22B295D3981006C23BE /* CreateRoomConfirmationVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CFC22A295D3981006C23BE /* CreateRoomConfirmationVC.swift */; };
-		E8CFC22D295D5E55006C23BE /* RoomsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CFC22C295D5E55006C23BE /* RoomsVC.swift */; };
-		E8D004A62963B02C00907A64 /* RoomUsersVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8D004A52963B02C00907A64 /* RoomUsersVC.swift */; };
-		E8D004A92963B82B00907A64 /* RoomHistoryVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8D004A82963B82B00907A64 /* RoomHistoryVC.swift */; };
-		E8D004AB2964056400907A64 /* RoomHistoryCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = E8D004AA2964056400907A64 /* RoomHistoryCell.xib */; };
+		E8CFC22D295D5E55006C23BE /* GroupsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CFC22C295D5E55006C23BE /* GroupsVC.swift */; };
+		E8D004A62963B02C00907A64 /* GroupUsersVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8D004A52963B02C00907A64 /* GroupUsersVC.swift */; };
+		E8D004A92963B82B00907A64 /* GroupHistoryVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8D004A82963B82B00907A64 /* GroupHistoryVC.swift */; };
+		E8D004AB2964056400907A64 /* GroupHistoryCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = E8D004AA2964056400907A64 /* GroupHistoryCell.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -101,10 +103,11 @@
 		E8188FD22A1751D5005AA0BF /* CalendarModalCardVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarModalCardVC.swift; sourceTree = "<group>"; };
 		E8188FDC2A18811A005AA0BF /* Event+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Event+Ext.swift"; sourceTree = "<group>"; };
 		E81D25052A145217003C65C5 /* UILabel+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UILabel+Ext.swift"; sourceTree = "<group>"; };
+		E83146652AE0F6D700A5B250 /* GroupViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupViewCell.swift; sourceTree = "<group>"; };
 		E83D878D2AAB82B600C4113C /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
-		E84541AE295F818B00CBB430 /* RoomDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomDetailVC.swift; sourceTree = "<group>"; };
+		E84541AE295F818B00CBB430 /* GroupDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupDetailVC.swift; sourceTree = "<group>"; };
 		E84541B1295FADDC00CBB430 /* EventKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventKitManager.swift; sourceTree = "<group>"; };
-		E84541B4295FC17500CBB430 /* RoomDetailNib.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RoomDetailNib.xib; sourceTree = "<group>"; };
+		E84541B4295FC17500CBB430 /* GroupDetailNib.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = GroupDetailNib.xib; sourceTree = "<group>"; };
 		E865A7A82A1C108A00F105AA /* TTEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTEvent.swift; sourceTree = "<group>"; };
 		E865A7AC2A1C80C800F105AA /* TTProfileImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTProfileImageView.swift; sourceTree = "<group>"; };
 		E865A7E42A1F432900F105AA /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
@@ -117,11 +120,11 @@
 		E865A7FF2A2072BA00F105AA /* SubscriptionProPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionProPlanView.swift; sourceTree = "<group>"; };
 		E865A8012A207A7600F105AA /* SubscriptionFreePlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionFreePlanView.swift; sourceTree = "<group>"; };
 		E865A8032A207D7A00F105AA /* View+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Ext.swift"; sourceTree = "<group>"; };
-		E873BCD82964E4200015AE99 /* RoomAggregateResultVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomAggregateResultVC.swift; sourceTree = "<group>"; };
+		E873BCD82964E4200015AE99 /* GroupAggregateResultVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupAggregateResultVC.swift; sourceTree = "<group>"; };
 		E873BCE3296693C70015AE99 /* TTCloseButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTCloseButton.swift; sourceTree = "<group>"; };
 		E873BCE62966A0DC0015AE99 /* FirebaseStorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseStorageManager.swift; sourceTree = "<group>"; };
 		E873BCEA296904F50015AE99 /* RoomUserCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomUserCell.swift; sourceTree = "<group>"; };
-		E873BCF2297910330015AE99 /* RoomOverviewVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomOverviewVC.swift; sourceTree = "<group>"; };
+		E873BCF2297910330015AE99 /* GroupOverviewVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupOverviewVC.swift; sourceTree = "<group>"; };
 		E873C4622ADBC08000FB8ED6 /* TTCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTCache.swift; sourceTree = "<group>"; };
 		E88A6CFE2ADD0FB300DE38A6 /* FriendCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendCell.swift; sourceTree = "<group>"; };
 		E893A26C2959859D004F7BC5 /* FriendsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsVC.swift; sourceTree = "<group>"; };
@@ -131,8 +134,9 @@
 		E893A276295A62EF004F7BC5 /* FriendsAndRequestsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsAndRequestsVC.swift; sourceTree = "<group>"; };
 		E893A279295A6D40004F7BC5 /* TTConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTConstants.swift; sourceTree = "<group>"; };
 		E893A27B295A7564004F7BC5 /* FriendRequestCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendRequestCell.swift; sourceTree = "<group>"; };
-		E893A27D295A8793004F7BC5 /* TTRoom.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTRoom.swift; sourceTree = "<group>"; };
-		E8B6BDB92A21D25F00DAFF04 /* RoomSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomSettingsView.swift; sourceTree = "<group>"; };
+		E893A27D295A8793004F7BC5 /* TTGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTGroup.swift; sourceTree = "<group>"; };
+		E89AE6002AE23BEC00BDC454 /* Array+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Ext.swift"; sourceTree = "<group>"; };
+		E8B6BDB92A21D25F00DAFF04 /* GroupSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupSettingsView.swift; sourceTree = "<group>"; };
 		E8B6BDBB2A22916E00DAFF04 /* TTSwiftUIAlertView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTSwiftUIAlertView.swift; sourceTree = "<group>"; };
 		E8B6BDBD2A2299C000DAFF04 /* UIApplication+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+Ext.swift"; sourceTree = "<group>"; };
 		E8B6BDC12A23216500DAFF04 /* TTRoomCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTRoomCodeView.swift; sourceTree = "<group>"; };
@@ -165,10 +169,10 @@
 		E8CFC226295D0836006C23BE /* JoinRoomVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinRoomVC.swift; sourceTree = "<group>"; };
 		E8CFC228295D371D006C23BE /* TTModalCardVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTModalCardVC.swift; sourceTree = "<group>"; };
 		E8CFC22A295D3981006C23BE /* CreateRoomConfirmationVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateRoomConfirmationVC.swift; sourceTree = "<group>"; };
-		E8CFC22C295D5E55006C23BE /* RoomsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomsVC.swift; sourceTree = "<group>"; };
-		E8D004A52963B02C00907A64 /* RoomUsersVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomUsersVC.swift; sourceTree = "<group>"; };
-		E8D004A82963B82B00907A64 /* RoomHistoryVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomHistoryVC.swift; sourceTree = "<group>"; };
-		E8D004AA2964056400907A64 /* RoomHistoryCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = RoomHistoryCell.xib; sourceTree = "<group>"; };
+		E8CFC22C295D5E55006C23BE /* GroupsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupsVC.swift; sourceTree = "<group>"; };
+		E8D004A52963B02C00907A64 /* GroupUsersVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupUsersVC.swift; sourceTree = "<group>"; };
+		E8D004A82963B82B00907A64 /* GroupHistoryVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupHistoryVC.swift; sourceTree = "<group>"; };
+		E8D004AA2964056400907A64 /* GroupHistoryCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = GroupHistoryCell.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -191,40 +195,40 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		E8188FD62A185B7C005AA0BF /* RoomDetail */ = {
+		E8188FD62A185B7C005AA0BF /* GroupDetail */ = {
 			isa = PBXGroup;
 			children = (
-				E84541AE295F818B00CBB430 /* RoomDetailVC.swift */,
-				E84541B4295FC17500CBB430 /* RoomDetailNib.xib */,
+				E84541AE295F818B00CBB430 /* GroupDetailVC.swift */,
+				E84541B4295FC17500CBB430 /* GroupDetailNib.xib */,
 			);
-			path = RoomDetail;
+			path = GroupDetail;
 			sourceTree = "<group>";
 		};
-		E8188FD72A185B8B005AA0BF /* RoomUsers */ = {
+		E8188FD72A185B8B005AA0BF /* GroupUsers */ = {
 			isa = PBXGroup;
 			children = (
-				E8D004A52963B02C00907A64 /* RoomUsersVC.swift */,
+				E8D004A52963B02C00907A64 /* GroupUsersVC.swift */,
 				E8CEE2BA2957A89C000CD7FE /* AddUsersModalVC.swift */,
 			);
-			path = RoomUsers;
+			path = GroupUsers;
 			sourceTree = "<group>";
 		};
-		E8188FD82A185BA1005AA0BF /* RoomHistory */ = {
+		E8188FD82A185BA1005AA0BF /* GroupHistory */ = {
 			isa = PBXGroup;
 			children = (
-				E8D004A82963B82B00907A64 /* RoomHistoryVC.swift */,
-				E8D004AA2964056400907A64 /* RoomHistoryCell.xib */,
+				E8D004A82963B82B00907A64 /* GroupHistoryVC.swift */,
+				E8D004AA2964056400907A64 /* GroupHistoryCell.xib */,
 			);
-			path = RoomHistory;
+			path = GroupHistory;
 			sourceTree = "<group>";
 		};
-		E8188FD92A185BC0005AA0BF /* RoomAggregateResult */ = {
+		E8188FD92A185BC0005AA0BF /* GroupAggregateResult */ = {
 			isa = PBXGroup;
 			children = (
-				E873BCD82964E4200015AE99 /* RoomAggregateResultVC.swift */,
+				E873BCD82964E4200015AE99 /* GroupAggregateResultVC.swift */,
 				E8188FD22A1751D5005AA0BF /* CalendarModalCardVC.swift */,
 			);
-			path = RoomAggregateResult;
+			path = GroupAggregateResult;
 			sourceTree = "<group>";
 		};
 		E84541B0295F81A000CBB430 /* Login */ = {
@@ -346,7 +350,7 @@
 			children = (
 				E84541B0295F81A000CBB430 /* Login */,
 				E8CFC225295D07F5006C23BE /* Search */,
-				E8D004A72963B04500907A64 /* Rooms */,
+				E8D004A72963B04500907A64 /* Groups */,
 				E893A278295A633D004F7BC5 /* Friends */,
 				E873BCDE296555D10015AE99 /* Settings */,
 			);
@@ -374,7 +378,7 @@
 				E8CEE2DA2957D71E000CD7FE /* TTError.swift */,
 				E8CEE2E029582A2E000CD7FE /* TTUser.swift */,
 				E893A274295A5DB1004F7BC5 /* TTFriendRequest.swift */,
-				E893A27D295A8793004F7BC5 /* TTRoom.swift */,
+				E893A27D295A8793004F7BC5 /* TTGroup.swift */,
 				E865A7A82A1C108A00F105AA /* TTEvent.swift */,
 				E873C4622ADBC08000FB8ED6 /* TTCache.swift */,
 			);
@@ -389,6 +393,7 @@
 				E873BCEA296904F50015AE99 /* RoomUserCell.swift */,
 				E8B6BDC52A25B5CB00DAFF04 /* CreateRoomUserQueueCell.swift */,
 				E88A6CFE2ADD0FB300DE38A6 /* FriendCell.swift */,
+				E83146652AE0F6D700A5B250 /* GroupViewCell.swift */,
 			);
 			path = Cells;
 			sourceTree = "<group>";
@@ -419,6 +424,7 @@
 				E8188FDC2A18811A005AA0BF /* Event+Ext.swift */,
 				E865A8032A207D7A00F105AA /* View+Ext.swift */,
 				E8B6BDC72A26B01900DAFF04 /* UISearchBar+Ext.swift */,
+				E89AE6002AE23BEC00BDC454 /* Array+Ext.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -434,19 +440,19 @@
 			path = Search;
 			sourceTree = "<group>";
 		};
-		E8D004A72963B04500907A64 /* Rooms */ = {
+		E8D004A72963B04500907A64 /* Groups */ = {
 			isa = PBXGroup;
 			children = (
-				E8188FD62A185B7C005AA0BF /* RoomDetail */,
-				E8188FD92A185BC0005AA0BF /* RoomAggregateResult */,
-				E8188FD82A185BA1005AA0BF /* RoomHistory */,
-				E8188FD72A185B8B005AA0BF /* RoomUsers */,
-				E8CFC22C295D5E55006C23BE /* RoomsVC.swift */,
-				E873BCF2297910330015AE99 /* RoomOverviewVC.swift */,
+				E8188FD62A185B7C005AA0BF /* GroupDetail */,
+				E8188FD92A185BC0005AA0BF /* GroupAggregateResult */,
+				E8188FD82A185BA1005AA0BF /* GroupHistory */,
+				E8188FD72A185B8B005AA0BF /* GroupUsers */,
+				E8CFC22C295D5E55006C23BE /* GroupsVC.swift */,
+				E873BCF2297910330015AE99 /* GroupOverviewVC.swift */,
 				E8188FCE2A15ED92005AA0BF /* SaveOrCancelIsland.swift */,
-				E8B6BDB92A21D25F00DAFF04 /* RoomSettingsView.swift */,
+				E8B6BDB92A21D25F00DAFF04 /* GroupSettingsView.swift */,
 			);
-			path = Rooms;
+			path = Groups;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -526,8 +532,8 @@
 				E8CEE2AD29579571000CD7FE /* LaunchScreen.storyboard in Resources */,
 				E8CEE2AA29579571000CD7FE /* Assets.xcassets in Resources */,
 				E83D878E2AAB82B600C4113C /* GoogleService-Info.plist in Resources */,
-				E8D004AB2964056400907A64 /* RoomHistoryCell.xib in Resources */,
-				E84541B5295FC17500CBB430 /* RoomDetailNib.xib in Resources */,
+				E8D004AB2964056400907A64 /* GroupHistoryCell.xib in Resources */,
+				E84541B5295FC17500CBB430 /* GroupDetailNib.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -541,9 +547,9 @@
 				E893A273295A3C52004F7BC5 /* ProfileUsernameCell.swift in Sources */,
 				E873BCEB296904F50015AE99 /* RoomUserCell.swift in Sources */,
 				E81D25062A145217003C65C5 /* UILabel+Ext.swift in Sources */,
-				E873BCD92964E4200015AE99 /* RoomAggregateResultVC.swift in Sources */,
+				E873BCD92964E4200015AE99 /* GroupAggregateResultVC.swift in Sources */,
 				E8CEE2BB2957A89C000CD7FE /* AddUsersModalVC.swift in Sources */,
-				E8D004A92963B82B00907A64 /* RoomHistoryVC.swift in Sources */,
+				E8D004A92963B82B00907A64 /* GroupHistoryVC.swift in Sources */,
 				E8CEE2E129582A2E000CD7FE /* TTUser.swift in Sources */,
 				E8CEE2B529579D3A000CD7FE /* CreateRoomVC.swift in Sources */,
 				E893A26F29598E2F004F7BC5 /* TTEmptyStateView.swift in Sources */,
@@ -564,11 +570,12 @@
 				E865A7F42A1FF30100F105AA /* SettingsView.swift in Sources */,
 				E8B6BDC82A26B01900DAFF04 /* UISearchBar+Ext.swift in Sources */,
 				E893A275295A5DB1004F7BC5 /* TTFriendRequest.swift in Sources */,
-				E8CFC22D295D5E55006C23BE /* RoomsVC.swift in Sources */,
+				E8CFC22D295D5E55006C23BE /* GroupsVC.swift in Sources */,
 				E8B6BDBC2A22916E00DAFF04 /* TTSwiftUIAlertView.swift in Sources */,
 				E865A8002A2072BA00F105AA /* SubscriptionProPlanView.swift in Sources */,
-				E893A27E295A8793004F7BC5 /* TTRoom.swift in Sources */,
+				E893A27E295A8793004F7BC5 /* TTGroup.swift in Sources */,
 				E8CFC21B295B8AD7006C23BE /* Notification.Name+Ext.swift in Sources */,
+				E89AE6012AE23BEC00BDC454 /* Array+Ext.swift in Sources */,
 				E8CFC22B295D3981006C23BE /* CreateRoomConfirmationVC.swift in Sources */,
 				E893A27A295A6D40004F7BC5 /* TTConstants.swift in Sources */,
 				E865A7A92A1C108A00F105AA /* TTEvent.swift in Sources */,
@@ -578,7 +585,7 @@
 				E84541B2295FADDC00CBB430 /* EventKitManager.swift in Sources */,
 				E8CEE2C82957AFF0000CD7FE /* FirebaseManager.swift in Sources */,
 				E8B6BDC22A23216500DAFF04 /* TTRoomCodeView.swift in Sources */,
-				E84541AF295F818B00CBB430 /* RoomDetailVC.swift in Sources */,
+				E84541AF295F818B00CBB430 /* GroupDetailVC.swift in Sources */,
 				E893A27C295A7564004F7BC5 /* FriendRequestCell.swift in Sources */,
 				E8188FC92A14C641005AA0BF /* UITableView+Ext.swift in Sources */,
 				E8CEE2B92957A0C7000CD7FE /* TTButton.swift in Sources */,
@@ -590,12 +597,13 @@
 				E865A8022A207A7600F105AA /* SubscriptionFreePlanView.swift in Sources */,
 				E8CEE2A12957956E000CD7FE /* AppDelegate.swift in Sources */,
 				E865A7F82A2007A700F105AA /* SettingsMyProfileView.swift in Sources */,
-				E8D004A62963B02C00907A64 /* RoomUsersVC.swift in Sources */,
+				E8D004A62963B02C00907A64 /* GroupUsersVC.swift in Sources */,
 				E893A26D2959859D004F7BC5 /* FriendsVC.swift in Sources */,
-				E873BCF3297910330015AE99 /* RoomOverviewVC.swift in Sources */,
+				E873BCF3297910330015AE99 /* GroupOverviewVC.swift in Sources */,
 				E865A7FC2A202A8700F105AA /* SettingsGeneralView.swift in Sources */,
 				E8CEE2CC2957B102000CD7FE /* TTTitleLabel.swift in Sources */,
 				E8CEE2CE2957BF22000CD7FE /* CreateAccountVC.swift in Sources */,
+				E83146662AE0F6D700A5B250 /* GroupViewCell.swift in Sources */,
 				E8CFC229295D371D006C23BE /* TTModalCardVC.swift in Sources */,
 				E8CEE2A32957956E000CD7FE /* SceneDelegate.swift in Sources */,
 				E893A277295A62EF004F7BC5 /* FriendsAndRequestsVC.swift in Sources */,
@@ -606,7 +614,7 @@
 				E865A7E52A1F432A00F105AA /* SettingsManager.swift in Sources */,
 				E8CEE2DB2957D71E000CD7FE /* TTError.swift in Sources */,
 				E8CEE2D72957D1B2000CD7FE /* TTBodyLabel.swift in Sources */,
-				E8B6BDBA2A21D25F00DAFF04 /* RoomSettingsView.swift in Sources */,
+				E8B6BDBA2A21D25F00DAFF04 /* GroupSettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -12,7 +12,7 @@ extension Notification.Name {
         return .init(rawValue: "Firebase.updatedUser")
     }
     
-    static var updatedCurrentUserRooms: Notification.Name {
-        return .init(rawValue: "Firebase.updatedCurrentUserRooms")
+    static var updatedCurrentUserGroups: Notification.Name {
+        return .init(rawValue: "Firebase.updatedCurrentUserGroups")
     }
 }

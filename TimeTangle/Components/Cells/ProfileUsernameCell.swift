@@ -33,9 +33,11 @@ class ProfileUsernameCell: UITableViewCell {
         update()
     }
     
-    func set(for user: TTUser, backgroundColor: UIColor? = .secondarySystemBackground) {
+    func set(for user: TTUser, backgroundColor: UIColor? = .systemGreen) {
         self.user = user
-        self.backgroundColor = backgroundColor
+        self.backgroundColor = backgroundColor?.withAlphaComponent(0.3)
+        self.layer.borderColor = backgroundColor?.cgColor
+        self.layer.borderWidth = 1
         
         usernameLabel.text = user.getFullName()
     
@@ -50,6 +52,8 @@ class ProfileUsernameCell: UITableViewCell {
         layer.cornerRadius = 10
         selectionStyle = .none
         clipsToBounds = true
+        
+        avatarImageView.showBorder = true
         
         hStackView.axis = .horizontal
         hStackView.alignment = .center

@@ -1,5 +1,5 @@
 //
-//  RoomOverviewVC.swift
+//  GroupOverviewVC.swift
 //  TimeTangle
 //
 //  Created by Justin Wong on 1/18/23.
@@ -8,35 +8,35 @@
 import UIKit
 import CalendarKit
 
-enum RoomOverviewFilterType {
+enum GroupOverviewFilterType {
     case availableTimes
     case unAvailableTimes
     case all
 }
 
-private struct RoomOverviewSection {
+private struct GroupOverviewSection {
     var date: Date
     var events: [TTEvent]
 }
 
-protocol RoomOverviewCellDelegate: AnyObject {
+protocol GroupOverviewCellDelegate: AnyObject {
     func didSelectInterval(for event: TTEvent?)
 }
 
-class RoomOverviewVC: UIViewController {
+class GroupOverviewVC: UIViewController {
     
-    private var room: TTRoom!
-    private var roomSummarySections: [RoomOverviewSection]!
-    private var filteredRoomSummarySections = [RoomOverviewSection]()
+    private var group: TTGroup!
+    private var groupSummarySections: [GroupOverviewSection]!
+    private var filteredGroupSummarySections = [GroupOverviewSection]()
     private var notVisibleMembers = [String]()
     private var timesTableView: UITableView!
-    private var currentFilterMode: RoomOverviewFilterType = .all
+    private var currentFilterMode: GroupOverviewFilterType = .all
     
     private var selectedInterval: TTEvent?
     
-    init(room: TTRoom, notVisibleMembers: [String], openIntervals: [TTEvent]) {
-        self.room = room
-        self.room.events.append(contentsOf: openIntervals)
+    init(group: TTGroup, notVisibleMembers: [String], openIntervals: [TTEvent]) {
+        self.group = group
+        self.group.events.append(contentsOf: openIntervals)
         self.notVisibleMembers = notVisibleMembers
         super.init(nibName: nil, bundle: nil)
         funcRemoveAllDayEvents()
@@ -55,7 +55,7 @@ class RoomOverviewVC: UIViewController {
         configureTimesTable()
         navigationController?.navigationBar.prefersLargeTitles = false
         
-        configureRoomSummarySections()
+        configureGroupSummarySections()
         DispatchQueue.main.async {
             self.timesTableView.reloadData()
         }
@@ -63,7 +63,7 @@ class RoomOverviewVC: UIViewController {
     
     private func configureVC() {
         view.backgroundColor = .systemBackground
-        title = "\(room.name) Overview"
+        title = "\(group.name) Overview"
     }
     
     private func configureNavigationBarItems() {
@@ -87,7 +87,7 @@ class RoomOverviewVC: UIViewController {
     
     private func filterShowAll() {
         if currentFilterMode != .all {
-            filteredRoomSummarySections = roomSummarySections
+            filteredGroupSummarySections = groupSummarySections
             currentFilterMode = .all
             timesTableView.reloadData()
         }
@@ -95,13 +95,13 @@ class RoomOverviewVC: UIViewController {
     
     private func filterAndShowOpenIntervals() {
         if currentFilterMode != .availableTimes {
-            guard let roomSummarySections = roomSummarySections else { return }
-            var openIntervalSections = roomSummarySections
+            guard let groupSummarySections = groupSummarySections else { return }
+            var openIntervalSections = groupSummarySections
             
             for i in 0..<openIntervalSections.count {
                 openIntervalSections[i].events = openIntervalSections[i].events.filter { $0.createdBy == "TimeTangle" }
             }
-            filteredRoomSummarySections = openIntervalSections.filter { !$0.events.isEmpty }
+            filteredGroupSummarySections = openIntervalSections.filter { !$0.events.isEmpty }
             currentFilterMode = .availableTimes
             timesTableView.reloadData()
         }
@@ -109,42 +109,42 @@ class RoomOverviewVC: UIViewController {
     
     private func filterAndShowUnavailableIntervals() {
         if currentFilterMode != .unAvailableTimes {
-            guard let roomSummarySections = roomSummarySections else { return }
-            var unavailableSections = roomSummarySections
+            guard let groupSummarySections = groupSummarySections else { return }
+            var unavailableSections = groupSummarySections
             
             for i in 0..<unavailableSections.count {
                 unavailableSections[i].events = unavailableSections[i].events.filter { $0.createdBy != "TimeTangle" }
             }
             
-            filteredRoomSummarySections = unavailableSections.filter { !$0.events.isEmpty }
+            filteredGroupSummarySections = unavailableSections.filter { !$0.events.isEmpty }
             currentFilterMode = .unAvailableTimes
             timesTableView.reloadData()
         }
     }
     
     private func funcRemoveAllDayEvents() {
-        self.room.events = self.room.events.filter { !$0.isAllDay }
+        self.group.events = self.group.events.filter { !$0.isAllDay }
     }
     
-    private func configureRoomSummarySections() {
-        guard !room.events.isEmpty else {
-            roomSummarySections = []
+    private func configureGroupSummarySections() {
+        guard !group.events.isEmpty else {
+            groupSummarySections = []
             timesTableView.backgroundView = TTEmptyStateView(message: "No Events")
             return
         }
         
         timesTableView.backgroundView = nil
-        var sections = [RoomOverviewSection]()
-        let firstEvent = room.events.first!
-        sections.append(RoomOverviewSection(date: firstEvent.startDate, events: [firstEvent]))
+        var sections = [GroupOverviewSection]()
+        let firstEvent = group.events.first!
+        sections.append(GroupOverviewSection(date: firstEvent.startDate, events: [firstEvent]))
         
-        for index in stride(from: 1, to: room.events.count, by: 1) {
-            let event = room.events[index]
+        for index in stride(from: 1, to: group.events.count, by: 1) {
+            let event = group.events[index]
             
             if let index = sections.firstIndex(where: { $0.date.compare(with: event.startDate, toGranularity: .day) == .orderedSame}) {
                 sections[index].events.append(event)
             } else {
-                sections.append(RoomOverviewSection(date: event.startDate, events: [event]))
+                sections.append(GroupOverviewSection(date: event.startDate, events: [event]))
             }
         }
         
@@ -154,8 +154,8 @@ class RoomOverviewVC: UIViewController {
         }
         
         //Sort sections
-        roomSummarySections = sections.sorted(by: { $0.date < $1.date })
-        filteredRoomSummarySections = roomSummarySections
+        groupSummarySections = sections.sorted(by: { $0.date < $1.date })
+        filteredGroupSummarySections = groupSummarySections
     }
     
     private func configureTimesTable() {
@@ -164,7 +164,7 @@ class RoomOverviewVC: UIViewController {
         timesTableView.translatesAutoresizingMaskIntoConstraints = false
         timesTableView.dataSource = self
         timesTableView.delegate = self
-        timesTableView.register(RoomOverviewCell.self, forCellReuseIdentifier: RoomOverviewCell.reuseID)
+        timesTableView.register(GroupOverviewCell.self, forCellReuseIdentifier: GroupOverviewCell.reuseID)
         view.addSubview(timesTableView)
         
         let padding: CGFloat = 10
@@ -178,10 +178,10 @@ class RoomOverviewVC: UIViewController {
     }
 }
 
-//MARK: - RoomOverviewVC TableView Delegates
-extension RoomOverviewVC: UITableViewDelegate, UITableViewDataSource {
+//MARK: - GroupOverviewVC TableView Delegates
+extension GroupOverviewVC: UITableViewDelegate, UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
-        return filteredRoomSummarySections.count
+        return filteredGroupSummarySections.count
     }
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
@@ -190,7 +190,7 @@ extension RoomOverviewVC: UITableViewDelegate, UITableViewDataSource {
         
         let titleLabel = UILabel()
         titleLabel.font = UIFont.boldSystemFont(ofSize: 20)
-        titleLabel.text = filteredRoomSummarySections[section].date.formatted(with: "M/d/yyyy")
+        titleLabel.text = filteredGroupSummarySections[section].date.formatted(with: "M/d/yyyy")
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         headerView.addSubview(titleLabel)
         
@@ -204,40 +204,40 @@ extension RoomOverviewVC: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return filteredRoomSummarySections[section].events.count
+        return filteredGroupSummarySections[section].events.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = timesTableView.dequeueReusableCell(withIdentifier: RoomOverviewCell.reuseID) as! RoomOverviewCell
+        let cell = timesTableView.dequeueReusableCell(withIdentifier: GroupOverviewCell.reuseID) as! GroupOverviewCell
         
-        let section = filteredRoomSummarySections[indexPath.section]
+        let section = filteredGroupSummarySections[indexPath.section]
         let event = section.events[indexPath.row]
         cell.set(for: event, selectedInterval: selectedInterval)
-        cell.roomOverviewCellDelegate = self
+        cell.groupOverviewCellDelegate = self
 
         return cell
     }
 }
 
-extension RoomOverviewVC: RoomOverviewCellDelegate {
+extension GroupOverviewVC: GroupOverviewCellDelegate {
     func didSelectInterval(for event: TTEvent?) {
         selectedInterval = event
         timesTableView.reloadData()
     }
 }
 
-//MARK: - RoomOverviewCell
-class RoomOverviewCell: UITableViewCell {
-    static let reuseID = "RoomOverviewCell"
+//MARK: - GroupOverviewCell
+class GroupOverviewCell: UITableViewCell {
+    static let reuseID = "GroupOverviewCell"
     
     private var event: TTEvent?
     private var isCellSelected = false
     
     private var createdByUserLabel = UILabel()
-    private var roomNameAndTimeLabel = UILabel()
+    private var groupNameAndTimeLabel = UILabel()
     private var selectedIntervalImageView = UIImageView()
     
-    weak var roomOverviewCellDelegate: RoomOverviewCellDelegate?
+    weak var groupOverviewCellDelegate: GroupOverviewCellDelegate?
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -261,16 +261,16 @@ class RoomOverviewCell: UITableViewCell {
         
         let timeIntervalText = "\(timeFormatter.string(from: event.startDate)) - \(timeFormatter.string(from: event.endDate))"
         boldString.append(NSMutableAttributedString(string: timeIntervalText))
-        roomNameAndTimeLabel.attributedText = boldString
+        groupNameAndTimeLabel.attributedText = boldString
         
         //configure cell based on event.createdBy
         if event.isCreatedByUser {
-            roomNameAndTimeLabel.textColor = .systemRed
+            groupNameAndTimeLabel.textColor = .systemRed
             createdByUserLabel.isHidden = false
             createdByUserLabel.text = event.createdBy
             backgroundColor = .systemRed.withAlphaComponent(0.15)
         } else {
-            roomNameAndTimeLabel.textColor = .systemGreen
+            groupNameAndTimeLabel.textColor = .systemGreen
             createdByUserLabel.isHidden = true
             backgroundColor = .systemGreen.withAlphaComponent(0.15)
         }
@@ -284,8 +284,8 @@ class RoomOverviewCell: UITableViewCell {
     
     private func configureCell() {
         let defaultFontSize = UIFont.preferredFont(forTextStyle: .body).pointSize
-        roomNameAndTimeLabel.numberOfLines = 2
-        roomNameAndTimeLabel.translatesAutoresizingMaskIntoConstraints = false
+        groupNameAndTimeLabel.numberOfLines = 2
+        groupNameAndTimeLabel.translatesAutoresizingMaskIntoConstraints = false
         
         createdByUserLabel.font = UIFont.boldSystemFont(ofSize: defaultFontSize * 0.8)
         createdByUserLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -311,7 +311,7 @@ class RoomOverviewCell: UITableViewCell {
         hStackView.alignment = .center
         hStackView.translatesAutoresizingMaskIntoConstraints = false
         hStackView.setContentCompressionResistancePriority(UILayoutPriority.required, for: .vertical)
-        hStackView.addArrangedSubview(roomNameAndTimeLabel)
+        hStackView.addArrangedSubview(groupNameAndTimeLabel)
         
         vStackView.addArrangedSubview(hStackView)
         vStackView.addArrangedSubview(createdByUserLabel)
@@ -337,7 +337,7 @@ class RoomOverviewCell: UITableViewCell {
     }
     
     @objc private func selectInterval() {
-        guard let event = event, let delegate = roomOverviewCellDelegate else { return }
+        guard let event = event, let delegate = groupOverviewCellDelegate else { return }
         
         if !event.isCreatedByUser {
             delegate.didSelectInterval(for: event)

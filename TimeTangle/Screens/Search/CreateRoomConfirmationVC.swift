@@ -1,5 +1,5 @@
 //
-//  CreateRoomConfirmationVC.swift
+//  CreateGroupConfirmationVC.swift
 //  TimeTangle
 //
 //  Created by Justin Wong on 12/28/22.
@@ -7,31 +7,31 @@
 
 import UIKit
 
-protocol CreateRoomConfirmationVCDelegate: AnyObject {
-    func didSuccessfullyCreateRoom()
+protocol CreateGroupConfirmationVCDelegate: AnyObject {
+    func didSuccessfullyCreateGroup()
 }
 
-class CreateRoomConfirmationVC: TTModalCardVC {
+class CreateGroupConfirmationVC: TTModalCardVC {
     
     private var usersInQueue = [TTUser]()
     
     private let containerViewHeader = UIStackView()
     private var headerLabel = TTTitleLabel(textAlignment: .center, fontSize: 18)
-    private var roomCodeView: TTRoomCodeView!
-    private var roomCode: String!
-    let roomNameTextField = UIStackView()
+    private var groupCodeView: TTGroupCodeView!
+    private var groupCode: String!
+    let groupNameTextField = UIStackView()
     let textField = TTTextField()
     let confirmationButton = TTButton(backgroundColor: .systemGreen, title: "Tangle!")
 
     
-    weak var createRoomConfirmationDelegate: CreateRoomConfirmationVCDelegate!
+    weak var createGroupConfirmationDelegate: CreateGroupConfirmationVCDelegate!
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        headerLabel.text = "Confirm Room Settings"
+        headerLabel.text = "Confirm Group Settings"
         configureContainerViewHeader()
-        configureRoomCodeView()
-        configureRoomNameTitledText()
+        configureGroupCodeView()
+        configureGroupNameTitledText()
         configureConfirmationButton()
     }
     
@@ -68,47 +68,47 @@ class CreateRoomConfirmationVC: TTModalCardVC {
         ])
     }
     
-    private func configureRoomCodeView() {
-        roomCode = generateRandomRoomCode()
-        roomCodeView = TTRoomCodeView(codeText: roomCode)
-        roomCodeView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(roomCodeView)
+    private func configureGroupCodeView() {
+        groupCode = generateRandomGroupCode()
+        groupCodeView = TTGroupCodeView(codeText: groupCode)
+        groupCodeView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(groupCodeView)
         
         NSLayoutConstraint.activate([
-            roomCodeView.topAnchor.constraint(equalTo: containerViewHeader.bottomAnchor, constant: 10),
-            roomCodeView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 50),
-            roomCodeView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -50),
-            roomCodeView.heightAnchor.constraint(equalToConstant: 80)
+            groupCodeView.topAnchor.constraint(equalTo: containerViewHeader.bottomAnchor, constant: 10),
+            groupCodeView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 50),
+            groupCodeView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -50),
+            groupCodeView.heightAnchor.constraint(equalToConstant: 80)
         ])
     }
     
-    private func configureRoomNameTitledText() {
-        view.addSubview(roomNameTextField)
-        roomNameTextField.translatesAutoresizingMaskIntoConstraints = false
-        roomNameTextField.axis = .vertical
-        roomNameTextField.distribution = .fillProportionally
+    private func configureGroupNameTitledText() {
+        view.addSubview(groupNameTextField)
+        groupNameTextField.translatesAutoresizingMaskIntoConstraints = false
+        groupNameTextField.axis = .vertical
+        groupNameTextField.distribution = .fillProportionally
         
-        let enterRoomNameLabel = UILabel()
-        enterRoomNameLabel.text = "Enter Room Name:"
-        enterRoomNameLabel.translatesAutoresizingMaskIntoConstraints = false
-        enterRoomNameLabel.font = UIFont.boldSystemFont(ofSize: 17)
+        let enterGroupNameLabel = UILabel()
+        enterGroupNameLabel.text = "Enter Group Name:"
+        enterGroupNameLabel.translatesAutoresizingMaskIntoConstraints = false
+        enterGroupNameLabel.font = UIFont.boldSystemFont(ofSize: 17)
         
         textField.becomeFirstResponder()
         
-        roomNameTextField.addArrangedSubview(enterRoomNameLabel)
-        roomNameTextField.addArrangedSubview(textField)
+        groupNameTextField.addArrangedSubview(enterGroupNameLabel)
+        groupNameTextField.addArrangedSubview(textField)
         
         NSLayoutConstraint.activate([
-            roomNameTextField.topAnchor.constraint(equalTo: roomCodeView.bottomAnchor, constant: 10),
-            roomNameTextField.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 50),
-            roomNameTextField.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -50),
-            roomNameTextField.heightAnchor.constraint(equalToConstant: 100)
+            groupNameTextField.topAnchor.constraint(equalTo: groupCodeView.bottomAnchor, constant: 10),
+            groupNameTextField.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 50),
+            groupNameTextField.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -50),
+            groupNameTextField.heightAnchor.constraint(equalToConstant: 100)
         ])
     }
     
     private func configureConfirmationButton() {
         view.addSubview(confirmationButton)
-        confirmationButton.addTarget(self, action: #selector(confirmRoom), for: .touchUpInside)
+        confirmationButton.addTarget(self, action: #selector(confirmGroup), for: .touchUpInside)
         
         NSLayoutConstraint.activate([
             confirmationButton.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -30),
@@ -118,44 +118,44 @@ class CreateRoomConfirmationVC: TTModalCardVC {
         ])
     }
     
-    private func generateRandomRoomCode() -> String {
+    private func generateRandomGroupCode() -> String {
         let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
         return String((0...5).map{ _ in letters.randomElement()! })
     }
     
-    @objc private func confirmRoom() {
+    @objc private func confirmGroup() {
         guard !textField.text!.isEmpty else {
-            self.presentTTAlert(title: "Room Name Can't Be Empty", message: TTError.textFieldsCannotBeEmpty.rawValue, buttonTitle: "Ok")
+            self.presentTTAlert(title: "Group Name Can't Be Empty", message: TTError.textFieldsCannotBeEmpty.rawValue, buttonTitle: "Ok")
             return
         }
         
-        guard let roomCode = roomCode,
+        guard let groupCode = groupCode,
         let currentUser = FirebaseManager.shared.currentUser else { return }
         
-        //Create a room instance in Firestore
+        //Create a group instance in Firestore
         let dateAMonthAgoFromToday = Date().getDateWithMonthOffset(by: -1) ?? Date()
         let dateAMonthFromToday = Date().getDateWithMonthOffset(by: 1) ?? Date()
-        let newRoom = TTRoom(name: textField.text!, users: usersInQueue.map{$0.username}, code: roomCode, startingDate: Date(), endingDate: Date(), histories: [], events: [], admins: [currentUser.username], setting: TTRoomSetting(minimumNumOfUsers: 2, maximumNumOfUsers: 10, boundedStartDate: dateAMonthAgoFromToday, boundedEndDate: dateAMonthFromToday, lockRoomChanges: false, allowRoomJoin: true))
-        FirebaseManager.shared.createRoom(for: newRoom) { [weak self] result in
+        let newGroup = TTGroup(name: textField.text!, users: usersInQueue.map{$0.username}, code: groupCode, startingDate: Date(), endingDate: Date(), histories: [], events: [], admins: [currentUser.username], setting: TTGroupSetting(minimumNumOfUsers: 2, maximumNumOfUsers: 10, boundedStartDate: dateAMonthAgoFromToday, boundedEndDate: dateAMonthFromToday, lockGroupChanges: false, allowGroupJoin: true))
+        FirebaseManager.shared.createGroup(for: newGroup) { [weak self] result in
             switch result {
             case .success(_):
-                self?.createRoomConfirmationDelegate.didSuccessfullyCreateRoom()
+                self?.createGroupConfirmationDelegate.didSuccessfullyCreateGroup()
             case .failure(let error):
-                self?.presentTTAlert(title: "Cannot Create New Room", message: error.rawValue, buttonTitle: "Ok")
+                self?.presentTTAlert(title: "Cannot Create New Group", message: error.rawValue, buttonTitle: "Ok")
             }
         }
         
-        //add room code to roomCodes property of all of the usersInQueue
+        //add group code to groupCodes property of all of the usersInQueue
         for username in usersInQueue.map({ $0.username }) {
-            //fetch the data of each user to get the roomCodes property
+            //fetch the data of each user to get the groupCodes property
             FirebaseManager.shared.fetchUserDocumentData(with: username) { [weak self] result in
                 switch result {
                 case .success(let user):
-                    let roomCodesField = [
-                        TTConstants.roomCodes: user.roomCodes.arrayByAppending(roomCode)
+                    let groupCodesField = [
+                        TTConstants.groupCodes: user.groupCodes.arrayByAppending(groupCode)
                     ]
-                    //update the roomCodes property of each user
-                    FirebaseManager.shared.updateUserData(for: username, with: roomCodesField) { error in
+                    //update the groupCodes property of each user
+                    FirebaseManager.shared.updateUserData(for: username, with: groupCodesField) { error in
                         guard let error = error else { return }
                         self?.presentTTAlert(title: "Cannot update user", message: error.rawValue, buttonTitle: "Ok")
                     }

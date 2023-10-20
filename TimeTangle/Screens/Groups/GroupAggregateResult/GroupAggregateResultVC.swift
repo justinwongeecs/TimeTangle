@@ -1,5 +1,5 @@
 //
-//  RoomAggregateResultVC.swift
+//  GroupAggregateResultVC.swift
 //  TimeTangle
 //
 //  Created by Justin Wong on 1/3/23.
@@ -9,13 +9,13 @@ import UIKit
 import EventKitUI
 import CalendarKit
 
-protocol RoomAggregateResultVCDelegate: AnyObject {
+protocol GroupAggregateResultVCDelegate: AnyObject {
     func updatedAggregateResultVC(ttEvents: [TTEvent])
 }
 
-class RoomAggregateResultVC: DayViewController {
+class GroupAggregateResultVC: DayViewController {
     
-    private var room: TTRoom!
+    private var group: TTGroup!
     private var openDateIntervals = [DateInterval]()
     private var usersNotVisible = [String]()
     private var currentPresentedDate: Date!
@@ -26,11 +26,11 @@ class RoomAggregateResultVC: DayViewController {
     private var leftStepper = UIButton(type: .custom)
     
     
-    weak var roomAggregateResultDelegate: RoomAggregateResultVCDelegate?
+    weak var groupAggregateResultDelegate: GroupAggregateResultVCDelegate?
     
-    required init(room: TTRoom, usersNotVisible: [String]) {
-        self.room = room
-        self.currentPresentedDate = room.startingDate
+    required init(group: TTGroup, usersNotVisible: [String]) {
+        self.group = group
+        self.currentPresentedDate = group.startingDate
         self.usersNotVisible = usersNotVisible
         super.init(nibName: nil, bundle: nil)
     }
@@ -56,10 +56,10 @@ class RoomAggregateResultVC: DayViewController {
         move(to: currentPresentedDate)
     }
     
-    func setView(usersNotVisible: [String], room: TTRoom) {
+    func setView(usersNotVisible: [String], group: TTGroup) {
         self.usersNotVisible = usersNotVisible
-        self.room = room
-        self.room.events = room.events.filter { !usersNotVisible.contains($0.createdBy) }
+        self.group = group
+        self.group.events = group.events.filter { !usersNotVisible.contains($0.createdBy) }
 
         updateStepperButtons()
         dayView.reloadData()
@@ -127,8 +127,8 @@ class RoomAggregateResultVC: DayViewController {
     
     @objc private func presentCalendarModalCardVC() {
         let calendarModalCardVC =
-        CalendarModalCardVC(startingDate: room.startingDate,
-                            endingDate: room.endingDate,
+        CalendarModalCardVC(startingDate: group.startingDate,
+                            endingDate: group.endingDate,
                             closeButtonClosure: { [weak self] in
             self?.dismiss(animated: true)
             
@@ -158,21 +158,21 @@ class RoomAggregateResultVC: DayViewController {
     
     private func updateStepperButtons() {
         if let yesterdayDate = dayView.calendar.date(byAdding: .day, value: -1, to: currentPresentedDate) {
-            let result = Calendar.current.compare(yesterdayDate, to: room.startingDate, toGranularity: .day)
+            let result = Calendar.current.compare(yesterdayDate, to: group.startingDate, toGranularity: .day)
             if result == .orderedSame || result == .orderedDescending{
                 leftStepper.isEnabled = true
             } else if result == .orderedAscending {
-                //Yesterday date is before room.startingDate
+                //Yesterday date is before group.startingDate
                 leftStepper.isEnabled = false
             }
         }
         
         if let tomorrowDate = dayView.calendar.date(byAdding: .day, value: 1, to: currentPresentedDate) {
-            let result = Calendar.current.compare(tomorrowDate, to: room.endingDate, toGranularity: .day)
+            let result = Calendar.current.compare(tomorrowDate, to: group.endingDate, toGranularity: .day)
             if result == .orderedSame || result == .orderedAscending{
                 rightStepper.isEnabled = true
             } else if result == .orderedDescending {
-                //room date is before room.endingDate
+                //group date is before group.endingDate
                 rightStepper.isEnabled = false
             }
         }
@@ -189,13 +189,13 @@ class RoomAggregateResultVC: DayViewController {
     
     //MARK: - Event Data Source
     override func eventsForDate(_ date: Date) -> [EventDescriptor] {
-        guard let room = room else { return [] }
+        guard let group = group else { return [] }
         
         var events = [Event]()
         openDateIntervals = [DateInterval]()
-        let roomNonAllDayEvents = room.events.filter { !$0.isAllDay }
+        let groupNonAllDayEvents = group.events.filter { !$0.isAllDay }
 
-        for ttEvent in roomNonAllDayEvents {
+        for ttEvent in groupNonAllDayEvents {
             let newEvent = Event()
             newEvent.text = ttEvent.name
             newEvent.dateInterval = DateInterval(start: ttEvent.startDate, end: ttEvent.endDate)
@@ -205,7 +205,7 @@ class RoomAggregateResultVC: DayViewController {
             events.append(newEvent)
         }
         
-        let openIntervalEvents = createEventsForOpenIntervals(with: roomNonAllDayEvents)
+        let openIntervalEvents = createEventsForOpenIntervals(with: groupNonAllDayEvents)
         var validOpenIntervalEvents = [Event]()
         
         //filter out any open intervals with the same starting and ending date
@@ -224,7 +224,7 @@ class RoomAggregateResultVC: DayViewController {
             showEmptyStateView(with: "No Events", in: view)
         }
         
-        if let delegate = roomAggregateResultDelegate {
+        if let delegate = groupAggregateResultDelegate {
             delegate.updatedAggregateResultVC(ttEvents: splitTimeIntervalsByDays(for: openIntervalEvents.map { $0.toTTEvent() }))
         }
         
@@ -234,9 +234,9 @@ class RoomAggregateResultVC: DayViewController {
     func createEventsForOpenIntervals(with occupiedEvents: [TTEvent]) -> [Event] {
         var occupiedEvents = occupiedEvents.sorted { $0.startDate < $1.endDate }
         var openInternalEvents = [Event]()
-        guard let room = room else { return [Event]() }
+        guard let group = group else { return [Event]() }
         
-        var pointerDate = room.startingDate
+        var pointerDate = group.startingDate
         
         for i in 0..<occupiedEvents.count {
             let occupiedEvent = occupiedEvents[i]
@@ -246,8 +246,8 @@ class RoomAggregateResultVC: DayViewController {
             pointerDate = occupiedEvent.endDate
         }
         
-        //add last open interval if there is one ending at room's end date
-        openDateIntervals.append(DateInterval(start: pointerDate, end: room.endingDate))
+        //add last open interval if there is one ending at group's end date
+        openDateIntervals.append(DateInterval(start: pointerDate, end: group.endingDate))
         
         //create events based on openIntervals
         for openInterval in openDateIntervals {

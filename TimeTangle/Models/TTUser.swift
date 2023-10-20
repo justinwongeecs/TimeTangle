@@ -21,7 +21,7 @@ struct TTUser: Codable, Equatable {
     var uid: String
     var friends: [String]
     var friendRequests: [TTFriendRequest]
-    var roomCodes: [String]
+    var groupCodes: [String]
     var profilePictureData: Data?
     
     //Contact Information

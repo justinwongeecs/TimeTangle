@@ -1,5 +1,5 @@
 //
-//  JoinRoomVC.swift
+//  JoinGroupVC.swift
 //  TimeTangle
 //
 //  Created by Justin Wong on 12/28/22.
@@ -7,10 +7,10 @@
 
 import UIKit
 
-class JoinRoomVC: TTModalCardVC {
+class JoinGroupVC: TTModalCardVC {
     
     private let containerViewHeader = UIStackView()
-    private var codeTextField: JoinRoomCodeTextField!
+    private var codeTextField: JoinGroupCodeTextField!
     private var headerLabel = TTTitleLabel(textAlignment: .center, fontSize: 18)
     
     private let padding: CGFloat = 30
@@ -25,14 +25,14 @@ class JoinRoomVC: TTModalCardVC {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        headerLabel.text = "Enter Room Code:"
+        headerLabel.text = "Enter Group Code:"
         configureContainerViewHeader()
         configureCodeTextField()
     }
     
     private func configureCodeTextField() {
-        codeTextField = JoinRoomCodeTextField(with: 6) { [weak self] in
-            self?.presentTTAlert(title: "Cannot Add To Room", message: TTError.unableToJoinRoom.rawValue, buttonTitle: "OK")
+        codeTextField = JoinGroupCodeTextField(with: 6) { [weak self] in
+            self?.presentTTAlert(title: "Cannot Add To Group", message: TTError.unableToJoinGroup.rawValue, buttonTitle: "OK")
         }
         containerView.addSubview(codeTextField)
         codeTextField.translatesAutoresizingMaskIntoConstraints = false
