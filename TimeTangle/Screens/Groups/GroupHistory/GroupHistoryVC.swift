@@ -11,17 +11,19 @@ import FirebaseFirestore
 enum GroupHistorySortOrder {
     case dateAscending
     case dateDescending
+    //TODO: Add case for today
 //    case today
 }
 
 class GroupHistoryVC: UIViewController {
-    
     var group: TTGroup!
+    var groupUsers: [TTUser]!
     private let groupHistoryTableView = UITableView()
     private var groupHistorySortOrder: GroupHistorySortOrder = .dateDescending
     
-    init(group: TTGroup) {
+    init(group: TTGroup, groupUsers: [TTUser]) {
         self.group = group
+        self.groupUsers = groupUsers
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -100,7 +102,7 @@ class GroupHistoryVC: UIViewController {
         groupHistoryTableView.allowsSelection = false
         groupHistoryTableView.delegate = self
         groupHistoryTableView.dataSource = self
-        groupHistoryTableView.register(UINib(nibName: "GroupHistoryCell", bundle: nil), forCellReuseIdentifier: GroupHistoryCell.reuseID)
+        groupHistoryTableView.register(GroupHistoryCell.self, forCellReuseIdentifier: GroupHistoryCell.reuseID)
         
         NSLayoutConstraint.activate([
             groupHistoryTableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
@@ -146,7 +148,9 @@ extension GroupHistoryVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = groupHistoryTableView.dequeueReusableCell(withIdentifier: GroupHistoryCell.reuseID) as! GroupHistoryCell
         let groupHistory = group.histories[indexPath.row]
-        cell.setCell(for: groupHistory)
+        if let authorUserIndex = groupUsers.firstIndex(where: { $0.username == groupHistory.author }) {
+            cell.setCell(for: groupHistory, authorUser: groupUsers[authorUserIndex])
+        }
         return cell
     }
     
@@ -158,43 +162,73 @@ extension GroupHistoryVC: UITableViewDelegate, UITableViewDataSource {
 //MARK: - GroupHistoryCell 
 class GroupHistoryCell: UITableViewCell {
     static let reuseID = "GroupHistoryCell"
-    
-    @IBOutlet weak var authorImageView: UIImageView!
-    @IBOutlet weak var authorNameLabel: UILabel!
-    @IBOutlet weak var historyDateLabel: UILabel!
-    @IBOutlet weak var descriptionLabel: UILabel!
-    
     private var groupHistory: TTGroupEdit!
+    private var authorUser: TTUser!
+    
+    private let authorNameLabel = UILabel()
+    private let historyDateLabel = UILabel()
+    private let descriptionLabel = UILabel()
+    private let authorImageView = TTProfileImageView(widthHeight: TTConstants.profileImageViewInCellHeightAndWidth * 1.3)
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        configureCell()
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
     }
     
-    func setCell(for groupHistory: TTGroupEdit) {
+    func setCell(for groupHistory: TTGroupEdit, authorUser: TTUser) {
         self.groupHistory = groupHistory
+        self.authorUser = authorUser
+        
         configureCell()
     }
     
     private func configureCell() {
-       //Configure authorImageView
-        //TODO: - Set image to custom one stored in Firestore
-        authorImageView.image = UIImage(systemName: "person.crop.circle")?.withTintColor(.lightGray, renderingMode: .alwaysOriginal)
-        authorImageView.layer.masksToBounds = true
-        authorImageView.layer.cornerRadius = 10
+        if let authorImageData = authorUser.profilePictureData, let image = UIImage(data: authorImageData) {
+            authorImageView.setImage(to: image)
+        } else {
+            authorImageView.setToDefaultImage()
+        }
+        authorImageView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(authorImageView)
         
-        //Configure authorNameLabel
+        //HeaderStackView with authorNameLabel and historyDateLabel
+        let headerStackView = UIStackView()
+        headerStackView.axis = .horizontal
+        headerStackView.distribution = .fill
+        headerStackView.spacing = 10
+        headerStackView.translatesAutoresizingMaskIntoConstraints = false
+        
         authorNameLabel.text = groupHistory.author
+        authorNameLabel.font = UIFont.systemFont(ofSize: 17, weight: .bold)
+        authorNameLabel.translatesAutoresizingMaskIntoConstraints = false
+        headerStackView.addArrangedSubview(authorNameLabel)
         
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "M/d/y h:mm a"
         dateFormatter.amSymbol = "AM"
         dateFormatter.pmSymbol = "PM"
+        
         historyDateLabel.text = dateFormatter.string(from: groupHistory.createdDate)
+        historyDateLabel.textColor = .lightGray
+        historyDateLabel.translatesAutoresizingMaskIntoConstraints = false
+        headerStackView.addArrangedSubview(historyDateLabel)
+        
+        let vMainContentStackView = UIStackView()
+        vMainContentStackView.axis = .vertical
+        vMainContentStackView.distribution = .fill
+        vMainContentStackView.spacing = 10
+        vMainContentStackView.translatesAutoresizingMaskIntoConstraints = false
+        vMainContentStackView.addArrangedSubview(headerStackView)
+        
+        descriptionLabel.textColor = .systemGray
+        descriptionLabel.font = UIFont.systemFont(ofSize: 13)
+        descriptionLabel.numberOfLines = 2
+        descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
+        vMainContentStackView.addArrangedSubview(descriptionLabel)
+        addSubview(vMainContentStackView)
         
         switch groupHistory.editType {
         case .changedStartingDate:
@@ -203,8 +237,24 @@ class GroupHistoryCell: UITableViewCell {
             descriptionLabel.text = "Changed ending time from \(groupHistory.editDifference.before ?? "") to \(groupHistory.editDifference.after ?? "")"
         case .addedUserToGroup:
             descriptionLabel.text = "Added \(groupHistory.editDifference.after ?? "") to group"
+        case .userSynced:
+            descriptionLabel.text = "Synced their calendar."
         default:
             descriptionLabel.text = "No description"
         }
+        
+        let padding: CGFloat = 10
+        
+        NSLayoutConstraint.activate([
+            vMainContentStackView.topAnchor.constraint(equalTo: topAnchor, constant: padding),
+            vMainContentStackView.leadingAnchor.constraint(equalTo: authorImageView.trailingAnchor, constant: padding),
+            vMainContentStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -padding),
+            vMainContentStackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -padding),
+            
+            authorImageView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: padding),
+            authorImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
+            authorImageView.widthAnchor.constraint(equalToConstant: TTConstants.profileImageViewInCellHeightAndWidth * 1.3),
+            authorImageView.heightAnchor.constraint(equalToConstant: TTConstants.profileImageViewInCellHeightAndWidth * 1.3)
+        ])
     }
 }

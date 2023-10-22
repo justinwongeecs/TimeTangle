@@ -117,6 +117,7 @@ struct GroupSettingsView: View {
                     }) {
                         Text("Cancel")
                     }
+                    .tint(.green)
                 }
                 //Save Button
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -132,6 +133,7 @@ struct GroupSettingsView: View {
                             .cornerRadius(10)
                             
                     }
+                    .tint(.green)
                 }
             }
             .onChange(of: minimumNumberOfUsersIndex) { [minimumNumberOfUsersIndex] newValue in
@@ -170,7 +172,6 @@ struct GroupSettingsView: View {
                 config.hostingController?.presentTTAlert(title: "Setting Error", message: ttError?.rawValue ?? "No Message", buttonTitle: "OK")
             }
         }
-        .tint(.green)
     }
     
     //MARK: - MinimumNumberofUsersPicker

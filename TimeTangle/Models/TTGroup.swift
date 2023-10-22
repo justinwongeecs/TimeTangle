@@ -60,6 +60,7 @@ struct TTGroupEdit: Codable, Hashable {
         case addedUserToGroup
         case changedStartingDate
         case changedEndingDate
+        case userSynced
         case none
         
         var description: String {
@@ -68,6 +69,7 @@ struct TTGroupEdit: Codable, Hashable {
                 case .addedUserToGroup: return "addedUserToGroup"
                 case .changedStartingDate: return "changedStartingDate"
                 case .changedEndingDate: return "changedEndingDate"
+                case .userSynced: return "userSynced"
                 case .none: return "none"
                 }
             }

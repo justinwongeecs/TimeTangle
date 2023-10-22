@@ -9,20 +9,23 @@ import UIKit
 
 protocol SaveOrCancelIslandDelegate: AnyObject {
     func didCancelIsland()
-    func didSaveIsland()
 }
 
 class SaveOrCancelIsland: UIView {
     
+    private let outerContainerView = UIView()
+    private var blurView: UIVisualEffectView!
     private var confirmGroupChangesContainerView = UIView()
     private var isPresentingGroupChangesView: Bool = false
     private var parentVC: UIViewController!
     
+    private var saveCompletionHandler: (() -> Void)?
     weak var delegate: SaveOrCancelIslandDelegate?
     
-    init(parentVC: UIViewController) {
+    init(parentVC: UIViewController, saveCompletionHandler: (() -> Void)?) {
         super.init(frame: .zero)
         self.parentVC = parentVC
+        self.saveCompletionHandler = saveCompletionHandler
         configure()
     }
     
@@ -31,18 +34,21 @@ class SaveOrCancelIsland: UIView {
         configure()
     }
     
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        updateBlurBackground()
+    }
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
     private func configure() {
-        
         let innerPadding: CGFloat = 10
         let outerPadding: CGFloat = 20
-        
-        let outerContainerView = UIView()
         let screenSize = UIScreen.main.bounds.size
         outerContainerView.translatesAutoresizingMaskIntoConstraints = false
+        
+        updateBlurBackground()
         
         let groupChangesStackView = UIStackView()
         groupChangesStackView.axis = .horizontal
@@ -58,27 +64,9 @@ class SaveOrCancelIsland: UIView {
         outerContainerView.layer.shadowOffset = CGSize.zero
         outerContainerView.layer.shadowOpacity = 1.0
         outerContainerView.layer.shadowRadius = 7.0
+        outerContainerView.layer.borderWidth = 1
         outerContainerView.addSubview(groupChangesStackView)
         
-        let blurEffect: UIBlurEffect!
-        if traitCollection.userInterfaceStyle == .light {
-            blurEffect = UIBlurEffect(style: .dark)
-        } else {
-            blurEffect = UIBlurEffect(style: .light)
-        }
-     
-        let blurView = UIVisualEffectView(effect: blurEffect)
-        blurView.frame = confirmGroupChangesContainerView.bounds
-        blurView.autoresizingMask = .flexibleWidth
-        outerContainerView.insertSubview(blurView, at: 0)
-
-        NSLayoutConstraint.activate([
-            blurView.topAnchor.constraint(equalTo: outerContainerView.topAnchor),
-                blurView.leadingAnchor.constraint(equalTo: outerContainerView.leadingAnchor),
-                blurView.trailingAnchor.constraint(equalTo: outerContainerView.trailingAnchor),
-                blurView.bottomAnchor.constraint(equalTo: outerContainerView.bottomAnchor)
-        ])
-   
         let closeButton = TTCloseButton()
         closeButton.tintColor = .systemRed
         closeButton.addTarget(self, action: #selector(cancel), for: .touchUpInside)
@@ -93,6 +81,10 @@ class SaveOrCancelIsland: UIView {
         
         groupChangesStackView.addArrangedSubview(closeButton)
         groupChangesStackView.addArrangedSubview(saveButton)
+        
+        let swipeDownGestureReognizer = UISwipeGestureRecognizer(target: self, action: #selector(cancel))
+        swipeDownGestureReognizer.direction = .down
+        outerContainerView.addGestureRecognizer(swipeDownGestureReognizer)
 
         NSLayoutConstraint.activate([
             outerContainerView.leadingAnchor.constraint(equalTo: confirmGroupChangesContainerView.leadingAnchor, constant: outerPadding),
@@ -107,18 +99,41 @@ class SaveOrCancelIsland: UIView {
         ])
     }
     
-    @objc public func save() {
-        if let delegate = delegate {
-            dismiss()
-            delegate.didSaveIsland()
+    private func updateBlurBackground() {
+        let blurEffect: UIBlurEffect!
+        
+        if traitCollection.userInterfaceStyle == .light {
+            blurEffect = UIBlurEffect(style: .dark)
+            outerContainerView.layer.borderColor = UIColor.black.cgColor
+        } else {
+            blurEffect = UIBlurEffect(style: .light)
+            outerContainerView.layer.borderColor = UIColor.white.cgColor
         }
+        
+        blurView?.removeFromSuperview()
+        blurView = UIVisualEffectView(effect: blurEffect)
+        blurView.translatesAutoresizingMaskIntoConstraints = false
+        blurView.autoresizingMask = .flexibleWidth
+        outerContainerView.insertSubview(blurView, at: 0)
+
+        NSLayoutConstraint.activate([
+            blurView.topAnchor.constraint(equalTo: outerContainerView.topAnchor),
+            blurView.leadingAnchor.constraint(equalTo: outerContainerView.leadingAnchor),
+            blurView.trailingAnchor.constraint(equalTo: outerContainerView.trailingAnchor),
+            blurView.bottomAnchor.constraint(equalTo: outerContainerView.bottomAnchor)
+        ])
+    }
+    
+    @objc public func save() {
+        if let saveCompletionHandler = saveCompletionHandler {
+            saveCompletionHandler()
+        }
+        dismiss()
     }
     
     @objc private func cancel() {
-        if let delegate = delegate {
-            dismiss()
-            delegate.didCancelIsland()
-        }
+        dismiss()
+        delegate?.didCancelIsland()
     }
     
     public func dismiss() {

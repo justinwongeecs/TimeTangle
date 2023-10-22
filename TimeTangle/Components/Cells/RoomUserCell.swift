@@ -69,7 +69,7 @@ class GroupUserCell: ProfileUsernameCell {
     }
 
     private func configureAdminIndicator() {
-        adminIndicatorView.image = UIImage(systemName: "person.2.badge.gearshape.fill", withConfiguration: UIImage.SymbolConfiguration(pointSize: 19, weight: .regular, scale: .medium))
+        adminIndicatorView.image = UIImage(systemName: "person.2.badge.gearshape.fill", withConfiguration: UIImage.SymbolConfiguration(scale: .medium))
         adminIndicatorView.tintColor = .systemPurple
         adminIndicatorView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(adminIndicatorView)
@@ -77,8 +77,8 @@ class GroupUserCell: ProfileUsernameCell {
         NSLayoutConstraint.activate([
             adminIndicatorView.centerYAnchor.constraint(equalTo: centerYAnchor),
             adminIndicatorView.leadingAnchor.constraint(equalTo: usernameLabel.trailingAnchor, constant: 10),
-            adminIndicatorView.widthAnchor.constraint(equalToConstant: 20),
-            adminIndicatorView.heightAnchor.constraint(equalToConstant: 20)
+            adminIndicatorView.widthAnchor.constraint(equalToConstant: 30),
+            adminIndicatorView.heightAnchor.constraint(equalToConstant: 30)
         ])
     }
     

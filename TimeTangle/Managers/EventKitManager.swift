@@ -12,16 +12,15 @@ import CalendarKit
 
 class EventKitManager {
     static let shared = EventKitManager()
-    let store = EKEventStore()
+    var store = EKEventStore()
     
     init() {
-        store.requestAccess(to: .event) { [weak self] granted, error in
-            //TODO: parse error and give more specific error messages
-            guard let _ = error, granted == false else {
-                //listen to calendar event changes
-//                NotificationCenter.default.addObserver(self, selector: Selector("storeChanged:"), name: .EKEventStoreChanged, object: self?.store)
-                return
-            }
+        store.requestFullAccessToEvents { granted, error in
+            //            guard let _ = error, granted == false else {
+            //                //listen to calendar event changes
+            ////                NotificationCenter.default.addObserver(self, selector: Selector("storeChanged:"), name: .EKEventStoreChanged, object: self?.store)
+            //                return
+            //            }
         }
     }
 //

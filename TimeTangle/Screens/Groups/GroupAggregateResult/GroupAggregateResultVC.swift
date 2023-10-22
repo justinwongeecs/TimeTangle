@@ -43,6 +43,7 @@ class GroupAggregateResultVC: DayViewController {
         dayView = DayView(calendar: calendar)
         view = dayView
         dayView.isHeaderViewVisible = false
+        dayView.autoScrollToFirstEvent = true
     }
     
     override func viewDidLoad() {

@@ -32,8 +32,9 @@ class GroupDetailVC: UIViewController {
     private var groupOverviewVC: GroupOverviewVC!
     private var confirmGroupChangesContainerView: UIView!
     private var saveOrCancelIsland: SaveOrCancelIsland!
-    private var groupUsersCache = TTCache<String, TTUser>()
     
+    private var groupMembers = [TTUser]()
+    private var groupsUsersCache: TTCache<String, TTUser>!
     private var originalGroupState: TTGroup!
     private var openIntervals = [TTEvent]()
     private var isPresentingGroupChangesView: Bool = false
@@ -41,9 +42,10 @@ class GroupDetailVC: UIViewController {
     //filters displaying users
     var usersNotVisible = [String]()
     
-    init(group: TTGroup, nibName: String) {
+    init(group: TTGroup, groupsUsersCache: TTCache<String, TTUser>, nibName: String) {
         super.init(nibName: nibName, bundle: nil)
         self.group = group
+        self.groupsUsersCache = groupsUsersCache
         title = "\(group.name)"
         originalGroupState = group
     }
@@ -59,6 +61,7 @@ class GroupDetailVC: UIViewController {
         configureGroupAggregateResultView()
         configureSaveOrCancelIsland()
         updateView()
+        loadGroupUsers()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -80,6 +83,31 @@ class GroupDetailVC: UIViewController {
 //            endingDatePicker.isUserInteractionEnabled = true
 //        }
 //    }
+    
+    //MARK: - Load Group Users
+    private func loadGroupUsers() {
+        for username in group.users {
+            if let cachedUser = groupsUsersCache[username] {
+                groupMembers.append(cachedUser)
+            } else {
+                fetchGroupTTUser(for: username)
+            }
+        }
+    }
+    
+    private func fetchGroupTTUser(for username: String) {
+        FirebaseManager.shared.fetchUserDocumentData(with: username) { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let ttUser):
+                self.groupMembers.append(ttUser)
+                self.groupsUsersCache.insert(ttUser, forKey: ttUser.username)
+            case .failure(let error):
+                self.presentTTAlert(title: "Fetch Error", message: error.rawValue, buttonTitle: "OK")
+            }
+        }
+    }
     
     //MARK: - NavigationBarItems
     private func configureNavigationBarItems() {
@@ -177,7 +205,7 @@ class GroupDetailVC: UIViewController {
     }
     
     @objc private func showGroupHistoryVC() {
-        groupHistoryVC = GroupHistoryVC(group: group)
+        groupHistoryVC = GroupHistoryVC(group: group, groupUsers: groupMembers)
         navigationController?.pushViewController(groupHistoryVC, animated: true)
     }
     
@@ -214,22 +242,32 @@ class GroupDetailVC: UIViewController {
     
     @objc private func syncUserCalendar() {
         //Fetch current user's events within group time frame
-        let ekManager = EventKitManager()
+        let ekManager = EventKitManager.shared
         let userEventsWithinGroupRangeSet = Set(ekManager.getUserTTEvents(from: group.startingDate, to: group.endingDate))
         let currGroupEventsSet = Set(group.events)
         let unionGroupEvents = Array(currGroupEventsSet.union(userEventsWithinGroupRangeSet))
 
         group.events = unionGroupEvents
         updateGroupAggregateVC()
-        //TODO: - Update Firebase Group Events
+    
+        let syncUserCalendarSaveOrCancelIsland = SaveOrCancelIsland(parentVC: self) { [weak self] in
+            self?.updateGroupEventsWithCurrentUserEvents(with: unionGroupEvents)
+            self?.addGroupHistory(of: .userSynced, before: nil, after: nil)
+        }
+        syncUserCalendarSaveOrCancelIsland.delegate = self 
+        view.addSubview(syncUserCalendarSaveOrCancelIsland)
+        
+        syncUserCalendarSaveOrCancelIsland.present()
+    }
+    
+    private func updateGroupEventsWithCurrentUserEvents(with currUserEvents: [TTEvent]) {
         FirebaseManager.shared.updateGroup(for: group.code, with: [
-            TTConstants.groupEvents: unionGroupEvents
+            TTConstants.groupEvents: currUserEvents.getFirestoreDictionaries()
         ]) { error in
             if let error = error  {
                 self.presentTTAlert(title: "Cannot Sync Calendar", message: error.localizedDescription, buttonTitle: "OK")
             }
         }
-//        saveOrCancelIsland.present()
     }
     
     private func showGroupSettingsVC() {
@@ -281,7 +319,9 @@ class GroupDetailVC: UIViewController {
     }
     
     private func configureSaveOrCancelIsland() {
-        saveOrCancelIsland = SaveOrCancelIsland(parentVC: self)
+        saveOrCancelIsland = SaveOrCancelIsland(parentVC: self) { [weak self] in
+            self?.generalGroupSave()
+        }
         saveOrCancelIsland.delegate = self
         view.addSubview(saveOrCancelIsland)
     }
@@ -300,8 +340,8 @@ class GroupDetailVC: UIViewController {
     
     //push new view controller to display list of members view
     @IBAction func clickedUsersCountButton(_ sender: UIButton) {
-        groupUsersVC = GroupUsersVC(group: group, groupUsersCache: groupUsersCache, usersNotVisible: usersNotVisible)
-        groupUsersVC.delegate = self 
+        groupUsersVC = GroupUsersVC(group: group, groupUsers: groupMembers, usersNotVisible: usersNotVisible)
+        groupUsersVC.delegate = self
         navigationController?.pushViewController(groupUsersVC, animated: true)
     }
     
@@ -338,7 +378,6 @@ class GroupDetailVC: UIViewController {
     
     //Should be triggered after every group edit
     private func addGroupHistory(of editType: TTGroupEditType, before: String?, after: String?) {
-
         guard let currentUserUsername = FirebaseManager.shared.currentUser?.username else { return }
         let editDifference = TTGroupEditDifference(before: before, after: after)
         let newGroupEdit = TTGroupEdit(author: currentUserUsername, createdDate: Date(), editDifference: editDifference, editType: editType)
@@ -367,10 +406,44 @@ class GroupDetailVC: UIViewController {
     public func setGroupHistories(with histories: [TTGroupEdit]) {
         group.histories = histories
     }
+    
+    private func generalGroupSave() {
+        if !group.setting.lockGroupChanges {
+            
+            let previousStartingDate = originalGroupState.startingDate
+            let previousEndingDate = originalGroupState.endingDate
+            
+            FirebaseManager.shared.updateGroup(for: group.code, with: [
+                TTConstants.groupStartingDate: group.startingDate,
+                TTConstants.groupEndingDate: group.endingDate,
+                TTConstants.groupEvents: group.events.getFirestoreDictionaries()
+            ]) { [weak self] error in
+                guard let self = self else { return }
+                guard let error = error  else {
+                    let dateFormat = "MMM d y, h:mm a"
+                    
+                    if group.startingDate != previousStartingDate {
+                        self.addGroupHistory(of: .changedStartingDate, before: previousStartingDate.formatted(with: dateFormat), after: self.group.startingDate.formatted(with: dateFormat))
+                    }
+                    
+                    if group.endingDate != previousEndingDate {
+                        self.addGroupHistory(of: .changedEndingDate, before: previousEndingDate.formatted(with: dateFormat), after: self.group.endingDate.formatted(with: dateFormat))
+                    }
+            
+                    DispatchQueue.main.async {
+                        self.saveOrCancelIsland.dismiss()
+                    }
+                    return
+                }
+                self.presentTTAlert(title: "Cannot change ending date", message: error.rawValue, buttonTitle: "Ok")
+            }
+        } else {
+            presentTTAlert(title: "Cannot Save Group", message: "Group setting \"Lock Group Changes\" is set to true. This group cannot be edited", buttonTitle: "OK")
+        }
+    }
 }
 
 //MARK: - Delegates
-
 extension GroupDetailVC: GroupAggregateResultVCDelegate {
     func updatedAggregateResultVC(ttEvents: [TTEvent]) {
         openIntervals = ttEvents
@@ -402,41 +475,6 @@ extension GroupDetailVC: SaveOrCancelIslandDelegate {
         group = originalGroupState
         updateView()
         updateGroupAggregateVC()
-    }
-    
-    func didSaveIsland() {
-        if !group.setting.lockGroupChanges {
-            
-            let previousStartingDate = originalGroupState.startingDate
-            let previousEndingDate = originalGroupState.endingDate
-            
-            FirebaseManager.shared.updateGroup(for: group.code, with: [
-                TTConstants.groupStartingDate: group.startingDate,
-                TTConstants.groupEndingDate: group.endingDate,
-                TTConstants.groupEvents: group.events.map { $0.dictionary }
-            ]) { [weak self] error in
-                guard let self = self else { return }
-                guard let error = error  else {
-                    let dateFormat = "MMM d y, h:mm a"
-                    
-                    if group.startingDate != previousStartingDate {
-                        self.addGroupHistory(of: .changedStartingDate, before: previousStartingDate.formatted(with: dateFormat), after: self.group.startingDate.formatted(with: dateFormat))
-                    }
-                    
-                    if group.endingDate != previousEndingDate {
-                        self.addGroupHistory(of: .changedEndingDate, before: previousEndingDate.formatted(with: dateFormat), after: self.group.endingDate.formatted(with: dateFormat))
-                    }
-            
-                    DispatchQueue.main.async {
-                        self.saveOrCancelIsland.dismiss()
-                    }
-                    return
-                }
-                self.presentTTAlert(title: "Cannot change ending date", message: error.rawValue, buttonTitle: "Ok")
-            }
-        } else {
-            presentTTAlert(title: "Cannot Save Group", message: "Group setting \"Lock Group Changes\" is set to true. This group cannot be edited", buttonTitle: "OK")
-        }
     }
 }
 

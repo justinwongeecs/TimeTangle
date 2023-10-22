@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct TTEvent: Codable, Equatable, Hashable {
+struct TTEvent: FirestoreDataCompatible, Codable, Equatable, Hashable {
     var name: String
     var startDate: Date
     var endDate: Date
@@ -41,3 +41,4 @@ extension TTEvent {
         self.createdBy != "TimeTangle"
     }
 }
+

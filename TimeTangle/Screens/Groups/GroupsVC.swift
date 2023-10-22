@@ -12,6 +12,7 @@ class GroupsVC: UIViewController {
     private var groups = [TTGroup]()
     private var updatedGroups = Set<TTGroup>()
     private var groupsCache = TTCache<String, TTGroup>()
+    private var groupUsersCache = TTCache<String, TTUser>()
     
     private let groupsTable = UITableView()
     private let refreshControl = UIRefreshControl()
@@ -77,9 +78,12 @@ class GroupsVC: UIViewController {
         } else if groupModification.modificationType == .modified, let removeIndex = removeIndex {
             print("modified")
             groups[removeIndex] = groupModification.group
-            if var currentUpdatedGroupCodes = getUpdatedGroupCodesFromUserDefaults() {
+
+            if var currentUpdatedGroupCodes = getUpdatedGroupCodesFromUserDefaults(), !currentUpdatedGroupCodes.contains(groupModification.group.code) {
                 currentUpdatedGroupCodes.append(groupModification.group.code)
                 saveUpdatedGroupCodesToUserDefaults(for: currentUpdatedGroupCodes)
+            } else {
+                saveUpdatedGroupCodesToUserDefaults(for: [groupModification.group.code])
             }
         } else {
             print("append")
@@ -176,6 +180,7 @@ extension GroupsVC: UITableViewDelegate, UITableViewDataSource {
         var isGroupUpdated = false
         
         if let updatedGroupCodes = getUpdatedGroupCodesFromUserDefaults() {
+            print(updatedGroupCodes)
             isGroupUpdated = updatedGroupCodes.contains(group.code)
         }
         
@@ -186,7 +191,7 @@ extension GroupsVC: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedGroup = groups[indexPath.section]
-        let groupInfoVC = GroupDetailVC(group: selectedGroup, nibName: "GroupDetailNib")
+        let groupInfoVC = GroupDetailVC(group: selectedGroup, groupsUsersCache: groupUsersCache, nibName: "GroupDetailNib")
         selectedVCIndex = indexPath.section
     
         if var currentUpdatedGroupCodes = getUpdatedGroupCodesFromUserDefaults(), let removeIndex = currentUpdatedGroupCodes.firstIndex(of: selectedGroup.code) {

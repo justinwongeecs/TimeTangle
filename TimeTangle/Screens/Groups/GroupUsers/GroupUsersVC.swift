@@ -11,17 +11,16 @@ import FirebaseFirestore
 class GroupUsersVC: UIViewController {
     
     private var group: TTGroup!
-    private var ttUsers = [TTUser]()
-    private var groupUsersCache = TTCache<String, TTUser>()
+    private var groupUsers: [TTUser]!
     private let activityIndicator = UIActivityIndicatorView(style: .medium)
     private let usersTableView = UITableView()
     private var usersNotVisible = [String]()
     
     weak var delegate: GroupUpdateDelegate? 
     
-    init(group: TTGroup, groupUsersCache: TTCache<String, TTUser>, usersNotVisible: [String]) {
+    init(group: TTGroup, groupUsers: [TTUser], usersNotVisible: [String]) {
         self.group = group
-        self.groupUsersCache = groupUsersCache
+        self.groupUsers = groupUsers
         self.usersNotVisible = usersNotVisible
         super.init(nibName: nil, bundle: nil)
     }
@@ -36,49 +35,8 @@ class GroupUsersVC: UIViewController {
         view.backgroundColor = .systemBackground
         configureActivityIndicator()
         configureUsersTableView()
-        loadGroupUsers()
     }
-    
-    //Is this the best place to put this?
-    private func loadGroupUsers() {
-        activityIndicator.startAnimating()
-        
-        for username in group.users {
-            if let cachedUser = groupUsersCache[username] {
-                ttUsers.append(cachedUser)
-            } else {
-                fetchGroupTTUser(for: username)
-            }
-        }
-    
-        activityIndicator.stopAnimating()
-        updateVCTitle()
-    }
-    
-    private func fetchGroupTTUser(for username: String) {
-        print("Fetch group tt users")
-        activityIndicator.startAnimating()
-        FirebaseManager.shared.fetchUserDocumentData(with: username) { [weak self] result in
-            guard let self = self else { return }
-            
-            switch result {
-            case .success(let ttUser):
-                self.ttUsers.append(ttUser)
-                for ttUser in ttUsers {
-                    self.groupUsersCache.insert(ttUser, forKey: ttUser.username)
-                }
-                self.sortUsersByAdminAndName()
-            case .failure(let error):
-                self.presentTTAlert(title: "Fetch Error", message: error.rawValue, buttonTitle: "OK")
-            }
-            DispatchQueue.main.async {
-                self.usersTableView.reloadData()
-                self.updateVCTitle()
-                self.activityIndicator.stopAnimating()
-            }
-        }
-    }
-    
+
     private func configureActivityIndicator() {
         activityIndicator.color = .lightGray
         activityIndicator.center = CGPoint(x: usersTableView.bounds.width / 2, y: usersTableView.bounds.height / 2)
@@ -112,21 +70,21 @@ class GroupUsersVC: UIViewController {
     
     private func sortUsersByAdminAndName() {
         //Need to create a copy to avoid "simultaneous access error"
-        var users = ttUsers
-        users.sort(by: {
+        var users = groupUsers
+        users?.sort(by: {
             self.group.doesContainsAdmin(for: $0.username) && !self.group.doesContainsAdmin(for: $1.username)
         })
-        ttUsers = users
+        groupUsers = users
     }
     
     private func updateVCTitle() {
-        title = "\(ttUsers.count) \(ttUsers.count > 1 ? "Members" : "Member")"
+        title = "\(groupUsers.count) \(groupUsers.count > 1 ? "Members" : "Member")"
     }
 }
 
 extension GroupUsersVC: UITableViewDelegate, UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
-        return ttUsers.count
+        return groupUsers.count
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -135,7 +93,7 @@ extension GroupUsersVC: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = usersTableView.dequeueReusableCell(withIdentifier: GroupUserCell.reuseID) as! GroupUserCell
-        let user = ttUsers[indexPath.section]
+        let user = groupUsers[indexPath.section]
         cell.set(for: user, usersNotVisible: usersNotVisible, group: group)
         cell.delegate = self
         return cell
@@ -283,9 +241,8 @@ extension GroupUsersVC: GroupUserCellDelegate {
     func groupUserCellDidRemoveUser(for user: TTUser) {
         removeUser(for: user.username) { [weak self] _ in
             guard let self = self else { return }
-            if let ttUsersIndex = self.ttUsers.firstIndex(of: user) {
-                self.ttUsers.remove(at: ttUsersIndex)
-                self.groupUsersCache.removeValue(forKey: user.username)
+            if let groupUsersIndex = self.groupUsers.firstIndex(of: user) {
+                self.groupUsers.remove(at: groupUsersIndex)
                 DispatchQueue.main.async {
                     self.updateVCTitle()
                     self.usersTableView.reloadData()
