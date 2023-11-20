@@ -13,7 +13,7 @@ struct TTConstants {
     static let usersCollection = "users"
     static let groupsCollection = "groups"
     
-    //TTUser
+    //MARK: - TTUser
     static let firstname = "firstname"
     static let friendRequests = "friendRequests"
     static let friends = "friends"
@@ -25,12 +25,12 @@ struct TTConstants {
     static let email = "email"
     static let phoneNumber = "phoneNumber"
     
-    //TTFriendRequest
+    //MARK: - TTFriendRequest
     static let recipientUsername = "recipientUsername"
     static let requestType = "requestType"
     static let senderUsername = "senderUsername"
     
-    //TTGroup
+    //MARK: - TTGroup
     static let groupCode = "code"
     static let groupName = "name"
     static let groupUsers = "users"
@@ -40,7 +40,7 @@ struct TTConstants {
     static let groupAdmins = "admins"
     static let groupEvents = "events"
     
-    //TTGroupSetting
+    //MARK: - TTGroupSetting
     static let groupSettingMinimumNumOfUsers = "setting.minimumNumOfUsers"
     static let groupSettingMaximumNumOfUsers = "setting.maximumNumOfUsers"
     static let groupSettingBoundedStartDate = "setting.boundedStartDate"
@@ -56,5 +56,13 @@ struct TTConstants {
     static let defaultCellHeight: CGFloat = 60
     static let defaultCellColor: UIColor = .systemGreen
     static let defaultCellHeaderAndFooterHeight: CGFloat = 7
+    
+    //MARK: - StoreKit
+    static let storeProductIDs: [String] = [
+        "subscription.pro.monthly",
+        "subscription.pro.yearly"
+    ]
+    static let proMonthlySubscriptionID: String = "subscription.pro.monthly"
+    static let proYearlySubscriptionID: String = "subscription.pro.yearly"
 }
 

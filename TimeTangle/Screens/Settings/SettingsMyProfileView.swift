@@ -9,6 +9,11 @@ import SwiftUI
 import Setting
 import PhotosUI
 
+struct TTAlert {
+    var title: String
+    var message: String
+}
+
 struct SettingsMyProfileView: View {
     
     @State private var profileImage: UIImage?
@@ -28,6 +33,7 @@ struct SettingsMyProfileView: View {
     
     @State private var ttError: TTError? = nil
     @State private var showErrorAlert = false
+    @State private var showPasswordResetConfirmationAlert = false
     
     var body: some View {
         SettingStack(isSearchable: false) {
@@ -48,7 +54,7 @@ struct SettingsMyProfileView: View {
                 }
                 
                 SettingGroup(id: "Email", header: "Email") {
-                    SettingText(title: email == "" ? "No Email" : email, foregroundColor: email == "" ? .red : .black)
+                    SettingText(title: email == "" ? "No Email" : email, foregroundColor: email == "" ? .red : .primary)
                     SettingCustomView(id: "ChangeEmail") {
                         changeEmailButton
                     }
@@ -56,9 +62,34 @@ struct SettingsMyProfileView: View {
                 
                 SettingGroup(id: "Phone Number", header: "Phone Number") {
                     SettingText(title: phoneNumber == "" ? "No Phone Number" : phoneNumber,
-                                foregroundColor: phoneNumber == "" ? .red : .black)
+                                foregroundColor: phoneNumber == "" ? .red : .primary)
                     SettingCustomView(id: "ChangePhoneNumber") {
                         changePhoneNumberButton
+                    }
+                }
+                
+                SettingGroup {
+                    SettingCustomView(id: "ForgotPassword") {
+                        Button("Forgot Password") {
+                            //Reset Password
+                            FirebaseManager.shared.sendPasswordResetEmail { error in
+                                if let error = error {
+                                    ttError = TTError(rawValue: error.localizedDescription)
+                                    showErrorAlert.toggle()
+                                } else {
+                                    
+                                }
+                            }
+                        }
+                        .foregroundColor(.red)
+                        .padding(15)
+                    }
+                    SettingCustomView(id: "DeleteAccount") {
+                        Button("Delete Account") {
+                            //Delete Account From Firestore
+                        }
+                        .foregroundColor(.red)
+                        .padding(15)
                     }
                 }
                 
@@ -79,13 +110,22 @@ struct SettingsMyProfileView: View {
                     }
                 }
                 ttError = TTError(rawValue: TTError.unableToFetchImage.rawValue)
-                showErrorAlert = true
+                showErrorAlert.toggle()
             }
         }
-        .presentScreen(isPresented: $showErrorAlert, modalPresentationStyle: .fullScreen) {
-            TTSwiftUIAlertView(alertTitle: "Error", message: ttError?.rawValue ?? "No Message", buttonTitle: "OK")
-                .ignoresSafeArea(.all)
+       
+        .alert("Password Reset Sent To Email", isPresented: $showPasswordResetConfirmationAlert) {
+            Button(action: { showPasswordResetConfirmationAlert.toggle() }) {
+                Text("OK")
+            }
+        } message: {
+            if let email = FirebaseManager.shared.currentUser?.email {
+                Text("Password Reset Sent To: \(email)")
+            } else {
+                Text("Error: Can't find your email to send.")
+            }
         }
+
     }
     
     //MARK: - Profile Picture Section

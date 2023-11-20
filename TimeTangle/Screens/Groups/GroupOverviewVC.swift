@@ -126,8 +126,8 @@ class GroupOverviewVC: UIViewController {
         self.group.events = self.group.events.filter { !$0.isAllDay }
     }
     
-    private func configureGroupSummarySections() {
-        guard !group.events.isEmpty else {
+    private func configureGroupSummarySections() {        
+        guard !group.events.isEmpty, let firstEvent = group.events.first, firstEvent.endDate != firstEvent.startDate else {
             groupSummarySections = []
             timesTableView.backgroundView = TTEmptyStateView(message: "No Events")
             return
@@ -135,7 +135,6 @@ class GroupOverviewVC: UIViewController {
         
         timesTableView.backgroundView = nil
         var sections = [GroupOverviewSection]()
-        let firstEvent = group.events.first!
         sections.append(GroupOverviewSection(date: firstEvent.startDate, events: [firstEvent]))
         
         for index in stride(from: 1, to: group.events.count, by: 1) {

@@ -28,9 +28,7 @@
 		E865A7F62A1FFE8100F105AA /* TTHostingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A7F52A1FFE8100F105AA /* TTHostingController.swift */; };
 		E865A7F82A2007A700F105AA /* SettingsMyProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A7F72A2007A700F105AA /* SettingsMyProfileView.swift */; };
 		E865A7FA2A2029A400F105AA /* TTSwiftUIProfileImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A7F92A2029A400F105AA /* TTSwiftUIProfileImageView.swift */; };
-		E865A7FC2A202A8700F105AA /* SettingsGeneralView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A7FB2A202A8700F105AA /* SettingsGeneralView.swift */; };
 		E865A7FE2A20718500F105AA /* Wiggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A7FD2A20718500F105AA /* Wiggle.swift */; };
-		E865A8002A2072BA00F105AA /* SubscriptionProPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A7FF2A2072BA00F105AA /* SubscriptionProPlanView.swift */; };
 		E865A8022A207A7600F105AA /* SubscriptionFreePlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A8012A207A7600F105AA /* SubscriptionFreePlanView.swift */; };
 		E865A8042A207D7A00F105AA /* View+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E865A8032A207D7A00F105AA /* View+Ext.swift */; };
 		E873BCD72964D99A0015AE99 /* CalendarKit in Frameworks */ = {isa = PBXBuildFile; productRef = E873BCD62964D99A0015AE99 /* CalendarKit */; };
@@ -40,6 +38,8 @@
 		E873BCEB296904F50015AE99 /* RoomUserCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E873BCEA296904F50015AE99 /* RoomUserCell.swift */; };
 		E873BCF3297910330015AE99 /* GroupOverviewVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E873BCF2297910330015AE99 /* GroupOverviewVC.swift */; };
 		E873C4632ADBC08000FB8ED6 /* TTCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = E873C4622ADBC08000FB8ED6 /* TTCache.swift */; };
+		E87569042AF2B9A5007E7220 /* SettingsSubscriptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E87569032AF2B9A5007E7220 /* SettingsSubscriptionView.swift */; };
+		E8782E962B083B440088E81D /* FeedbackEmailFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8782E952B083B440088E81D /* FeedbackEmailFormView.swift */; };
 		E88A6CFF2ADD0FB300DE38A6 /* FriendCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E88A6CFE2ADD0FB300DE38A6 /* FriendCell.swift */; };
 		E893A25F2959611B004F7BC5 /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = E893A25E2959611B004F7BC5 /* FirebaseAppCheck */; };
 		E893A2612959611B004F7BC5 /* FirebaseAppDistribution-Beta in Frameworks */ = {isa = PBXBuildFile; productRef = E893A2602959611B004F7BC5 /* FirebaseAppDistribution-Beta */; };
@@ -57,6 +57,7 @@
 		E893A27C295A7564004F7BC5 /* FriendRequestCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E893A27B295A7564004F7BC5 /* FriendRequestCell.swift */; };
 		E893A27E295A8793004F7BC5 /* TTGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = E893A27D295A8793004F7BC5 /* TTGroup.swift */; };
 		E89AE6012AE23BEC00BDC454 /* Array+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E89AE6002AE23BEC00BDC454 /* Array+Ext.swift */; };
+		E8A6E03D2AF1A7C200A34599 /* StoreViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8A6E03C2AF1A7C200A34599 /* StoreViewModel.swift */; };
 		E8B6BDBA2A21D25F00DAFF04 /* GroupSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8B6BDB92A21D25F00DAFF04 /* GroupSettingsView.swift */; };
 		E8B6BDBC2A22916E00DAFF04 /* TTSwiftUIAlertView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8B6BDBB2A22916E00DAFF04 /* TTSwiftUIAlertView.swift */; };
 		E8B6BDBE2A2299C000DAFF04 /* UIApplication+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8B6BDBD2A2299C000DAFF04 /* UIApplication+Ext.swift */; };
@@ -91,6 +92,7 @@
 		E8CFC22D295D5E55006C23BE /* GroupsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CFC22C295D5E55006C23BE /* GroupsVC.swift */; };
 		E8D004A62963B02C00907A64 /* GroupUsersVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8D004A52963B02C00907A64 /* GroupUsersVC.swift */; };
 		E8D004A92963B82B00907A64 /* GroupHistoryVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8D004A82963B82B00907A64 /* GroupHistoryVC.swift */; };
+		E8ECA5672AFA260600907813 /* SubscriptionPlanBadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8ECA5662AFA260600907813 /* SubscriptionPlanBadgeView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -114,9 +116,7 @@
 		E865A7F52A1FFE8100F105AA /* TTHostingController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTHostingController.swift; sourceTree = "<group>"; };
 		E865A7F72A2007A700F105AA /* SettingsMyProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsMyProfileView.swift; sourceTree = "<group>"; };
 		E865A7F92A2029A400F105AA /* TTSwiftUIProfileImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTSwiftUIProfileImageView.swift; sourceTree = "<group>"; };
-		E865A7FB2A202A8700F105AA /* SettingsGeneralView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsGeneralView.swift; sourceTree = "<group>"; };
 		E865A7FD2A20718500F105AA /* Wiggle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Wiggle.swift; sourceTree = "<group>"; };
-		E865A7FF2A2072BA00F105AA /* SubscriptionProPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionProPlanView.swift; sourceTree = "<group>"; };
 		E865A8012A207A7600F105AA /* SubscriptionFreePlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionFreePlanView.swift; sourceTree = "<group>"; };
 		E865A8032A207D7A00F105AA /* View+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Ext.swift"; sourceTree = "<group>"; };
 		E873BCD82964E4200015AE99 /* GroupAggregateResultVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupAggregateResultVC.swift; sourceTree = "<group>"; };
@@ -125,6 +125,9 @@
 		E873BCEA296904F50015AE99 /* RoomUserCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomUserCell.swift; sourceTree = "<group>"; };
 		E873BCF2297910330015AE99 /* GroupOverviewVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupOverviewVC.swift; sourceTree = "<group>"; };
 		E873C4622ADBC08000FB8ED6 /* TTCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTCache.swift; sourceTree = "<group>"; };
+		E87569022AF2B672007E7220 /* Products.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Products.storekit; sourceTree = "<group>"; };
+		E87569032AF2B9A5007E7220 /* SettingsSubscriptionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSubscriptionView.swift; sourceTree = "<group>"; };
+		E8782E952B083B440088E81D /* FeedbackEmailFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackEmailFormView.swift; sourceTree = "<group>"; };
 		E88A6CFE2ADD0FB300DE38A6 /* FriendCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendCell.swift; sourceTree = "<group>"; };
 		E893A26C2959859D004F7BC5 /* FriendsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsVC.swift; sourceTree = "<group>"; };
 		E893A26E29598E2F004F7BC5 /* TTEmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTEmptyStateView.swift; sourceTree = "<group>"; };
@@ -135,6 +138,7 @@
 		E893A27B295A7564004F7BC5 /* FriendRequestCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendRequestCell.swift; sourceTree = "<group>"; };
 		E893A27D295A8793004F7BC5 /* TTGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTGroup.swift; sourceTree = "<group>"; };
 		E89AE6002AE23BEC00BDC454 /* Array+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Ext.swift"; sourceTree = "<group>"; };
+		E8A6E03C2AF1A7C200A34599 /* StoreViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreViewModel.swift; sourceTree = "<group>"; };
 		E8B6BDB92A21D25F00DAFF04 /* GroupSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupSettingsView.swift; sourceTree = "<group>"; };
 		E8B6BDBB2A22916E00DAFF04 /* TTSwiftUIAlertView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTSwiftUIAlertView.swift; sourceTree = "<group>"; };
 		E8B6BDBD2A2299C000DAFF04 /* UIApplication+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+Ext.swift"; sourceTree = "<group>"; };
@@ -171,6 +175,7 @@
 		E8CFC22C295D5E55006C23BE /* GroupsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupsVC.swift; sourceTree = "<group>"; };
 		E8D004A52963B02C00907A64 /* GroupUsersVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupUsersVC.swift; sourceTree = "<group>"; };
 		E8D004A82963B82B00907A64 /* GroupHistoryVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupHistoryVC.swift; sourceTree = "<group>"; };
+		E8ECA5662AFA260600907813 /* SubscriptionPlanBadgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionPlanBadgeView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -250,13 +255,15 @@
 		E873BCDE296555D10015AE99 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
-				E865A7F32A1FF30100F105AA /* SettingsView.swift */,
 				E865A7E42A1F432900F105AA /* SettingsManager.swift */,
+				E8A6E03C2AF1A7C200A34599 /* StoreViewModel.swift */,
+				E8ECA5662AFA260600907813 /* SubscriptionPlanBadgeView.swift */,
+				E865A7F32A1FF30100F105AA /* SettingsView.swift */,
 				E865A7F72A2007A700F105AA /* SettingsMyProfileView.swift */,
 				E865A7F92A2029A400F105AA /* TTSwiftUIProfileImageView.swift */,
-				E865A7FB2A202A8700F105AA /* SettingsGeneralView.swift */,
-				E865A7FF2A2072BA00F105AA /* SubscriptionProPlanView.swift */,
 				E865A8012A207A7600F105AA /* SubscriptionFreePlanView.swift */,
+				E87569032AF2B9A5007E7220 /* SettingsSubscriptionView.swift */,
+				E8782E952B083B440088E81D /* FeedbackEmailFormView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -338,6 +345,7 @@
 				E8CEE2A22957956E000CD7FE /* SceneDelegate.swift */,
 				E8CEE2A929579571000CD7FE /* Assets.xcassets */,
 				E8CEE2AB29579571000CD7FE /* LaunchScreen.storyboard */,
+				E87569022AF2B672007E7220 /* Products.storekit */,
 			);
 			path = Support;
 			sourceTree = "<group>";
@@ -542,6 +550,7 @@
 			files = (
 				E893A273295A3C52004F7BC5 /* ProfileUsernameCell.swift in Sources */,
 				E873BCEB296904F50015AE99 /* RoomUserCell.swift in Sources */,
+				E87569042AF2B9A5007E7220 /* SettingsSubscriptionView.swift in Sources */,
 				E81D25062A145217003C65C5 /* UILabel+Ext.swift in Sources */,
 				E873BCD92964E4200015AE99 /* GroupAggregateResultVC.swift in Sources */,
 				E8CEE2BB2957A89C000CD7FE /* AddUsersModalVC.swift in Sources */,
@@ -563,14 +572,15 @@
 				E8CEE2D32957C7C7000CD7FE /* TTTitledTextField.swift in Sources */,
 				E8CEE2CA2957B03C000CD7FE /* LoginVC.swift in Sources */,
 				E865A7AD2A1C80C800F105AA /* TTProfileImageView.swift in Sources */,
+				E8ECA5672AFA260600907813 /* SubscriptionPlanBadgeView.swift in Sources */,
 				E865A7F42A1FF30100F105AA /* SettingsView.swift in Sources */,
 				E8B6BDC82A26B01900DAFF04 /* UISearchBar+Ext.swift in Sources */,
 				E893A275295A5DB1004F7BC5 /* TTFriendRequest.swift in Sources */,
 				E8CFC22D295D5E55006C23BE /* GroupsVC.swift in Sources */,
 				E8B6BDBC2A22916E00DAFF04 /* TTSwiftUIAlertView.swift in Sources */,
-				E865A8002A2072BA00F105AA /* SubscriptionProPlanView.swift in Sources */,
 				E893A27E295A8793004F7BC5 /* TTGroup.swift in Sources */,
 				E8CFC21B295B8AD7006C23BE /* Notification.Name+Ext.swift in Sources */,
+				E8782E962B083B440088E81D /* FeedbackEmailFormView.swift in Sources */,
 				E89AE6012AE23BEC00BDC454 /* Array+Ext.swift in Sources */,
 				E8CFC22B295D3981006C23BE /* CreateRoomConfirmationVC.swift in Sources */,
 				E893A27A295A6D40004F7BC5 /* TTConstants.swift in Sources */,
@@ -591,12 +601,12 @@
 				E8CEE2B729579DE3000CD7FE /* TTTextField.swift in Sources */,
 				E88A6CFF2ADD0FB300DE38A6 /* FriendCell.swift in Sources */,
 				E865A8022A207A7600F105AA /* SubscriptionFreePlanView.swift in Sources */,
+				E8A6E03D2AF1A7C200A34599 /* StoreViewModel.swift in Sources */,
 				E8CEE2A12957956E000CD7FE /* AppDelegate.swift in Sources */,
 				E865A7F82A2007A700F105AA /* SettingsMyProfileView.swift in Sources */,
 				E8D004A62963B02C00907A64 /* GroupUsersVC.swift in Sources */,
 				E893A26D2959859D004F7BC5 /* FriendsVC.swift in Sources */,
 				E873BCF3297910330015AE99 /* GroupOverviewVC.swift in Sources */,
-				E865A7FC2A202A8700F105AA /* SettingsGeneralView.swift in Sources */,
 				E8CEE2CC2957B102000CD7FE /* TTTitleLabel.swift in Sources */,
 				E8CEE2CE2957BF22000CD7FE /* CreateAccountVC.swift in Sources */,
 				E83146662AE0F6D700A5B250 /* GroupViewCell.swift in Sources */,

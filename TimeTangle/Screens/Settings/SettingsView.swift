@@ -7,6 +7,8 @@
 
 import SwiftUI
 import Setting
+import StoreKit
+import MessageUI
 
 //MARK: - SettingsViewModel
 class SettingsViewModel: ObservableObject {
@@ -19,26 +21,45 @@ class SettingsViewModel: ObservableObject {
 }
 
 struct SettingsView: View {
-    @StateObject private var model = SettingsViewModel()
+    @StateObject private var settingsViewModel = SettingsViewModel()
+    @StateObject private var storeViewModel = StoreViewModel()
+    
     @State private var size: CGSize = .zero
+    @State private var isPresentingSubscriptionSheet = false
+    
+    @State private var currentSubscription: Product? = nil
+    @State private var subscriptionStatus: Product.SubscriptionInfo.Status? = nil
+    
+    init(storeViewModel: StoreViewModel) {
+        _storeViewModel = StateObject(wrappedValue: storeViewModel)
+    }
     
     var body: some View {
         GeometryReader { geo in
             SettingStack {
                 SettingPage(title: "Settings") {
-                    SettingGroup {
-                        SettingCustomView {
-                            SettingsProfileHeaderView()
+                    profileHeaderSection
+                    
+                    SettingGroup(id: "SubscriptionHeaderView") {
+                        if currentSubscription == nil {
+                            SettingCustomView {
+                                Button(action: {
+                                    isPresentingSubscriptionSheet.toggle()
+                                }) {
+                                    SubscriptionHeaderView()
+                                }
+                            }
                         }
                     }
                     
+                    
                     SettingGroup {
-                        generalSection
-                        appearanceSection
                         privacySection
-                        subscriptionSection
+                        if currentSubscription != nil {
+                            subscriptionSection
+                        }
                         contributionsSection
-                        helpSection
+                        feedbackSection
                         aboutSection
                     }
                 }
@@ -49,89 +70,37 @@ struct SettingsView: View {
             }.onChange(of: geo.size) { newSize in
                 size = newSize
             }
-        }
-    }
-    
-    //MARK: - General Section
-    @SettingBuilder private var generalSection: some Setting {
-        SettingPage(title: "General") {
-            SettingGroup {
-                SettingToggle(title: "Enable Notifications", isOn: $model.allowNotifications)
+            .sheet(isPresented: $isPresentingSubscriptionSheet) {
+                SubscriptionProPlanView()
+                    .environmentObject(storeViewModel)
             }
-            
-            SettingGroup {
-                SettingCustomView {
-                    SettingPicker(title: "Delete Groups After Ending Date", choices: [
-                        "1 Week",
-                        "1 Month",
-                        "6 Months",
-                        "1 Year",
-                        "Never"
-                    ], selectedIndex: $model.timePeriodToDeleteGroupsIndex)
-                    Text("If specified, groups will be deleted after a period of inactivity")
-                        .font(.system(size: 13))
-                        .foregroundColor(.secondary)
-                        .padding(15)
+            .onAppear {
+                Task {
+                    await updateSubscriptionStatus()
                 }
             }
-            
-            SettingGroup {
-                SettingCustomView(id: "ForgotPassword") {
-                    Button("Forgot Password") {
-                        //Reset Password
-                    }
-                    .foregroundColor(.red)
-                    .padding(15)
-                }
-                SettingCustomView(id: "DeleteAccount") {
-                    Button("Delete Account") {
-                        //Delete Account From Firestore
-                    }
-                    .foregroundColor(.red)
-                    .padding(15)
+            .onChange(of: storeViewModel.purchasedSubscriptions) {
+                Task {
+                    await updateSubscriptionStatus()
                 }
             }
         }
-        .previewIcon("gear", foregroundColor: .white, backgroundColor: .gray)
     }
     
-    //MARK: - Appearance Section
-    @SettingBuilder private var appearanceSection: some Setting {
-        SettingPage(title: "Appearance") {
-            SettingGroup {
-                SettingCustomView(id: "SettingAppearanceSectionHeader") {
-                    HStack {
-                        Text("Choose an appearance for TimeTangle. \"Auto\" will match TimeTangle to the system-wide appearance")
-                            .foregroundColor(.secondary)
-                            .font(.system(size: 13))
-                        Image(systemName: "sun.max.fill")
-                            .frame(width: 70, height: 70)
-                            .background(.black)
-                            .foregroundColor(.yellow)
-                            .cornerRadius(10)
-                            .font(.system(.largeTitle))
-                    }
-                    .padding(15)
-                }
-            }
-            
-            SettingGroup {
-                SettingPicker(title: "Appearance", choices: [
-                "Auto",
-                "Light",
-                "Dark"
-                ], selectedIndex: $model.appearanceIndex, choicesConfiguration: .init(pickerDisplayMode: .inline))
+    @SettingBuilder private var profileHeaderSection: some Setting {
+        SettingGroup(id: "SettingsProfileHeaderView") {
+            SettingCustomView {
+                SettingsProfileHeaderView(currentSubscription: currentSubscription)
             }
         }
-        .previewIcon("sun.max.fill", foregroundColor: .yellow, backgroundColor: .black)
     }
-    
+   
     //MARK: - Privacy Section
     @SettingBuilder private var privacySection: some Setting {
         SettingPage(title: "Privacy") {
             SettingGroup {
-                SettingToggle(title: "Automatically Pulls From Calendar", isOn: $model.automaticallyPullsFromCalendar)
-                SettingToggle(title: "Enable Public Discoverability", isOn: $model.friendsDiscoverability)
+                SettingToggle(title: "Automatically Pulls From Calendar", isOn: $settingsViewModel.automaticallyPullsFromCalendar)
+                SettingToggle(title: "Enable Public Discoverability", isOn: $settingsViewModel.friendsDiscoverability)
             }
         }
         .previewIcon("lock.fill", foregroundColor: .white, backgroundColor: .gray.opacity(0.7))
@@ -140,29 +109,11 @@ struct SettingsView: View {
     //MARK: - Subscription Section
     @SettingBuilder private var subscriptionSection: some Setting {
         SettingPage(title: "Subscription") {
-            SettingCustomView(id: "ProPlan") {
-                Color.purple
-                    .opacity(0.3)
-                    .overlay {
-                        SubscriptionProPlanView()
-                    }
-                    .frame(height: size.height * 0.7)
-                    .cornerRadius(12)
-                    .padding(.horizontal, 15)
-
-            }
-            
-            if model.subscriptionPlanIsFree {
-                SettingCustomView(id: "FreePlan") {
-                    Color(uiColor: UIColor.lightGray)
-                        .opacity(0.3)
-                        .overlay {
-                            SubscriptionFreePlanView()
-                        }
-                        .frame(height: size.height * 0.25)
-                        .cornerRadius(12)
-                        .padding(.horizontal, 15)
-                }
+            SettingCustomView(id: "Subscription View") {
+                SettingsSubscriptionView(currentSubscription: currentSubscription, subscriptionStatus: subscriptionStatus)
+                    .environmentObject(storeViewModel)
+                    .centered()
+                    
             }
         }
         .previewIcon("bubbles.and.sparkles", foregroundColor: .white, backgroundColor: .purple)
@@ -232,10 +183,53 @@ struct SettingsView: View {
         .previewIcon("dollarsign", foregroundColor: .white, backgroundColor: .green)
     }
     
-    //MARK: - Help Section
-    @SettingBuilder private var helpSection: some Setting {
-        SettingPage(title: "Help") {}
-            .previewIcon("questionmark.circle.fill", foregroundColor: .white, backgroundColor: .blue)
+    //MARK: - Feedback Section
+    @State private var isShowingFeatureRequestForm = false
+    
+    @SettingBuilder private var feedbackSection: some Setting {
+        SettingPage(title: "Feedback") {
+            SettingGroup {
+                SettingCustomView {
+                    VStack(spacing: 20) {
+                        Image(systemName: "questionmark.circle.fill")
+                            .foregroundStyle(.white)
+                            .font(.system(size: 60))
+                            .roundedRectangleBackgroundStyle(cornerRadius: 10, fillColor: .blue.opacity(0.7), strokeColor: .blue, frameWidth: 80, frameHeight: 80)
+                            .shadow(color: .blue, radius: /*@START_MENU_TOKEN@*/10/*@END_MENU_TOKEN@*/)
+                     
+                        Text("TimeTangle is constantly improving, and we need your help! If you encounter any bugs or have a new idea please feel free to let us know!")
+                            .bold()
+                    }
+                    .padding()
+                    .background(.blue.opacity(0.2))
+                    .sheet(isPresented: $isShowingFeatureRequestForm) {
+                        FeedbackEmailFormView(formType: .featureRequest)
+                            .ignoresSafeArea(.all)
+                    }
+                }
+            }
+            
+            if MFMailComposeViewController.canSendMail() {
+                SettingGroup {
+                    SettingButton(title: "Request New Feature") {
+                        isShowingFeatureRequestForm.toggle()
+                    }
+                    .icon("hand.raised.fill", backgroundColor: .purple)
+                }
+
+                SettingGroup {
+                    SettingButton(title: "Report Bug") {
+                        
+                    }
+                    .icon("ladybug.fill", backgroundColor: .red)
+                }
+            } else {
+                SettingGroup {
+                    SettingText(title: "Mail Services Are Not Available", foregroundColor: .red)
+                }
+            }
+        }
+        .previewIcon("questionmark.circle.fill", foregroundColor: .white, backgroundColor: .blue)
     }
     
     //MARK: - About Section
@@ -266,7 +260,7 @@ struct SettingsView: View {
             }
             
             SettingCustomView(id: "About Me") {
-                Text("TimeTangle is built by Justin Wong, a passionate iOS developer, Apple 🐑, & student at UC Berkeley studying EECS.")
+                Text("TimeTangle is built by Justin Wong, a passionate iOS developer, Apple 🐑, & student at UC Berkeley studying Electrical Engineering & Computer Sciences.")
                     .foregroundColor(.gray)
                     .centered()
                     .padding(15)
@@ -277,12 +271,12 @@ struct SettingsView: View {
                     Group {
                         Button(action: {}) {
                             Text("Personal Website")
-                                .foregroundColor(.blue)
+                                .foregroundColor(.green)
                                 .leftAligned()
                         }
                         Button(action: {}) {
                             Text("Privacy Policy")
-                                .foregroundColor(.blue)
+                                .foregroundColor(.green)
                                 .leftAligned()
                         }
                     }
@@ -294,10 +288,76 @@ struct SettingsView: View {
         }
         .previewIcon("info.circle.fill", foregroundColor: .white, backgroundColor: .green)
     }
+    
+    @MainActor
+    func updateSubscriptionStatus() async {
+        do {
+            //This app has only one subscription group, so products in the subscriptions
+            //array all belong to the same group. The statuses that
+            //`product.subscription.status` returns apply to the entire subscription group.
+            guard let product = storeViewModel.subscriptions.first,
+                  let statuses = try await product.subscription?.status else {
+                return
+            }
+            
+//            var newSubscription: Product?
+
+            //Iterate through `statuses` for this subscription group and find
+            //the `Status` with the highest level of service that isn't
+            //in an expired or revoked state. For example, a customer may be subscribed to the
+            //same product with different levels of service through Family Sharing.
+            for status in statuses {
+                switch status.state {
+                case .expired, .revoked:
+                    continue
+                default:
+                    let renewalInfo = try storeViewModel.checkVerified(status.renewalInfo)
+
+                    //Find the first subscription product that matches the subscription status renewal info by comparing the product IDs.
+                    guard let newSubscription = storeViewModel.subscriptions.first(where: { $0.id == renewalInfo.currentProductID }) else {
+                        continue
+                    }
+                    subscriptionStatus = status
+                    currentSubscription = newSubscription
+                    
+                }
+            }
+        } catch {
+            print("Could not update subscription status \(error)")
+        }
+    }
+}
+
+//MARK: - SubscriptionHeaderView
+struct SubscriptionHeaderView: View {
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 5) {
+                Text("Unleash With Pro!")
+                    .font(.system(size: 25))
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(
+                        LinearGradient(colors: [.purple, .blue], startPoint: .leading, endPoint: .trailing)
+                    )
+                Text("⭐️ Unlimited Groups")
+                Text("⭐️ Custom Group Presets")
+            }
+            .foregroundColor(.primary)
+            
+            .fontWeight(.bold)
+            Spacer()
+            Text("🤩")
+                .font(.system(size: 90))
+            Spacer()
+        }
+        .padding(15)
+        .background(.green.opacity(0.3))
+    }
 }
 
 //MARK: - SettingsProfileHeaderView
 struct SettingsProfileHeaderView: View {
+    var currentSubscription: Product?
     
     @State private var profileImage: UIImage?
     @State private var name: String = ""
@@ -314,12 +374,14 @@ struct SettingsProfileHeaderView: View {
                         .font(.title2.bold())
                     Text(username)
                         .foregroundColor(.secondary)
-                    Text("Free Plan")
-                        .foregroundColor(.secondary)
+                    if currentSubscription == nil {
+                        SubscriptionPlanBadgeView(isPro: false)
+                    } else {
+                        SubscriptionPlanBadgeView(isPro: true)
+                    }
+                   
                 }
                 Spacer()
-//                Image(systemName: "chevron.right")
-//                    .foregroundColor(.gray)
             }
             .padding(15)
         }
@@ -335,7 +397,8 @@ struct SettingsProfileHeaderView: View {
 }
 
 struct SettingsView_Previews: PreviewProvider {
+    static let storeViewModel = StoreViewModel()
     static var previews: some View {
-        SettingsView()
+        SettingsView(storeViewModel: storeViewModel)
     }
 }

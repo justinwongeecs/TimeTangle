@@ -77,8 +77,8 @@ class GroupUserCell: ProfileUsernameCell {
         NSLayoutConstraint.activate([
             adminIndicatorView.centerYAnchor.constraint(equalTo: centerYAnchor),
             adminIndicatorView.leadingAnchor.constraint(equalTo: usernameLabel.trailingAnchor, constant: 10),
-            adminIndicatorView.widthAnchor.constraint(equalToConstant: 30),
-            adminIndicatorView.heightAnchor.constraint(equalToConstant: 30)
+            adminIndicatorView.widthAnchor.constraint(equalToConstant: 20),
+            adminIndicatorView.heightAnchor.constraint(equalToConstant: 20)
         ])
     }
     

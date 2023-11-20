@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import EventKitUI
 import CalendarKit
 
 protocol GroupAggregateResultVCDelegate: AnyObject {
@@ -198,9 +197,9 @@ class GroupAggregateResultVC: DayViewController {
 
         for ttEvent in groupNonAllDayEvents {
             let newEvent = Event()
-            newEvent.text = ttEvent.name
+            newEvent.text = "Not Available: \(ttEvent.createdBy.uppercased())"
             newEvent.dateInterval = DateInterval(start: ttEvent.startDate, end: ttEvent.endDate)
-            newEvent.color = .systemGreen
+            newEvent.color = .systemRed
             newEvent.isAllDay = ttEvent.isAllDay
             newEvent.lineBreakMode = .byTruncatingTail
             events.append(newEvent)
@@ -255,7 +254,7 @@ class GroupAggregateResultVC: DayViewController {
             let newEvent = Event()
             newEvent.text = "Open Interval"
             newEvent.dateInterval = openInterval
-            newEvent.color = .systemPurple
+            newEvent.color = .systemGreen
             newEvent.lineBreakMode = .byTruncatingTail
             openInternalEvents.append(newEvent)
         }
@@ -305,23 +304,7 @@ class GroupAggregateResultVC: DayViewController {
         
         return ttEvents
     }
-    
-    override func dayViewDidSelectEventView(_ eventView: EventView) {
-        guard let eventDescriptor = eventView.descriptor else { return }
-        let ekManager = EventKitManager()
-        let ekEvent = ekManager.createEKEventFromEventDescriptor(for: eventDescriptor)
-        
-        presentDetailView(ekEvent)
-    }
-    
-    private func presentDetailView(_ ekEvent: EKEvent) {
-        let eventViewController = EKEventViewController()
-        eventViewController.event = ekEvent
-        eventViewController.allowsCalendarPreview = true
-        eventViewController.allowsEditing = false
-        navigationController?.pushViewController(eventViewController, animated: true)
-    }
-    
+
     override func dayView(dayView: DayView, willMoveTo date: Date) {
         calendarViewButton.setTitle(date.formatted(with: "MMM d y"), for: .normal)
         self.currentPresentedDate = date

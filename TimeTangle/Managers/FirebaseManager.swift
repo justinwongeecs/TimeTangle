@@ -19,6 +19,7 @@ class FirebaseManager {
     private var currentUserGroupsListener: ListenerRegistration?
     private let sceneWindow = (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.window
     private let notificationCenter = NotificationCenter.default
+    private let storeViewModel = StoreViewModel()
     
     var currentUser: TTUser?
     
@@ -369,6 +370,13 @@ class FirebaseManager {
         return nil
     }
     
+    func sendPasswordResetEmail(completion: @escaping (Error?) -> Void) {
+        guard let currentUser = currentUser else { return }
+        Auth.auth().sendPasswordReset(withEmail: currentUser.email) { error in
+            completion(error)
+        }
+    }
+    
     func goToTabBarController() {
         (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootViewController(createTabbar())
     }
@@ -416,9 +424,8 @@ class FirebaseManager {
     }
     
     private func createSettingsNC() -> UINavigationController {
-        let settingsVC = TTHostingController(rootView: SettingsView())
+        let settingsVC = TTHostingController(rootView: SettingsView(storeViewModel: storeViewModel))
         settingsVC.tabBarItem = UITabBarItem(title: "Settings", image: UIImage(systemName: "gearshape"), tag: 3)
         return UINavigationController(rootViewController: settingsVC)
     }
-
 }

@@ -22,7 +22,7 @@ extension Date {
     }
     
     func getMonthComponent() -> Int {
-        return Calendar.current.component(.month, from: self)
+        return Calendar.current.component(.month, from: self) 
     }
     
     func getDayComponent() -> Int {

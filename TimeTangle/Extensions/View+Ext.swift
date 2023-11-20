@@ -35,6 +35,24 @@ struct RightAlignedView: ViewModifier {
     }
 }
 
+struct RoundedRectangleBackgroundView: ViewModifier {
+    var cornerRadius: CGFloat
+    var fillColor: Color
+    var fillColorOpacity: CGFloat
+    var strokeColor: Color
+    var strokeLineWidth: CGFloat
+    var frameHeight: CGFloat?
+    var frameWidth: CGFloat?
+    
+    func body(content: Content) -> some View {
+        RoundedRectangle(cornerRadius: cornerRadius)
+            .fill(fillColor.opacity(fillColorOpacity))
+            .stroke(strokeColor, lineWidth: strokeLineWidth)
+            .frame(width: frameWidth, height: frameHeight)
+            .overlay(content)
+    }
+}
+
 extension View {
     func presentScreen<Content>(isPresented: Binding<Bool>, modalPresentationStyle: UIModalPresentationStyle, @ViewBuilder content: @escaping () -> Content) -> some View where Content : View{
         if isPresented.wrappedValue {
@@ -62,5 +80,17 @@ extension View {
     
     func rightAligned() -> some View {
         modifier(RightAlignedView())
+    }
+    
+    func roundedRectangleBackgroundStyle(
+        cornerRadius: CGFloat,
+        fillColor: Color,
+        fillColorOpacity: CGFloat = 1,
+        strokeColor: Color,
+        strokeLineWidth: CGFloat = 1,
+        frameWidth: CGFloat? = nil,
+        frameHeight: CGFloat? = nil
+    ) -> some View {
+        modifier(RoundedRectangleBackgroundView(cornerRadius: cornerRadius, fillColor: fillColor, fillColorOpacity: fillColorOpacity, strokeColor: strokeColor, strokeLineWidth: strokeLineWidth, frameHeight: frameHeight, frameWidth: frameWidth))
     }
 }
