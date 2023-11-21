@@ -53,8 +53,6 @@ class ProfileUsernameCell: UITableViewCell {
         selectionStyle = .none
         clipsToBounds = true
         
-        avatarImageView.showBorder = true
-        
         hStackView.axis = .horizontal
         hStackView.alignment = .center
         hStackView.distribution = .fillProportionally

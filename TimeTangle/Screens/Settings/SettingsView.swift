@@ -27,8 +27,8 @@ struct SettingsView: View {
     @State private var size: CGSize = .zero
     @State private var isPresentingSubscriptionSheet = false
     
-    @State private var currentSubscription: Product? = nil
-    @State private var subscriptionStatus: Product.SubscriptionInfo.Status? = nil
+//    @State private var currentSubscription: Product? = nil
+//    @State private var subscriptionStatus: Product.SubscriptionInfo.Status? = nil
     
     init(storeViewModel: StoreViewModel) {
         _storeViewModel = StateObject(wrappedValue: storeViewModel)
@@ -41,7 +41,7 @@ struct SettingsView: View {
                     profileHeaderSection
                     
                     SettingGroup(id: "SubscriptionHeaderView") {
-                        if currentSubscription == nil {
+                        if storeViewModel.currentSubscription == nil {
                             SettingCustomView {
                                 Button(action: {
                                     isPresentingSubscriptionSheet.toggle()
@@ -55,7 +55,7 @@ struct SettingsView: View {
                     
                     SettingGroup {
                         privacySection
-                        if currentSubscription != nil {
+                        if storeViewModel.currentSubscription != nil {
                             subscriptionSection
                         }
                         contributionsSection
@@ -76,12 +76,12 @@ struct SettingsView: View {
             }
             .onAppear {
                 Task {
-                    await updateSubscriptionStatus()
+                    await storeViewModel.updateSubscriptionStatus()
                 }
             }
             .onChange(of: storeViewModel.purchasedSubscriptions) {
                 Task {
-                    await updateSubscriptionStatus()
+                    await storeViewModel.updateSubscriptionStatus()
                 }
             }
         }
@@ -90,7 +90,7 @@ struct SettingsView: View {
     @SettingBuilder private var profileHeaderSection: some Setting {
         SettingGroup(id: "SettingsProfileHeaderView") {
             SettingCustomView {
-                SettingsProfileHeaderView(currentSubscription: currentSubscription)
+                SettingsProfileHeaderView(currentSubscription: storeViewModel.currentSubscription)
             }
         }
     }
@@ -110,7 +110,7 @@ struct SettingsView: View {
     @SettingBuilder private var subscriptionSection: some Setting {
         SettingPage(title: "Subscription") {
             SettingCustomView(id: "Subscription View") {
-                SettingsSubscriptionView(currentSubscription: currentSubscription, subscriptionStatus: subscriptionStatus)
+                SettingsSubscriptionView(currentSubscription: storeViewModel.currentSubscription, subscriptionStatus: storeViewModel.subscriptionStatus)
                     .environmentObject(storeViewModel)
                     .centered()
                     
@@ -185,6 +185,7 @@ struct SettingsView: View {
     
     //MARK: - Feedback Section
     @State private var isShowingFeatureRequestForm = false
+    @State private var isShowingReportBugForm = false
     
     @SettingBuilder private var feedbackSection: some Setting {
         SettingPage(title: "Feedback") {
@@ -206,6 +207,10 @@ struct SettingsView: View {
                         FeedbackEmailFormView(formType: .featureRequest)
                             .ignoresSafeArea(.all)
                     }
+                    .sheet(isPresented: $isShowingReportBugForm) {
+                        FeedbackEmailFormView(formType: .bugReport)
+                            .ignoresSafeArea(.all)
+                    }
                 }
             }
             
@@ -219,7 +224,7 @@ struct SettingsView: View {
 
                 SettingGroup {
                     SettingButton(title: "Report Bug") {
-                        
+                        isShowingReportBugForm.toggle()
                     }
                     .icon("ladybug.fill", backgroundColor: .red)
                 }
@@ -287,44 +292,6 @@ struct SettingsView: View {
             }
         }
         .previewIcon("info.circle.fill", foregroundColor: .white, backgroundColor: .green)
-    }
-    
-    @MainActor
-    func updateSubscriptionStatus() async {
-        do {
-            //This app has only one subscription group, so products in the subscriptions
-            //array all belong to the same group. The statuses that
-            //`product.subscription.status` returns apply to the entire subscription group.
-            guard let product = storeViewModel.subscriptions.first,
-                  let statuses = try await product.subscription?.status else {
-                return
-            }
-            
-//            var newSubscription: Product?
-
-            //Iterate through `statuses` for this subscription group and find
-            //the `Status` with the highest level of service that isn't
-            //in an expired or revoked state. For example, a customer may be subscribed to the
-            //same product with different levels of service through Family Sharing.
-            for status in statuses {
-                switch status.state {
-                case .expired, .revoked:
-                    continue
-                default:
-                    let renewalInfo = try storeViewModel.checkVerified(status.renewalInfo)
-
-                    //Find the first subscription product that matches the subscription status renewal info by comparing the product IDs.
-                    guard let newSubscription = storeViewModel.subscriptions.first(where: { $0.id == renewalInfo.currentProductID }) else {
-                        continue
-                    }
-                    subscriptionStatus = status
-                    currentSubscription = newSubscription
-                    
-                }
-            }
-        } catch {
-            print("Could not update subscription status \(error)")
-        }
     }
 }
 

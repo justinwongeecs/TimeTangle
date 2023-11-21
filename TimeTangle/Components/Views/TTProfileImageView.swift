@@ -58,6 +58,8 @@ class TTProfileImageView: UIView {
             } else {
                 profileImageView.layer.borderColor = UIColor.gray.cgColor
             }
+        } else {
+            profileImageView.layer.borderColor = UIColor.clear.cgColor
         }
     }
     
@@ -121,17 +123,20 @@ class TTProfileImageView: UIView {
     func setImageForUser(for user: TTUser) {
         if let imageData = user.profilePictureData, let image = UIImage(data: imageData) {
             profileImageView.image = image
+            showBorder = true 
         }
     }
     
     func setImage(to image: UIImage) {
         profileImageView.image = image 
+        showBorder = true
     }
     
     func setToDefaultImage() {
-        let config = UIImage.SymbolConfiguration(pointSize: 50)
+        let config = UIImage.SymbolConfiguration(scale: .large)
         let profileImage = UIImage(systemName: "person.crop.circle", withConfiguration: config)
         profileImageView.image = profileImage
+        showBorder = false
     }
     
     func setShadowColor(to color: CGColor) {

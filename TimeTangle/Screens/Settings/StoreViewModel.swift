@@ -25,6 +25,12 @@ class StoreViewModel: ObservableObject {
     @Published private(set) var subscriptions = [Product]()
     @Published private(set) var purchasedSubscriptions = [Product]()
     @Published private(set) var subscriptionGroupStatus: RenewalState?
+    @Published private(set) var currentSubscription: Product? = nil
+    @Published private(set) var subscriptionStatus: Product.SubscriptionInfo.Status? = nil
+    
+    var isSubscriptionPro: Bool {
+        return currentSubscription != nil
+    }
     
     var updateListenerTask: Task<Void, Error>? = nil
     var subscriptionStatusUpdateListenerTask: Task<Void, Error>? = nil
@@ -182,6 +188,41 @@ class StoreViewModel: ObservableObject {
         //group, so products in the subscriptions array all belong to the same group. The statuses that
         // `product.subscription.status` returns apply to the entire subscription group.
         subscriptionGroupStatus = try? await subscriptions.first?.subscription?.status.first?.state
+    }
+    
+    @MainActor
+    func updateSubscriptionStatus() async {
+        do {
+            //This app has only one subscription group, so products in the subscriptions
+            //array all belong to the same group. The statuses that
+            //`product.subscription.status` returns apply to the entire subscription group.
+            guard let product = subscriptions.first,
+                  let statuses = try await product.subscription?.status else {
+                return
+            }
+
+            //Iterate through `statuses` for this subscription group and find
+            //the `Status` with the highest level of service that isn't
+            //in an expired or revoked state. For example, a customer may be subscribed to the
+            //same product with different levels of service through Family Sharing.
+            for status in statuses {
+                switch status.state {
+                case .expired, .revoked:
+                    continue
+                default:
+                    let renewalInfo = try checkVerified(status.renewalInfo)
+
+                    //Find the first subscription product that matches the subscription status renewal info by comparing the product IDs.
+                    guard let newSubscription = subscriptions.first(where: { $0.id == renewalInfo.currentProductID }) else {
+                        continue
+                    }
+                    subscriptionStatus = status
+                    currentSubscription = newSubscription
+                }
+            }
+        } catch {
+            print("Could not update subscription status \(error)")
+        }
     }
     
     func checkVerified<T>(_ result: VerificationResult<T>) throws -> T {

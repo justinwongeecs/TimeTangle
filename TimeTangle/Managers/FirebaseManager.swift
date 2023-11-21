@@ -19,7 +19,7 @@ class FirebaseManager {
     private var currentUserGroupsListener: ListenerRegistration?
     private let sceneWindow = (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.window
     private let notificationCenter = NotificationCenter.default
-    private let storeViewModel = StoreViewModel()
+    let storeViewModel = StoreViewModel()
     
     var currentUser: TTUser?
     
@@ -404,7 +404,7 @@ class FirebaseManager {
     }
     
     private func createGroupNC() -> UINavigationController {
-        let searchVC = CreateGroupVC()
+        let searchVC = CreateGroupVC(storeViewModel: storeViewModel)
         searchVC.title = "Create Group"
         searchVC.tabBarItem = UITabBarItem(title: "Create Group", image: UIImage(systemName: "door.left.hand.open"), tag: 0)
         return UINavigationController(rootViewController: searchVC)

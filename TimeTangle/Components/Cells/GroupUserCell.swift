@@ -30,8 +30,6 @@ class GroupUserCell: ProfileUsernameCell {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
         configureAdminIndicator()
-        configureVisibilityButton()
-       
     }
     
     required init?(coder: NSCoder) {
@@ -50,6 +48,7 @@ class GroupUserCell: ProfileUsernameCell {
         }
         
         updateAdminIndicator(for: user)
+        configureVisibilityButton()
         displayCorrectVisibilityButton()
         
         guard let currentUser = FirebaseManager.shared.currentUser else { return }
@@ -84,14 +83,20 @@ class GroupUserCell: ProfileUsernameCell {
     
     //MARK: - Visibility Button 
     private func configureVisibilityButton() {
-        //Visibility Button
+        guard let group = group, let currentUser = FirebaseManager.shared.currentUser else { return }
+        
         contentView.addSubview(visibilityButton)
         visibilityButton.tintColor = .systemGreen
         visibilityButton.addTarget(self, action: #selector(toggleVisibility), for: .touchUpInside)
         visibilityButton.translatesAutoresizingMaskIntoConstraints = false
         
+        if group.doesContainsAdmin(for: currentUser.username) {
+            visibilityButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -40).isActive = true
+        } else {
+            visibilityButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20).isActive = true
+        }
+        
         NSLayoutConstraint.activate([
-            visibilityButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -40),
             visibilityButton.topAnchor.constraint(equalTo: topAnchor, constant: 10),
             visibilityButton.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -10),
             visibilityButton.heightAnchor.constraint(equalToConstant: 70)

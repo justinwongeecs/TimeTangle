@@ -47,7 +47,7 @@ class EventKitManager {
     
     func convertEKEventToTTEvent(for event: EKEvent) -> TTEvent? {
         guard let currentUser = FirebaseManager.shared.currentUser else { return nil }
-        return TTEvent(name: event.title, startDate: event.startDate, endDate: event.endDate, isAllDay: event.isAllDay, createdBy: currentUser.getFullName())
+        return TTEvent(name: event.title, startDate: event.startDate, endDate: event.endDate, isAllDay: event.isAllDay, createdBy: currentUser.username)
     }
     
     func getUserTTEvents(from startDateBound: Date, to upperDateBound: Date) -> [TTEvent] {

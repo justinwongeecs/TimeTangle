@@ -15,6 +15,7 @@ struct GroupSettingsView: View {
     @State var group: TTGroup!
     private(set) var updateClosure: (TTGroup) -> Void
     private var popUIViewController: () -> Void
+    private let storeViewModel = FirebaseManager.shared.storeViewModel
     
     @State private var ttError: TTError? = nil
     @State private var showErrorAlert = false
@@ -29,6 +30,8 @@ struct GroupSettingsView: View {
     @State private var boundedEndDate = Date()
     @State private var lockGroupChanges = false
     @State private var allowGroupJoin = true
+    
+    private let numOfMembersChoices = ["2", "3", "4", "5", "6", "7", "8", "9", "10"]
     
     init(group: TTGroup, config: Configuration, updateClosure: @escaping (TTGroup) -> Void, popUIViewController: @escaping() -> Void) {
         _group = State(initialValue: group)
@@ -46,69 +49,23 @@ struct GroupSettingsView: View {
     
     var body: some View {
         NavigationStack {
-            SettingStack(isSearchable: false, embedInNavigationStack: true) {
-                SettingPage(title: "\(group.name) Settings", navigationTitleDisplayMode: .inline) {
-                    SettingGroup(id: "Change Group Name Button", header: "Group Name") {
-                        SettingText(title: "\(newGroupNameText)")
-                        SettingCustomView(id: "Change Group Name Button") {
-                            Button(action: {
-                                showChangeGroupNameAlert.toggle()
-                            }) {
-                                HStack {
-                                    Text("Change Group Name")
-                                    Image(systemName: "square.and.pencil")
-                                }
-                                .foregroundColor(.green)
-                                .leftAligned()
-                                .frame(maxWidth: .infinity)
-                            }
-                            .padding(15)
-                            .alert("Change Group Name", isPresented: $showChangeGroupNameAlert) {
-                                TextField("Group Name", text: $newGroupNameText)
-                                Button("OK", action: {
-                                    newGroupNameText = newGroupNameText.trimmingCharacters(in: .whitespacesAndNewlines)
-                                })
-                                Button("Cancel", role: .cancel) {
-                                    showChangeGroupNameAlert.toggle()
-                                }
-                            }
-                        }
-                    }
-                    
-                    SettingGroup(id: "Set Min And Max User Pickers", header: "Number Of Users") {
-                        minimumNumberOfUsersPicker
-                        maximumNumberOfUsersPicker
-                    }
-                    
-                    SettingGroup(id: "Set Min and Max Dates", header: "Date Bounds") {
-                        SettingCustomView(id: "Bounded Start Date Picker") {
-                            DatePicker("Bounded Start Date", selection: $boundedStartDate, displayedComponents: [.date])
-                                .datePickerStyle(.compact)
-                                .tint(.green)
-                                .padding(15)
-                        }
-                        SettingCustomView(id: "Bounded End Date Picker") {
-                            DatePicker("Bounded End Date", selection: $boundedEndDate, displayedComponents: [.date])
-                                .datePickerStyle(.compact)
-                                .tint(.green)
-                                .padding(15)
-                        }
-                    }
-                    
-                    SettingGroup(id: "Group Settings", header: "Group Settings") {
-                        lockGroupChangesButton
-                        enableGroupJoinToggle
-                    }
-                    
-                    SettingGroup(id: "Delete Group Button") {
-                        deleteGroupButton
-                    }
-                    
-                    SettingGroup(id: "Leave Group Button") {
-                        leaveGroupButton
-                    }
+            Form {
+                groupNameSection
+                
+                setMinAndMaxMembersSection
+                
+                setMinAndMaxDatesSection
+                
+                groupSettingsSection
+                
+                deleteGroupSection
+                
+                Section {
+                    leaveGroupButton
                 }
             }
+            .navigationTitle("\(group.name) Settings")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 //Close Button
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -174,100 +131,169 @@ struct GroupSettingsView: View {
         }
     }
     
-    //MARK: - MinimumNumberofUsersPicker
-    @SettingBuilder private var minimumNumberOfUsersPicker: some Setting {
-        SettingPicker(title: "Minimum Users", choices: [
-        "2", "3", "4", "5", "6", "7", "8", "9", "10"
-        ], selectedIndex: $minimumNumberOfUsersIndex, choicesConfiguration: .init(pickerDisplayMode: .menu))
-    }
-    
-    //MARK: - MaximumNumberOfUsersPicker
-    @SettingBuilder private var maximumNumberOfUsersPicker: some Setting {
-        SettingPicker(title: "Maximum Users", choices: [
-        "2", "3", "4", "5", "6", "7", "8", "9", "10"
-        ], selectedIndex: $maximumNumberOfUsersIndex, choicesConfiguration: .init(pickerDisplayMode: .menu))
-    }
-    
-    //MARK: - LockGroupChangesButton
-    @SettingBuilder private var lockGroupChangesButton: some Setting {
-        SettingCustomView(id: "Lock Unlock Group Changes Button") {
-            VStack {
+    private var groupNameSection : some View {
+        Section("Group Name") {
+            Text(newGroupNameText)
+            Button(action: {
+                showChangeGroupNameAlert.toggle()
+            }) {
                 HStack {
-                    Text("Lock Group Changes: ")
-                    Spacer()
-                    Button(action: {
-                        withAnimation {
-                            lockGroupChanges.toggle()
-                        }
-                    }) {
-                        HStack {
-                            if lockGroupChanges {
-                                Text("Locked")
-                                Image(systemName: "lock.fill")
-                            } else {
-                                Text("Unlocked")
-                            }
-                        }
-                        .bold()
-                        .foregroundColor(.white)
-                        .padding(8)
-                        .background(lockGroupChanges ? .red : .green)
-                        .cornerRadius(10)
-                    }
+                    Text("Change Group Name")
+                    Image(systemName: "square.and.pencil")
                 }
-                
-                Text("When locked, group can ONLY be edited by users with Admin access level")
-                    .font(.system(size: 13))
-                    .foregroundColor(.secondary)
+                .foregroundColor(.green)
+                .leftAligned()
+                .frame(maxWidth: .infinity)
             }
-            .padding(15)
+            .alert("Change Group Name", isPresented: $showChangeGroupNameAlert) {
+                TextField("Group Name", text: $newGroupNameText)
+                Button("OK", action: {
+                    newGroupNameText = newGroupNameText.trimmingCharacters(in: .whitespacesAndNewlines)
+                })
+                Button("Cancel", role: .cancel) {
+                    showChangeGroupNameAlert.toggle()
+                }
+            }
         }
     }
     
-    //MARK: - EnableGroupJoinToggle
-    @SettingBuilder private var enableGroupJoinToggle: some Setting {
-        SettingToggle(title: "Allow Group Join", isOn: $allowGroupJoin)
+    private var setMinAndMaxMembersSection: some View {
+        Section {
+            VStack {
+                Picker("Min Users", selection: $minimumNumberOfUsersIndex) {
+                    ForEach(numOfMembersChoices, id: \.self) { numOfUsers in
+                        Text(numOfUsers)
+                            .tag(Int(numOfUsers))
+                    }
+                }
+                .applySettingsBlurredStyle(isSubscriptionPro: storeViewModel.isSubscriptionPro)
+                
+                Divider()
+                
+                Picker("Max Users", selection: $maximumNumberOfUsersIndex) {
+                    ForEach(numOfMembersChoices, id: \.self) { numOfUsers in
+                        Text(numOfUsers)
+                            .tag(Int(numOfUsers))
+                    }
+                }
+                .applySettingsBlurredStyle(isSubscriptionPro: storeViewModel.isSubscriptionPro)
+            }
+            .applySettingsLockedStyle(isSubscriptionPro: storeViewModel.isSubscriptionPro )
+        } header: {
+            SettingsProHeaderSectionView(isSubscriptionPro: storeViewModel.isSubscriptionPro, headerText: "Set Min And Max Members")
+        }
+    }
+    
+    private var setMinAndMaxDatesSection: some View {
+        Section {
+            VStack {
+                DatePicker("Bounded Start Date", selection: $boundedStartDate, displayedComponents: [.date])
+                    .datePickerStyle(.compact)
+                    .tint(.green)
+                    .applySettingsBlurredStyle(isSubscriptionPro: storeViewModel.isSubscriptionPro)
+                Divider()
+                DatePicker("Bounded End Date", selection: $boundedEndDate, displayedComponents: [.date])
+                    .datePickerStyle(.compact)
+                    .tint(.green)
+                    .applySettingsBlurredStyle(isSubscriptionPro: storeViewModel.isSubscriptionPro)
+            }
+            .applySettingsLockedStyle(isSubscriptionPro: storeViewModel.isSubscriptionPro)
+        } header: {
+            SettingsProHeaderSectionView(isSubscriptionPro: storeViewModel.isSubscriptionPro, headerText: "Set Min and Max Dates")
+        }
+    }
+    
+    private var groupSettingsSection: some View {
+        Section {
+            VStack {
+                lockGroupChangesButton
+                Divider()
+                Toggle(isOn: $allowGroupJoin) { Text("Allow Group Join")}
+                    .applySettingsBlurredStyle(isSubscriptionPro: storeViewModel.isSubscriptionPro)
+            }
+            .applySettingsLockedStyle(isSubscriptionPro: storeViewModel.isSubscriptionPro)
+        } header: {
+            SettingsProHeaderSectionView(isSubscriptionPro: storeViewModel.isSubscriptionPro, headerText: "Group Settings")
+        }
+    }
+    
+    //MARK: - LockGroupChangesButton
+    private var lockGroupChangesButton: some View {
+        VStack {
+            HStack {
+                Text("Lock Group Changes: ")
+                Spacer()
+                Button(action: {
+                    withAnimation {
+                        lockGroupChanges.toggle()
+                    }
+                }) {
+                    HStack {
+                        if lockGroupChanges {
+                            Text("Locked")
+                            Image(systemName: "lock.fill")
+                        } else {
+                            Text("Unlocked")
+                        }
+                    }
+                    .bold()
+                    .foregroundColor(.white)
+                    .padding(8)
+                    .background(lockGroupChanges ? .red : .green)
+                    .cornerRadius(10)
+                }
+            }
+            
+            Text("When locked, group can ONLY be edited by users with Admin access level")
+                .font(.system(size: 13))
+                .foregroundColor(.secondary)
+        }
+        .applySettingsBlurredStyle(isSubscriptionPro: storeViewModel.isSubscriptionPro)
     }
     
     //MARK: - DeleteGroupButton
-    @SettingBuilder private var deleteGroupButton: some Setting {
-        SettingCustomView {
-            Button(action: {
-                showDeleteGroupConfirmation.toggle()
-            }) {
-                Text("Delete Group")
-                    .foregroundColor(.red)
-                    .leftAligned()
-                    .frame(maxWidth: .infinity)
-            }
-            .padding(15)
-            .alert(isPresented: $showDeleteGroupConfirmation) {
-                Alert(title: Text("Confirm Delete Group"),
-                      message: Text("Are you sure you want to delete \(group.name)?"),
-                      primaryButton: .cancel(),
-                      secondaryButton: .default(Text("OK")) { deleteGroup() })
+    private var deleteGroupButton: some View {
+        //TODO: Check to see if current user is admin
+        Button(action: {
+            showDeleteGroupConfirmation.toggle()
+        }) {
+            Text("Delete Group")
+                .foregroundColor(.red)
+                .leftAligned()
+                .frame(maxWidth: .infinity)
+        }
+        .alert(isPresented: $showDeleteGroupConfirmation) {
+            Alert(title: Text("Confirm Delete Group"),
+                  message: Text("Are you sure you want to delete \(group.name)?"),
+                  primaryButton: .cancel(),
+                  secondaryButton: .default(Text("OK")) { deleteGroup() })
+        }
+    }
+    
+    @ViewBuilder
+    private var deleteGroupSection: some View {
+        if let currentUser = FirebaseManager.shared.currentUser, group.doesContainsAdmin(for: currentUser.username) {
+            Section {
+                deleteGroupButton
             }
         }
     }
     
     //MARK: - LeaveGroupButton
-    @SettingBuilder private var leaveGroupButton: some Setting {
-        SettingCustomView {
-            Button(action: {
-                showLeaveGroupConfirmation.toggle()
-            }) {
-                Text("Leave Group")
-                    .foregroundColor(.red)
-                    .leftAligned()
-                    .frame(maxWidth: .infinity)
-            }
-            .padding(15)
-            .alert(isPresented: $showLeaveGroupConfirmation) {
-                Alert(title: Text("Confirm Leaving Group"),
-                      message: Text("Are you sure you want to leave \(group.name)?"),
-                      primaryButton: .cancel(),
-                      secondaryButton: .default(Text("OK")) { leaveGroup() })
-            }
+    private var leaveGroupButton: some View {
+        Button(action: {
+            showLeaveGroupConfirmation.toggle()
+        }) {
+            Text("Leave Group")
+                .foregroundColor(.red)
+                .leftAligned()
+                .frame(maxWidth: .infinity)
+        }
+        .alert(isPresented: $showLeaveGroupConfirmation) {
+            Alert(title: Text("Confirm Leaving Group"),
+                  message: Text("Are you sure you want to leave \(group.name)?"),
+                  primaryButton: .cancel(),
+                  secondaryButton: .default(Text("OK")) { leaveGroup() })
         }
     }
     
@@ -363,6 +389,21 @@ struct GroupSettingsView: View {
                     }
                 }
             }
+        }
+    }
+}
+
+//MARK: -
+struct SettingsProHeaderSectionView: View {
+    var isSubscriptionPro: Bool
+    var headerText: String
+    
+    var body: some View {
+        HStack {
+            if !isSubscriptionPro {
+                SubscriptionPlanBadgeView(isPro: true)
+            }
+            Text(headerText)
         }
     }
 }

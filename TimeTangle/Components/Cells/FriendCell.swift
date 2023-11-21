@@ -108,8 +108,8 @@ class FriendCell: ProfileUsernameCell {
         emailComposeVC.setToRecipients([friend.email])
         emailComposeVC.setSubject("Hello 👋!")
         
-        if parentViewController is FriendsAndRequestsVC {
-            emailComposeVC.present(emailComposeVC, animated: true)
+        if let parentViewController = parentViewController, parentViewController is FriendsAndRequestsVC {
+            parentViewController.present(emailComposeVC, animated: true)
         }
     }
 }

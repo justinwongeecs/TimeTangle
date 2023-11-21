@@ -103,6 +103,7 @@ class GroupDetailVC: UIViewController {
             case .success(let ttUser):
                 self.groupMembers.append(ttUser)
                 self.groupsUsersCache.insert(ttUser, forKey: ttUser.username)
+                self.groupAggregateVC.setView(usersNotVisible: usersNotVisible, group: group)
             case .failure(let error):
                 self.presentTTAlert(title: "Fetch Error", message: error.rawValue, buttonTitle: "OK")
             }
@@ -129,15 +130,6 @@ class GroupDetailVC: UIViewController {
                 self?.syncUserCalendar()
             },
             
-            UIAction(title: "Save", image: UIImage(systemName: "square.and.arrow.down")) { [weak self] action in
-                guard let self = self else { return }
-                if self.saveOrCancelIsland.isPresenting() {
-                    self.saveOrCancelIsland.save()
-                } else {
-                    self.saveOrCancelIsland.present()
-                }
-            },
-            
             UIAction(title: "Group Settings", image: UIImage(systemName: "gear")) { [weak self] action in
                 self?.showGroupSettingsVC()
             }
@@ -152,7 +144,7 @@ class GroupDetailVC: UIViewController {
     }
     
     private func configureGroupAggregateResultView() {
-        groupAggregateVC = GroupAggregateResultVC(group: group, usersNotVisible: usersNotVisible)
+        groupAggregateVC = GroupAggregateResultVC(group: group, groupsUsersCache: groupsUsersCache, usersNotVisible: usersNotVisible)
         groupAggregateVC.groupAggregateResultDelegate = self
         add(childVC: groupAggregateVC, to: aggregateResultView)
     }
@@ -300,7 +292,12 @@ class GroupDetailVC: UIViewController {
     
     @objc func clickedOnViewResultButton(_ sender: UIButton) {
         //show summary view
-        groupOverviewVC = GroupOverviewVC(group: group, notVisibleMembers: usersNotVisible, openIntervals: openIntervals)
+        groupOverviewVC = GroupOverviewVC(
+            group: group,
+            groupsUsersCache: groupsUsersCache,
+            notVisibleMembers: usersNotVisible,
+            openIntervals: openIntervals
+        )
         navigationController?.pushViewController(groupOverviewVC, animated: true)
     }
     
@@ -459,14 +456,12 @@ extension GroupDetailVC: GroupUpdateDelegate {
     }
     
     func groupUserVisibilityDidUpdate(for username: String) {
-        if usersNotVisible.contains(username) {
-            if let removeIndex = usersNotVisible.firstIndex(of: username) {
-                usersNotVisible.remove(at: removeIndex)
-            }
+        if usersNotVisible.contains(username), let removeIndex = usersNotVisible.firstIndex(of: username) {
+            usersNotVisible.remove(at: removeIndex)
         } else {
             usersNotVisible.append(username)
         }
-       updateGroupAggregateVC()
+        updateGroupAggregateVC()
     }
 }
 

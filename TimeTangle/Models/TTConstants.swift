@@ -64,5 +64,8 @@ struct TTConstants {
     ]
     static let proMonthlySubscriptionID: String = "subscription.pro.monthly"
     static let proYearlySubscriptionID: String = "subscription.pro.yearly"
+    
+    //MARK: - Subscription Restrictions
+    static let freePlanGroupCountMax: Int = 1
 }
 

@@ -24,18 +24,28 @@ protocol GroupOverviewCellDelegate: AnyObject {
 }
 
 class GroupOverviewVC: UIViewController {
-    
     private var group: TTGroup!
+    private var groupsUsersCache: TTCache<String, TTUser>!
     private var groupSummarySections: [GroupOverviewSection]!
     private var filteredGroupSummarySections = [GroupOverviewSection]()
     private var notVisibleMembers = [String]()
-    private var timesTableView: UITableView!
+    private let timesTableView = UITableView()
+    
+    private let filterIndicatorView = UIView()
+    private let filterIndicatorViewLabel = UILabel()
+    private var filterIndicatorViewWidthConstraint: NSLayoutConstraint!
     private var currentFilterMode: GroupOverviewFilterType = .all
     
     private var selectedInterval: TTEvent?
     
-    init(group: TTGroup, notVisibleMembers: [String], openIntervals: [TTEvent]) {
+    init(
+        group: TTGroup,
+        groupsUsersCache: TTCache<String,TTUser>,
+        notVisibleMembers: [String],
+        openIntervals: [TTEvent]
+    ) {
         self.group = group
+        self.groupsUsersCache = groupsUsersCache
         self.group.events.append(contentsOf: openIntervals)
         self.notVisibleMembers = notVisibleMembers
         super.init(nibName: nil, bundle: nil)
@@ -52,6 +62,7 @@ class GroupOverviewVC: UIViewController {
         
         configureNavigationBarItems()
         configureVC()
+        configureFilterIndicatorView()
         configureTimesTable()
         navigationController?.navigationBar.prefersLargeTitles = false
         
@@ -68,7 +79,7 @@ class GroupOverviewVC: UIViewController {
     
     private func configureNavigationBarItems() {
         let filterEventsMenu = UIMenu(title: "", children: [
-            UIAction(title: "Show All", image: UIImage(systemName: "list.bullet.rectangle")) { [weak self] action in
+            UIAction(title: "Show All", image: UIImage(systemName: "list.bullet")) { [weak self] action in
                 self?.filterShowAll()
             },
             UIAction(title: "Show Open Intervals", image: UIImage(systemName: "checkmark.circle")) { [weak self] action in
@@ -85,10 +96,43 @@ class GroupOverviewVC: UIViewController {
         navigationItem.rightBarButtonItem = filterEventsButton
     }
     
+    private func configureFilterIndicatorView() {
+        filterIndicatorView.backgroundColor = .systemIndigo.withAlphaComponent(0.7)
+        filterIndicatorView.layer.cornerRadius = 15
+        filterIndicatorView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(filterIndicatorView)
+        
+  
+        filterIndicatorViewLabel.text = "Show All"
+        filterIndicatorViewLabel.textColor = .white
+        filterIndicatorViewLabel.font = UIFont.systemFont(ofSize: 15, weight: .bold)
+        filterIndicatorViewLabel.translatesAutoresizingMaskIntoConstraints = false
+        filterIndicatorView.addSubview(filterIndicatorViewLabel)
+        
+        filterIndicatorViewWidthConstraint = filterIndicatorView.widthAnchor.constraint(equalToConstant: 100)
+        filterIndicatorViewWidthConstraint.isActive = true
+        
+        NSLayoutConstraint.activate([
+            filterIndicatorView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 5),
+            filterIndicatorView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            filterIndicatorView.heightAnchor.constraint(equalToConstant: 30),
+            
+            filterIndicatorViewLabel.centerXAnchor.constraint(equalTo: filterIndicatorView.centerXAnchor),
+            filterIndicatorViewLabel.centerYAnchor.constraint(equalTo: filterIndicatorView.centerYAnchor)
+        ])
+    }
+    
     private func filterShowAll() {
         if currentFilterMode != .all {
             filteredGroupSummarySections = groupSummarySections
             currentFilterMode = .all
+            filterIndicatorViewLabel.text = "Show All"
+            
+            UIView.animate(withDuration: 0.5) {
+                self.filterIndicatorViewWidthConstraint.constant = 100
+                self.filterIndicatorView.layoutIfNeeded()
+            }
+            
             timesTableView.reloadData()
         }
     }
@@ -103,6 +147,13 @@ class GroupOverviewVC: UIViewController {
             }
             filteredGroupSummarySections = openIntervalSections.filter { !$0.events.isEmpty }
             currentFilterMode = .availableTimes
+            
+            UIView.animate(withDuration: 0.5) {
+                self.filterIndicatorViewWidthConstraint.constant = 180
+                self.filterIndicatorView.layoutIfNeeded()
+            }
+            
+            filterIndicatorViewLabel.text = "Show Open Intervals"
             timesTableView.reloadData()
         }
     }
@@ -118,6 +169,14 @@ class GroupOverviewVC: UIViewController {
             
             filteredGroupSummarySections = unavailableSections.filter { !$0.events.isEmpty }
             currentFilterMode = .unAvailableTimes
+            filterIndicatorViewLabel.text = "Show Unavailable Intervals"
+            
+            UIView.animate(withDuration: 0.5) {
+                self.filterIndicatorViewWidthConstraint.constant = 220
+                self.filterIndicatorView.layoutIfNeeded()
+            }
+            
+            
             timesTableView.reloadData()
         }
     }
@@ -158,21 +217,18 @@ class GroupOverviewVC: UIViewController {
     }
     
     private func configureTimesTable() {
-        timesTableView = UITableView()
         timesTableView.separatorStyle = .none
         timesTableView.translatesAutoresizingMaskIntoConstraints = false
         timesTableView.dataSource = self
         timesTableView.delegate = self
         timesTableView.register(GroupOverviewCell.self, forCellReuseIdentifier: GroupOverviewCell.reuseID)
         view.addSubview(timesTableView)
-        
-        let padding: CGFloat = 10
 
         NSLayoutConstraint.activate([
-            timesTableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            timesTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: padding),
-            timesTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -padding),
-            timesTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -padding)
+            timesTableView.topAnchor.constraint(equalTo: filterIndicatorView.bottomAnchor),
+            timesTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            timesTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            timesTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
 }
@@ -211,7 +267,7 @@ extension GroupOverviewVC: UITableViewDelegate, UITableViewDataSource {
         
         let section = filteredGroupSummarySections[indexPath.section]
         let event = section.events[indexPath.row]
-        cell.set(for: event, selectedInterval: selectedInterval)
+        cell.set(for: event, selectedInterval: selectedInterval, groupsUsersCache: groupsUsersCache)
         cell.groupOverviewCellDelegate = self
 
         return cell
@@ -230,6 +286,7 @@ class GroupOverviewCell: UITableViewCell {
     static let reuseID = "GroupOverviewCell"
     
     private var event: TTEvent?
+    private var groupsUsersCache: TTCache<String, TTUser>!
     private var isCellSelected = false
     
     private var createdByUserLabel = UILabel()
@@ -247,26 +304,28 @@ class GroupOverviewCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func set(for event: TTEvent, selectedInterval: TTEvent?) {
+    func set(for event: TTEvent, selectedInterval: TTEvent?, groupsUsersCache: TTCache<String, TTUser>) {
         self.event = event
+        self.groupsUsersCache = groupsUsersCache
         
         let timeFormatter = DateFormatter()
         timeFormatter.dateFormat = "h:mm a"
         timeFormatter.amSymbol = "AM"
         timeFormatter.pmSymbol = "PM"
         
+        //TODO: Implement Ability for User to Choose if they want to display their event names
         let attrs = [NSAttributedString.Key.font : UIFont.boldSystemFont(ofSize: 15)]
-        let boldString = NSMutableAttributedString(string: "\(event.name): ", attributes:attrs)
+//        let boldString = NSMutableAttributedString(string: "\(event.name): ", attributes:attrs)
         
         let timeIntervalText = "\(timeFormatter.string(from: event.startDate)) - \(timeFormatter.string(from: event.endDate))"
-        boldString.append(NSMutableAttributedString(string: timeIntervalText))
-        groupNameAndTimeLabel.attributedText = boldString
+//        boldString.append(NSMutableAttributedString(string: timeIntervalText))
+        groupNameAndTimeLabel.text = timeIntervalText
         
         //configure cell based on event.createdBy
         if event.isCreatedByUser {
             groupNameAndTimeLabel.textColor = .systemRed
             createdByUserLabel.isHidden = false
-            createdByUserLabel.text = event.createdBy
+            createdByUserLabel.text = getUserFullNameFromUsername(for: event.createdBy)
             backgroundColor = .systemRed.withAlphaComponent(0.15)
         } else {
             groupNameAndTimeLabel.textColor = .systemGreen
@@ -279,6 +338,23 @@ class GroupOverviewCell: UITableViewCell {
         } else {
             selectedIntervalImageView.isHidden = true
         }
+    }
+    
+    func getUserFullNameFromUsername(for username: String) -> String {
+        if let user = groupsUsersCache.value(forKey: username) {
+            return user.getFullName().uppercased()
+        } else {
+            //Fetch User
+            FirebaseManager.shared.fetchUserDocumentData(with: username) { [weak self] result in
+                switch result {
+                case .success(let ttUser):
+                    self?.groupsUsersCache.insert(ttUser, forKey: username)
+                case .failure(let error):
+                    print(error.localizedDescription)
+                }
+            }
+        }
+        return username.uppercased()
     }
     
     private func configureCell() {

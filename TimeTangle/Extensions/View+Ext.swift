@@ -53,6 +53,30 @@ struct RoundedRectangleBackgroundView: ViewModifier {
     }
 }
 
+struct SettingsBlurredView: ViewModifier {
+    var isSubscriptionPro: Bool
+    
+    func body(content: Content) -> some View {
+        content
+        .blur(radius: isSubscriptionPro ? 0 : 6)
+        .disabled(isSubscriptionPro ? false : true)
+    }
+}
+
+struct SettingsLockedView: ViewModifier {
+    var isSubscriptionPro: Bool
+    
+    func body(content: Content) -> some View {
+        content
+            .overlay(
+                !isSubscriptionPro ?
+                Image(systemName: "lock.fill")
+                    .foregroundStyle(.gray)
+                    .font(.system(size: 30)) : nil
+            )
+    }
+}
+
 extension View {
     func presentScreen<Content>(isPresented: Binding<Bool>, modalPresentationStyle: UIModalPresentationStyle, @ViewBuilder content: @escaping () -> Content) -> some View where Content : View{
         if isPresented.wrappedValue {
@@ -92,5 +116,13 @@ extension View {
         frameHeight: CGFloat? = nil
     ) -> some View {
         modifier(RoundedRectangleBackgroundView(cornerRadius: cornerRadius, fillColor: fillColor, fillColorOpacity: fillColorOpacity, strokeColor: strokeColor, strokeLineWidth: strokeLineWidth, frameHeight: frameHeight, frameWidth: frameWidth))
+    }
+    
+    func applySettingsBlurredStyle(isSubscriptionPro: Bool) -> some View {
+        modifier(SettingsBlurredView(isSubscriptionPro: isSubscriptionPro))
+    }
+    
+    func applySettingsLockedStyle(isSubscriptionPro: Bool) -> some View {
+        modifier(SettingsLockedView(isSubscriptionPro: isSubscriptionPro))
     }
 }

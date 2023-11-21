@@ -15,6 +15,7 @@ protocol GroupAggregateResultVCDelegate: AnyObject {
 class GroupAggregateResultVC: DayViewController {
     
     private var group: TTGroup!
+    private var groupsUsersCache: TTCache<String, TTUser>!
     private var openDateIntervals = [DateInterval]()
     private var usersNotVisible = [String]()
     private var currentPresentedDate: Date!
@@ -27,8 +28,9 @@ class GroupAggregateResultVC: DayViewController {
     
     weak var groupAggregateResultDelegate: GroupAggregateResultVCDelegate?
     
-    required init(group: TTGroup, usersNotVisible: [String]) {
+    required init(group: TTGroup, groupsUsersCache: TTCache<String, TTUser>, usersNotVisible: [String]) {
         self.group = group
+        self.groupsUsersCache = groupsUsersCache
         self.currentPresentedDate = group.startingDate
         self.usersNotVisible = usersNotVisible
         super.init(nibName: nil, bundle: nil)
@@ -60,7 +62,6 @@ class GroupAggregateResultVC: DayViewController {
         self.usersNotVisible = usersNotVisible
         self.group = group
         self.group.events = group.events.filter { !usersNotVisible.contains($0.createdBy) }
-
         updateStepperButtons()
         dayView.reloadData()
     }
@@ -197,7 +198,7 @@ class GroupAggregateResultVC: DayViewController {
 
         for ttEvent in groupNonAllDayEvents {
             let newEvent = Event()
-            newEvent.text = "Not Available: \(ttEvent.createdBy.uppercased())"
+            newEvent.text = "Not Available: \(getUserFullNameFromUsername(for: ttEvent.createdBy))"
             newEvent.dateInterval = DateInterval(start: ttEvent.startDate, end: ttEvent.endDate)
             newEvent.color = .systemRed
             newEvent.isAllDay = ttEvent.isAllDay
@@ -231,8 +232,25 @@ class GroupAggregateResultVC: DayViewController {
         return events
     }
     
+    func getUserFullNameFromUsername(for username: String) -> String {
+        if let user = groupsUsersCache.value(forKey: username) {
+            return user.getFullName().uppercased()
+        } else {
+            //Fetch User
+            FirebaseManager.shared.fetchUserDocumentData(with: username) { [weak self] result in
+                switch result {
+                case .success(let ttUser):
+                    self?.groupsUsersCache.insert(ttUser, forKey: username)
+                case .failure(let error):
+                    print(error.localizedDescription)
+                }
+            }
+        }
+        return username.uppercased()
+    }
+    
     func createEventsForOpenIntervals(with occupiedEvents: [TTEvent]) -> [Event] {
-        var occupiedEvents = occupiedEvents.sorted { $0.startDate < $1.endDate }
+        let occupiedEvents = occupiedEvents.sorted { $0.startDate < $1.endDate }
         var openInternalEvents = [Event]()
         guard let group = group else { return [Event]() }
         

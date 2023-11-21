@@ -8,7 +8,7 @@
 import UIKit
 
 class CreateGroupVC: UIViewController {
-    
+    private var storeViewModel: StoreViewModel
     private var allFriends = [TTUser]()
     private var usersQueueCache = TTCache<String, TTUser>()
     private var usersQueueForGroupCreation = [TTUser]()
@@ -19,7 +19,20 @@ class CreateGroupVC: UIViewController {
     private let usersQueueCountLabel = TTTitleLabel(textAlignment: .center, fontSize: 15)
     private let usersQueueTable = UITableView()
     private let createGroupButton = TTButton(backgroundColor: .systemGreen, title: "Create Group")
-
+    
+    private var joinGroupButton: UIBarButtonItem!
+    private let lockedView = UIView()
+    private let blurEffectView = UIVisualEffectView()
+    
+    init(storeViewModel: StoreViewModel) {
+        self.storeViewModel = storeViewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         configureViewController()
@@ -28,9 +41,97 @@ class CreateGroupVC: UIViewController {
         configureCreateGroupButton()
         configureTableView()
         createDismissKeyboardTapGesture()
-        
+        configureLockedView()
         addCurrentUser()
         NotificationCenter.default.addObserver(self, selector: #selector(fetchUpdatedUser), name: .updatedUser, object: nil)
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        Task {
+            await storeViewModel.updateSubscriptionStatus()
+            updateVC()
+        }
+    }
+    
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.userInterfaceStyle == .light {
+            blurEffectView.effect = UIBlurEffect(style: .systemMaterialLight)
+        } else {
+            blurEffectView.effect = UIBlurEffect(style: .systemChromeMaterialDark)
+        }
+    }
+    
+    private func updateVC() {
+        guard let currentUser = FirebaseManager.shared.currentUser else { return }
+        if !storeViewModel.isSubscriptionPro && currentUser.groupCodes.count > TTConstants.freePlanGroupCountMax {
+            usersQueueCountLabel.layer.opacity = 0.1
+            lockedView.layer.opacity = 1
+            joinGroupButton.isEnabled = false
+            searchController.searchBar.isEnabled = false
+            usersQueueTable.isUserInteractionEnabled = false
+            usersQueueTable.layer.opacity = 0.1
+            createGroupButton.layer.opacity = 0.5
+            createGroupButton.isEnabled = false
+
+        } else {
+            usersQueueCountLabel.layer.opacity = 1
+            lockedView.layer.opacity = 0
+            joinGroupButton.isEnabled = true
+            searchController.searchBar.isEnabled = true
+            usersQueueTable.isUserInteractionEnabled = true
+            usersQueueTable.layer.opacity = 1
+            createGroupButton.layer.opacity = 1
+            createGroupButton.isEnabled = true
+        }
+    }
+    
+    private func configureLockedView() {
+        blurEffectView.frame = view.bounds
+        blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        lockedView.addSubview(blurEffectView)
+        lockedView.translatesAutoresizingMaskIntoConstraints = false
+        lockedView.layer.opacity = 0
+        view.insertSubview(lockedView, aboveSubview: usersQueueTable)
+        
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.spacing = 20
+        lockedView.addSubview(stackView)
+        
+        let lockImageView = UIImageView(image: UIImage(systemName: "lock.fill", withConfiguration: UIImage.SymbolConfiguration(pointSize: 70)))
+        lockImageView.tintColor = .systemRed
+        lockImageView.contentMode = .scaleAspectFit
+        lockImageView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.addArrangedSubview(lockImageView)
+        
+        let lockedText = UILabel()
+        lockedText.text = "You can only have up to \(TTConstants.freePlanGroupCountMax) group with the Free Plan. Upgrade to Pro to add unlimited groups!"
+        lockedText.font = UIFont.systemFont(ofSize: 16, weight: .bold)
+        lockedText.textColor = .systemRed
+        lockedText.textAlignment = .center
+        lockedText.numberOfLines = 0
+        stackView.addArrangedSubview(lockedText)
+        
+        NSLayoutConstraint.activate([
+            blurEffectView.topAnchor.constraint(equalTo: lockedView.topAnchor),
+            blurEffectView.leadingAnchor.constraint(equalTo: lockedView.leadingAnchor),
+            blurEffectView.trailingAnchor.constraint(equalTo: lockedView.trailingAnchor),
+            blurEffectView.bottomAnchor.constraint(equalTo: lockedView.bottomAnchor),
+            
+            lockedView.topAnchor.constraint(equalTo: view.topAnchor),
+            lockedView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            lockedView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            lockedView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            
+            stackView.centerXAnchor.constraint(equalTo: lockedView.centerXAnchor),
+            stackView.centerYAnchor.constraint(equalTo: lockedView.centerYAnchor),
+            stackView.leadingAnchor.constraint(equalTo: lockedView.leadingAnchor, constant: 10),
+            stackView.trailingAnchor.constraint(equalTo: lockedView.trailingAnchor, constant: -10),
+        ])
     }
     
     private func configureViewController() {
@@ -39,7 +140,7 @@ class CreateGroupVC: UIViewController {
         navigationController?.navigationBar.prefersLargeTitles = true
         
         //Join Group Button
-        let joinGroupButton = UIBarButtonItem(image: UIImage(systemName: "ipad.and.arrow.forward"), style: .plain, target: self, action: #selector(joinGroup))
+        joinGroupButton = UIBarButtonItem(image: UIImage(systemName: "ipad.and.arrow.forward"), style: .plain, target: self, action: #selector(joinGroup))
         joinGroupButton.tintColor = .systemGreen
         navigationItem.rightBarButtonItem = joinGroupButton
     }
@@ -112,6 +213,7 @@ class CreateGroupVC: UIViewController {
     
     private func configureTableView() {
         view.addSubview(usersQueueTable)
+        usersQueueTable.backgroundColor = .clear
         usersQueueTable.translatesAutoresizingMaskIntoConstraints = false
         usersQueueTable.separatorStyle = .none
         
