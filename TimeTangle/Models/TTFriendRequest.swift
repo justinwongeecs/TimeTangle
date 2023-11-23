@@ -59,13 +59,6 @@ struct TTFriendRequest: Codable {
             }
         }
     }
-    
-//    private func convertProfilePictureDataToString() -> String {
-//        if let profilePictureData = profilePictureData, let dataString = String(data: profilePictureData, encoding: .utf8) {
-//            return dataString
-//        }
-//        return ""
-//    }
 }
 
 extension TTFriendRequestType: Codable {

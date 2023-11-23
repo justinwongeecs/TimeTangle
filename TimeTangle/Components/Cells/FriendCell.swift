@@ -103,6 +103,7 @@ class FriendCell: ProfileUsernameCell {
     
     private func emailFriend() {
         guard let friend = friend else { return }
+//        UIView.appearance().tintColor = .systemGreen
         let emailComposeVC = MFMailComposeViewController()
         emailComposeVC.mailComposeDelegate = self
         emailComposeVC.setToRecipients([friend.email])

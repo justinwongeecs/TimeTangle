@@ -6,13 +6,24 @@
 //
 
 import UIKit
+import SwiftUI
 
 class FriendsVC: UIViewController {
+    private var storeViewModel: StoreViewModel
     
     private let searchBarField = UISearchBar()
     private let friendsAndRequestsView = UIView()
     private var friendsAndRequestsVC: FriendsAndRequestsVC!
-
+    
+    init(storeViewModel: StoreViewModel) {
+        self.storeViewModel = storeViewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         configureViewController()
@@ -35,9 +46,39 @@ class FriendsVC: UIViewController {
     }
     
     private func configureNavBar() {
+        let showGroupPresetsViewButton = UIBarButtonItem(image: UIImage(systemName: "person.3"), style: .plain, target: self, action: #selector(showGroupPresetsView))
+        showGroupPresetsViewButton.tintColor = .systemGreen
+        
         let addFriendButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addFriend))
         addFriendButton.tintColor = .systemGreen
-        navigationItem.rightBarButtonItem = addFriendButton
+        
+        //TODO: Change This Back Later 
+//        if storeViewModel.isSubscriptionPro {
+            navigationItem.rightBarButtonItems = [addFriendButton, showGroupPresetsViewButton]
+//        } else {
+//            navigationItem.rightBarButtonItem = addFriendButton
+//        }
+    }
+    
+    @objc private func showGroupPresetsView() {
+        let mockData = [TTGroupPreset(name: "Group 1", users: [
+            TTUser(firstname: "Justin", lastname: "Wong", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
+        ]),
+        TTGroupPreset(name: "Group 2", users: [
+            TTUser(firstname: "Justin", lastname: "Wong", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [])
+        ])]
+        let friendsGroupPresetsViewHostingController = UIHostingController(rootView: FriendsGroupPresetsView(groupPresets: mockData))
+        present(friendsGroupPresetsViewHostingController, animated: true)
     }
     
     @objc private func addFriend() {

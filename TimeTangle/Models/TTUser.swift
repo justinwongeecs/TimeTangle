@@ -13,8 +13,6 @@ struct TTUser: Codable, Equatable {
         lhs.uid == rhs.uid
     }
     
-//    @DocumentID public var id: String?
-    
     var firstname: String
     var lastname: String
     var username: String
@@ -30,5 +28,12 @@ struct TTUser: Codable, Equatable {
     
     func getFullName() -> String {
         return "\(firstname) \(lastname)"
+    }
+    
+    func getProfilePictureUIImage() -> UIImage? {
+        if let imageData = profilePictureData, let image = UIImage(data: imageData) {
+            return image
+        }
+        return nil
     }
 }

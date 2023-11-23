@@ -83,8 +83,6 @@ class FriendsAndRequestsVC: UIViewController {
         guard let currentUser = FirebaseManager.shared.currentUser else { return }
         friendRequests = currentUser.friendRequests
         
-        print("fetch friends")
-        
         if !currentUser.friends.isEmpty {
             activityIndicator.startAnimating()
             FirebaseManager.shared.fetchMultipleUsersDocumentData(with: currentUser.friends) { [weak self] result in

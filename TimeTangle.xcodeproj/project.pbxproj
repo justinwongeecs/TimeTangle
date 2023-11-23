@@ -16,7 +16,6 @@
 		E8188FDD2A18811A005AA0BF /* Event+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8188FDC2A18811A005AA0BF /* Event+Ext.swift */; };
 		E81D25062A145217003C65C5 /* UILabel+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E81D25052A145217003C65C5 /* UILabel+Ext.swift */; };
 		E83146662AE0F6D700A5B250 /* GroupViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E83146652AE0F6D700A5B250 /* GroupViewCell.swift */; };
-		E83D878E2AAB82B600C4113C /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = E83D878D2AAB82B600C4113C /* GoogleService-Info.plist */; };
 		E84541AF295F818B00CBB430 /* GroupDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84541AE295F818B00CBB430 /* GroupDetailVC.swift */; };
 		E84541B2295FADDC00CBB430 /* EventKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84541B1295FADDC00CBB430 /* EventKitManager.swift */; };
 		E84541B5295FC17500CBB430 /* GroupDetailNib.xib in Resources */ = {isa = PBXBuildFile; fileRef = E84541B4295FC17500CBB430 /* GroupDetailNib.xib */; };
@@ -92,6 +91,8 @@
 		E8CFC22D295D5E55006C23BE /* GroupsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CFC22C295D5E55006C23BE /* GroupsVC.swift */; };
 		E8D004A62963B02C00907A64 /* GroupUsersVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8D004A52963B02C00907A64 /* GroupUsersVC.swift */; };
 		E8D004A92963B82B00907A64 /* GroupHistoryVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8D004A82963B82B00907A64 /* GroupHistoryVC.swift */; };
+		E8DC69AD2B0DC5D700F3D36F /* FriendsGroupPresetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8DC69AC2B0DC5D700F3D36F /* FriendsGroupPresetsView.swift */; };
+		E8E669E02B0EED89001986C5 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = E8E669DF2B0EED89001986C5 /* GoogleService-Info.plist */; };
 		E8ECA5672AFA260600907813 /* SubscriptionPlanBadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8ECA5662AFA260600907813 /* SubscriptionPlanBadgeView.swift */; };
 /* End PBXBuildFile section */
 
@@ -105,7 +106,6 @@
 		E8188FDC2A18811A005AA0BF /* Event+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Event+Ext.swift"; sourceTree = "<group>"; };
 		E81D25052A145217003C65C5 /* UILabel+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UILabel+Ext.swift"; sourceTree = "<group>"; };
 		E83146652AE0F6D700A5B250 /* GroupViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupViewCell.swift; sourceTree = "<group>"; };
-		E83D878D2AAB82B600C4113C /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		E84541AE295F818B00CBB430 /* GroupDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupDetailVC.swift; sourceTree = "<group>"; };
 		E84541B1295FADDC00CBB430 /* EventKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventKitManager.swift; sourceTree = "<group>"; };
 		E84541B4295FC17500CBB430 /* GroupDetailNib.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = GroupDetailNib.xib; sourceTree = "<group>"; };
@@ -175,6 +175,9 @@
 		E8CFC22C295D5E55006C23BE /* GroupsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupsVC.swift; sourceTree = "<group>"; };
 		E8D004A52963B02C00907A64 /* GroupUsersVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupUsersVC.swift; sourceTree = "<group>"; };
 		E8D004A82963B82B00907A64 /* GroupHistoryVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupHistoryVC.swift; sourceTree = "<group>"; };
+		E8DC69AC2B0DC5D700F3D36F /* FriendsGroupPresetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsGroupPresetsView.swift; sourceTree = "<group>"; };
+		E8E669DE2B0EEAE4001986C5 /* TimeTangle.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TimeTangle.entitlements; sourceTree = "<group>"; };
+		E8E669DF2B0EED89001986C5 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		E8ECA5662AFA260600907813 /* SubscriptionPlanBadgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionPlanBadgeView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -282,6 +285,7 @@
 			children = (
 				E893A26C2959859D004F7BC5 /* FriendsVC.swift */,
 				E893A276295A62EF004F7BC5 /* FriendsAndRequestsVC.swift */,
+				E8DC69AC2B0DC5D700F3D36F /* FriendsGroupPresetsView.swift */,
 			);
 			path = Friends;
 			sourceTree = "<group>";
@@ -326,6 +330,7 @@
 		E8CEE29F2957956E000CD7FE /* TimeTangle */ = {
 			isa = PBXGroup;
 			children = (
+				E8E669DE2B0EEAE4001986C5 /* TimeTangle.entitlements */,
 				E84541B3295FADE300CBB430 /* Managers */,
 				E8CFC21C295B8ADD006C23BE /* Extensions */,
 				E8CEE2E229582A36000CD7FE /* Models */,
@@ -333,7 +338,7 @@
 				E8CEE2D02957BF43000CD7FE /* Screens */,
 				E8CEE2CF2957BF2E000CD7FE /* Support */,
 				E8CEE2AE29579571000CD7FE /* Info.plist */,
-				E83D878D2AAB82B600C4113C /* GoogleService-Info.plist */,
+				E8E669DF2B0EED89001986C5 /* GoogleService-Info.plist */,
 			);
 			path = TimeTangle;
 			sourceTree = "<group>";
@@ -535,8 +540,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				E8CEE2AD29579571000CD7FE /* LaunchScreen.storyboard in Resources */,
+				E8E669E02B0EED89001986C5 /* GoogleService-Info.plist in Resources */,
 				E8CEE2AA29579571000CD7FE /* Assets.xcassets in Resources */,
-				E83D878E2AAB82B600C4113C /* GoogleService-Info.plist in Resources */,
 				E84541B5295FC17500CBB430 /* GroupDetailNib.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -569,6 +574,7 @@
 				E8B6BDBE2A2299C000DAFF04 /* UIApplication+Ext.swift in Sources */,
 				E8CEE2D92957D1FD000CD7FE /* UIViewController+Ext.swift in Sources */,
 				E865A8042A207D7A00F105AA /* View+Ext.swift in Sources */,
+				E8DC69AD2B0DC5D700F3D36F /* FriendsGroupPresetsView.swift in Sources */,
 				E8CEE2D32957C7C7000CD7FE /* TTTitledTextField.swift in Sources */,
 				E8CEE2CA2957B03C000CD7FE /* LoginVC.swift in Sources */,
 				E865A7AD2A1C80C800F105AA /* TTProfileImageView.swift in Sources */,
@@ -757,11 +763,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = TimeTangle/TimeTangle.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2XN7A3Y7GG;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TimeTangle/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TimeTangle;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
@@ -784,11 +792,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = TimeTangle/TimeTangle.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2XN7A3Y7GG;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = TimeTangle/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TimeTangle;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;

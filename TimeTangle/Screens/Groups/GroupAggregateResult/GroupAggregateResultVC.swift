@@ -94,7 +94,6 @@ class GroupAggregateResultVC: DayViewController {
         calendarViewButton.setTitleColor(.white, for: .normal)
         calendarViewButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 15)
         calendarViewButton.translatesAutoresizingMaskIntoConstraints = false
-        calendarViewButton.contentEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 5)
         calendarViewButton.addTarget(self, action: #selector(presentCalendarModalCardVC), for: .touchUpInside)
         stepperDayHeaderView.addSubview(calendarViewButton)
         

@@ -122,7 +122,7 @@ class FirebaseManager {
     }
     
     func fetchUserDocumentData(with docId: String, completed: @escaping(Result<TTUser, TTError>) -> Void) {
-        
+        print("docId: \(docId)")
         let docRef = db.collection("users").document(docId)
         
         //docRef.getDocument(as: TTUser.self) gives ambiguous context error for some reason
@@ -131,19 +131,19 @@ class FirebaseManager {
             guard let _ = error else {
                 if let doc = document {
                     do {
-                        print("fetch nice")
+                        print("fetch nice: \(doc.data())")
                         let docUser = try doc.data(as: TTUser.self)
                         completed(.success(docUser))
                     } catch {
-                        print("fetch error - -")
+                        print("fetch error 1: \(error)")
                         completed(.failure(.unableToFetchUsers))
                     }
                     
                 }
-                print("doc error - ")
+                print("doc error 2: \(error)")
                 return
             }
-            print("fetch error - ")
+            print("fetch error 3: \(error)")
             completed(.failure(.unableToFetchUsers))
         }
     }
@@ -324,7 +324,8 @@ class FirebaseManager {
             "username": username,
             "friends": [],
             "friendRequests": [],
-            "groupCodes": []
+            "groupCodes": [],
+            "email": email
         ]) { err in
             if let _ = err {
                 completed(.failure(.unableToCreateFirestoreAssociatedUser))
@@ -418,7 +419,7 @@ class FirebaseManager {
     }
     
     private func createFriendsNC() -> UINavigationController {
-        let friendsVC = FriendsVC()
+        let friendsVC = FriendsVC(storeViewModel: storeViewModel)
         friendsVC.tabBarItem = UITabBarItem(title: "Friends", image: UIImage(systemName: "person.3"), tag: 2)
         return UINavigationController(rootViewController: friendsVC)
     }
