@@ -58,7 +58,6 @@ class StoreViewModel: ObservableObject {
                 do {
                     let transaction = try self.checkVerified(result)
                     
-                    //TODO: Deliver products to the user.
                     await self.updateCustomerProductStatus()
                     
                     //Always finish a transaction.

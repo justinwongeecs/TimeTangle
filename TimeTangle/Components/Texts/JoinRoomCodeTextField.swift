@@ -131,10 +131,10 @@ extension JoinGroupCodeTextField: UITextFieldDelegate {
             
             let groupRef = db.collection(TTConstants.groupsCollection).document(userEnteredCode)
             batch.updateData([
-                TTConstants.groupUsers: FieldValue.arrayUnion([currentUser.username])
+                TTConstants.groupUsers: FieldValue.arrayUnion([currentUser.id])
             ], forDocument: groupRef)
             
-            let currentUserRef = db.collection(TTConstants.usersCollection).document(currentUser.username)
+            let currentUserRef = db.collection(TTConstants.usersCollection).document(currentUser.id)
             batch.updateData([
                 TTConstants.groupCodes: FieldValue.arrayUnion([userEnteredCode])
             ], forDocument: currentUserRef)

@@ -12,8 +12,8 @@ protocol FirestoreDataCompatible {
 }
 
 extension Array where Element == TTUser {
-    func getUsernames() -> [String] {
-        return self.map{ $0.username }
+    func getIDs() -> [String] {
+        return self.map{ $0.id }
     }
 }
 

@@ -9,6 +9,7 @@ import Foundation
 
 enum TTError: String, Error {
     //MARK: - Firebase
+    case passwordsDoNotMatch = "Password and Confirm Password do not match."
     case unableToCreateUser = "Unable to create user. Please try again."
     case unableToCreateFirestoreAssociatedUser = "Unable to create database associated user."
     case textFieldsCannotBeEmpty = "Text fields cannot be empty"

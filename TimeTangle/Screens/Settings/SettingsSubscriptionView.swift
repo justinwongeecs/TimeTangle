@@ -156,10 +156,10 @@ struct SubscriptionView: View {
                     
                     let renewalOrEndingDate = transaction.expirationDate?.formatted(with: "MM/d/YYYY") ?? "[Can't Fetch Date]"
                     
-                    if autoRenewProductId == subscription.id {
+                    if subscription.id == currentSubscription.id && autoRenewProductId == currentSubscription.id {
+                        subscriptionStatusText = "Renews or Ends on \(renewalOrEndingDate)"
+                    } else if autoRenewProductId == subscription.id {
                         subscriptionStatusText = "Begins After Current Subscription Ends"
-                    } else if autoRenewProductId == currentSubscription.id {
-                        subscriptionStatusText = "Renews on Ends on \(renewalOrEndingDate)"
                     } else if subscription.id == currentSubscription.id {
                         subscriptionStatusText = "Ends on \(renewalOrEndingDate)"
                     } else {

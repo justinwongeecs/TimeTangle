@@ -10,16 +10,16 @@ import FirebaseFirestoreSwift
 
 struct TTUser: Codable, Equatable {
     static func == (lhs: TTUser, rhs: TTUser) -> Bool {
-        lhs.uid == rhs.uid
+        lhs.id == rhs.id
     }
     
     var firstname: String
     var lastname: String
-    var username: String
-    var uid: String
+    var id: String
     var friends: [String]
     var friendRequests: [TTFriendRequest]
     var groupCodes: [String]
+    var groupPresets: [[String]]
     var profilePictureData: Data?
     
     //Contact Information
@@ -35,5 +35,10 @@ struct TTUser: Codable, Equatable {
             return image
         }
         return nil
+    }
+    
+    func getCompressedProfilePictureData(withQuality compressionQuality: CGFloat) -> Data? {
+        guard let image = getProfilePictureUIImage() else { return nil }
+        return image.jpegData(compressionQuality: compressionQuality)
     }
 }

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct TTGroupPreset: Identifiable {
-    var id = UUID()
+    let id = UUID().uuidString
     var name: String
     var users: [TTUser]
 }
@@ -22,6 +22,10 @@ struct FriendsGroupPresetsView: View {
     @State private var isInEditMode = false
     @State private var isDisclosureGroupExpanded = false
     @State private var isTyping = false
+    @State private var isShowingZoomedView = false
+    
+    @State private var showCreateNewGroupPresetAlert = false
+    @State private var newGroupPresetName = ""
     
     init(groupPresets: [TTGroupPreset]) {
         _groupPresets = State(initialValue: groupPresets)
@@ -30,9 +34,11 @@ struct FriendsGroupPresetsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                if groupPresets.isEmpty {
-                    emptyView
-                } else {
+//                if !FirebaseManager.shared.storeViewModel.isSubscriptionPro {
+//                    lockedView
+//                } /*else if groupPresets.isEmpty {*/
+//                    emptyView
+//                else {
                     VStack {
                         List {
                             ForEach(groupPresets) { groupPreset in
@@ -44,17 +50,20 @@ struct FriendsGroupPresetsView: View {
                         }
                         .scrollDisabled(selectedGroupPreset != nil  ? true : false)
                         .scrollContentBackground(.hidden)
-                        
-                        if !isTyping {
-                            createNewGroupPresetButton
-                        }
+                        .allowsHitTesting(isShowingZoomedView ? false : true)
                     }
                     .blur(radius: selectedGroupPreset != nil ? 10 : 0)
                     
                     if selectedGroupPreset != nil {
                         GroupPresetZoomedView(selectedGroupPreset: $selectedGroupPreset, isInEditMode: $isInEditMode, isDisclosureGroupExpanded: $isDisclosureGroupExpanded, isTyping: $isTyping, animation: animation)
+                            .onAppear {
+                                isShowingZoomedView.toggle()
+                            }
+                            .onDisappear {
+                                isShowingZoomedView.toggle()
+                            }
                     }
-                }
+//                }
             }
             .navigationTitle("My Group Presets")
             .navigationBarTitleDisplayMode(.inline)
@@ -66,6 +75,17 @@ struct FriendsGroupPresetsView: View {
                         Image(systemName: "xmark.circle.fill")
                             .font(.system(size: 25))
                             .foregroundStyle(.gray)
+                    }
+                }
+                
+                if FirebaseManager.shared.storeViewModel.isSubscriptionPro && selectedGroupPreset == nil {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(action: {
+                            showCreateNewGroupPresetAlert.toggle()
+                        }) {
+                            Image(systemName: "plus")
+                                .foregroundStyle(.green)
+                        }
                     }
                 }
                 
@@ -84,6 +104,28 @@ struct FriendsGroupPresetsView: View {
             }
         }
         .interactiveDismissDisabled()
+        .alert("Enter New Group Preset Name", isPresented: $showCreateNewGroupPresetAlert) {
+            TextField("", text: $newGroupPresetName)
+                .textInputAutocapitalization(.never)
+            Button("OK", action: {})
+            Button("Cancel", role: .cancel) { }
+        }
+    }
+    
+    private var lockedView: some View {
+        VStack(spacing: 10) {
+            Image(systemName: "lock.fill")
+                .font(.system(size: 60))
+            VStack {
+                Text("Group Presets require")
+                HStack {
+                    SubscriptionPlanBadgeView(isPro: true)
+                    Text("subscription")
+                }
+            }
+            .font(.title3).bold()
+        }
+        .foregroundStyle(.gray)
     }
     
     private var emptyView: some View {
@@ -95,27 +137,9 @@ struct FriendsGroupPresetsView: View {
             Text("👇")
                 .font(.system(size: 50))
             Spacer()
-            createNewGroupPresetButton
         }
         .bold()
         .foregroundStyle(.gray)
-    }
-    
-    private var createNewGroupPresetButton: some View {
-        Button(action: {}) {
-            HStack {
-                Image(systemName: "plus.circle.fill")
-                Text("Create New Group Preset")
-                    
-            }
-            .padding()
-            .background(.green)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
-            .foregroundStyle(.white).bold()
-            .shadow(color: .green, radius: 10)
-            .padding()
-        }
-        .disabled(selectedGroupPreset != nil ? true : false)
     }
 }
 //MARK: - GroupPresetZoomedView
@@ -165,8 +189,8 @@ struct GroupPresetZoomedView: View {
             
             ScrollView {
                 LazyVGrid(columns: columns) {
-                    ForEach(friends, id: \.self) { friendUsername in
-                        GroupPresetAddFriendView(friendUsername: friendUsername)
+                    ForEach(friends, id: \.self) { friendID in
+                        GroupPresetAddFriendView(friendID: friendID)
                     }
                 }
                 .padding(EdgeInsets(top: 1, leading: 0, bottom: 1, trailing: 0))
@@ -227,9 +251,9 @@ struct GroupPresetZoomedView: View {
     
     private var backButton: some View {
         Button(action: {
-            isDisclosureGroupExpanded = false
             withAnimation(.easeInOut) {
                 selectedGroupPreset = nil
+                isDisclosureGroupExpanded = false
             }
         }) {
             Image(systemName: "chevron.left.circle.fill")
@@ -241,7 +265,10 @@ struct GroupPresetZoomedView: View {
 //MARK: GroupPresetAddFriendView
 struct GroupPresetAddFriendView: View {
     @State private var isSelected = false
-    var friendUsername: String
+    @State private var image: UIImage?
+    
+    var friendID: String
+    private let usersCache = FirebaseManager.shared.usersCache
     
     var body: some View {
         VStack {
@@ -252,20 +279,32 @@ struct GroupPresetAddFriendView: View {
             }) {
                 ZStack {
                     VStack {
-                        Image(systemName: "person.crop.circle.fill")
-                            .font(.system(size: 80))
+                        TTSwiftUIProfileImageView(image: image, size: 80)
                             .roundedRectangleBackgroundStyle(cornerRadius: 10, fillColor: .gray.opacity(0.6), strokeColor: .gray, frameWidth: 90, frameHeight: 90)
-                        Text(friendUsername)
+                        Text(friendID)
                             .lineLimit(1)
                             .multilineTextAlignment(.center)
                             .font(.caption).bold()
-                        
                     }
                     if isSelected {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundStyle(.red)
                             .font(.system(size: 25))
                             .offset(x: -45, y: 30)
+                    }
+                }
+            }
+        }
+        .onAppear {
+            if let user = usersCache.value(forKey: friendID) {
+                image = user.getProfilePictureUIImage()
+            } else {
+                FirebaseManager.shared.fetchUserDocumentData(with: friendID) { result in
+                    switch result {
+                    case .success(let ttUser):
+                        image = ttUser.getProfilePictureUIImage()
+                    case .failure(let error):
+                        print("Error: \(error)")
                     }
                 }
             }
@@ -280,6 +319,10 @@ struct GroupPresetDisclosureGroup: View {
     @Binding var isExpanded: Bool
     
     var groupPreset: TTGroupPreset
+    
+    var showMembersListView: Bool {
+        selectedGroupPresent?.id != groupPreset.id && isExpanded
+    }
     
     var body: some View {
         VStack {
@@ -296,7 +339,7 @@ struct GroupPresetDisclosureGroup: View {
                 )
                 .shadow(color: .green, radius: 5)
         
-            if isExpanded {
+            if showMembersListView {
                 groupPresetMembersListView
             }
         }
@@ -320,8 +363,9 @@ struct GroupPresetDisclosureGroup: View {
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
+                
                 Image(systemName: "chevron.forward")
-                    .rotationEffect(isExpanded ? .degrees(90) : .degrees(0))
+                    .rotationEffect(showMembersListView ? .degrees(90) : .degrees(0))
                     .fontWeight(.bold)
             }
         }
@@ -329,7 +373,7 @@ struct GroupPresetDisclosureGroup: View {
     
     private var groupPresetMembersListView: some View {
         List {
-            ForEach(groupPreset.users.sorted(by: { $0.firstname < $1.firstname}), id: \.username) { member in
+            ForEach(groupPreset.users.sorted(by: { $0.firstname < $1.firstname}), id: \.id) { member in
                 HStack {
                     if isInEditMode {
                         Button(action: {
@@ -378,20 +422,34 @@ struct GroupPresetMemberView: View {
 #Preview {
     FriendsGroupPresetsView(groupPresets: [
         TTGroupPreset(name: "Group 1", users: [
-            TTUser(firstname: "Justin", lastname: "Wong", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
-            TTUser(firstname: "Johnny", lastname: "Appleseed", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
-            TTUser(firstname: "Johnny", lastname: "Appleseed", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
-            TTUser(firstname: "Johnny", lastname: "Appleseed", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
-            TTUser(firstname: "Johnny", lastname: "Appleseed", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
-            TTUser(firstname: "Johnny", lastname: "Appleseed", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
-            TTUser(firstname: "Johnny", lastname: "Appleseed", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
-            TTUser(firstname: "Johnny", lastname: "Appleseed", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
-            TTUser(firstname: "Johnny", lastname: "Appleseed", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
-            TTUser(firstname: "Johnny", lastname: "Appleseed", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []), TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
         ]),
         TTGroupPreset(name: "Group 2", users: [
-            TTUser(firstname: "Justin", lastname: "Wong", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
-            TTUser(firstname: "Johnny", lastname: "Appleseed", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [])
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
+        ]),
+        TTGroupPreset(name: "Group 2", users: [
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
+        ]),
+        TTGroupPreset(name: "Group 2", users: [
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
         ])
     ])
 }

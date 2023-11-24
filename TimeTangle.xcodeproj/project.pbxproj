@@ -49,7 +49,7 @@
 		E893A26B2959611B004F7BC5 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = E893A26A2959611B004F7BC5 /* FirebaseStorage */; };
 		E893A26D2959859D004F7BC5 /* FriendsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E893A26C2959859D004F7BC5 /* FriendsVC.swift */; };
 		E893A26F29598E2F004F7BC5 /* TTEmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E893A26E29598E2F004F7BC5 /* TTEmptyStateView.swift */; };
-		E893A273295A3C52004F7BC5 /* ProfileUsernameCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E893A272295A3C52004F7BC5 /* ProfileUsernameCell.swift */; };
+		E893A273295A3C52004F7BC5 /* ProfileAndNameCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E893A272295A3C52004F7BC5 /* ProfileAndNameCell.swift */; };
 		E893A275295A5DB1004F7BC5 /* TTFriendRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = E893A274295A5DB1004F7BC5 /* TTFriendRequest.swift */; };
 		E893A277295A62EF004F7BC5 /* FriendsAndRequestsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E893A276295A62EF004F7BC5 /* FriendsAndRequestsVC.swift */; };
 		E893A27A295A6D40004F7BC5 /* TTConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E893A279295A6D40004F7BC5 /* TTConstants.swift */; };
@@ -131,7 +131,7 @@
 		E88A6CFE2ADD0FB300DE38A6 /* FriendCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendCell.swift; sourceTree = "<group>"; };
 		E893A26C2959859D004F7BC5 /* FriendsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsVC.swift; sourceTree = "<group>"; };
 		E893A26E29598E2F004F7BC5 /* TTEmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTEmptyStateView.swift; sourceTree = "<group>"; };
-		E893A272295A3C52004F7BC5 /* ProfileUsernameCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileUsernameCell.swift; sourceTree = "<group>"; };
+		E893A272295A3C52004F7BC5 /* ProfileAndNameCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileAndNameCell.swift; sourceTree = "<group>"; };
 		E893A274295A5DB1004F7BC5 /* TTFriendRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTFriendRequest.swift; sourceTree = "<group>"; };
 		E893A276295A62EF004F7BC5 /* FriendsAndRequestsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsAndRequestsVC.swift; sourceTree = "<group>"; };
 		E893A279295A6D40004F7BC5 /* TTConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTConstants.swift; sourceTree = "<group>"; };
@@ -398,7 +398,7 @@
 		E8CEE2E729590DFB000CD7FE /* Cells */ = {
 			isa = PBXGroup;
 			children = (
-				E893A272295A3C52004F7BC5 /* ProfileUsernameCell.swift */,
+				E893A272295A3C52004F7BC5 /* ProfileAndNameCell.swift */,
 				E893A27B295A7564004F7BC5 /* FriendRequestCell.swift */,
 				E873BCEA296904F50015AE99 /* GroupUserCell.swift */,
 				E8B6BDC52A25B5CB00DAFF04 /* CreateRoomUserQueueCell.swift */,
@@ -553,7 +553,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E893A273295A3C52004F7BC5 /* ProfileUsernameCell.swift in Sources */,
+				E893A273295A3C52004F7BC5 /* ProfileAndNameCell.swift in Sources */,
 				E873BCEB296904F50015AE99 /* GroupUserCell.swift in Sources */,
 				E87569042AF2B9A5007E7220 /* SettingsSubscriptionView.swift in Sources */,
 				E81D25062A145217003C65C5 /* UILabel+Ext.swift in Sources */,

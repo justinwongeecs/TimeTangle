@@ -9,7 +9,7 @@ import UIKit
 import MessageUI
 import FirebaseFirestore
 
-class FriendCell: ProfileUsernameCell {
+class FriendCell: ProfileAndNameCell {
     static let friendCellReuseID = "FriendCell"
     
     private var friend: TTUser?
@@ -73,8 +73,8 @@ class FriendCell: ProfileUsernameCell {
     
     private func removeFriend() {
         guard let currentUser = FirebaseManager.shared.currentUser else { return }
-        FirebaseManager.shared.updateUserData(for: currentUser.username, with: [
-            TTConstants.friends: FieldValue.arrayRemove([friend!.username])
+        FirebaseManager.shared.updateUserData(for: currentUser.id, with: [
+            TTConstants.friends: FieldValue.arrayRemove([friend!.id])
         ]) { [weak self] error in
             if let error = error, let parentVC = self?.parentViewController as? FriendsAndRequestsVC {
                 parentVC.presentTTAlert(title: "Cannot Remove Friend", message: error.localizedDescription, buttonTitle: "OK")

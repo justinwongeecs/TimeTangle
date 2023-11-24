@@ -6,17 +6,18 @@
 //
 
 import UIKit
-import SwiftUI
 
 class FriendsVC: UIViewController {
     private var storeViewModel: StoreViewModel
+    private var usersCache: TTCache<String, TTUser>
     
     private let searchBarField = UISearchBar()
     private let friendsAndRequestsView = UIView()
     private var friendsAndRequestsVC: FriendsAndRequestsVC!
     
-    init(storeViewModel: StoreViewModel) {
+    init(storeViewModel: StoreViewModel, usersCache: TTCache<String, TTUser>) {
         self.storeViewModel = storeViewModel
+        self.usersCache = usersCache
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -46,53 +47,24 @@ class FriendsVC: UIViewController {
     }
     
     private func configureNavBar() {
-        let showGroupPresetsViewButton = UIBarButtonItem(image: UIImage(systemName: "person.3"), style: .plain, target: self, action: #selector(showGroupPresetsView))
-        showGroupPresetsViewButton.tintColor = .systemGreen
-        
         let addFriendButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addFriend))
         addFriendButton.tintColor = .systemGreen
         
-        //TODO: Change This Back Later 
-//        if storeViewModel.isSubscriptionPro {
-            navigationItem.rightBarButtonItems = [addFriendButton, showGroupPresetsViewButton]
-//        } else {
-//            navigationItem.rightBarButtonItem = addFriendButton
-//        }
-    }
-    
-    @objc private func showGroupPresetsView() {
-        let mockData = [TTGroupPreset(name: "Group 1", users: [
-            TTUser(firstname: "Justin", lastname: "Wong", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
-            TTUser(firstname: "Johnny", lastname: "Appleseed", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
-            TTUser(firstname: "Johnny", lastname: "Appleseed", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
-            TTUser(firstname: "Johnny", lastname: "Appleseed", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
-            TTUser(firstname: "Johnny", lastname: "Appleseed", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
-            TTUser(firstname: "Johnny", lastname: "Appleseed", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
-            TTUser(firstname: "Johnny", lastname: "Appleseed", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
-            TTUser(firstname: "Johnny", lastname: "Appleseed", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
-            TTUser(firstname: "Johnny", lastname: "Appleseed", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
-            TTUser(firstname: "Johnny", lastname: "Appleseed", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
-        ]),
-        TTGroupPreset(name: "Group 2", users: [
-            TTUser(firstname: "Justin", lastname: "Wong", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: []),
-            TTUser(firstname: "Johnny", lastname: "Appleseed", username: "jwongeecs", uid: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [])
-        ])]
-        let friendsGroupPresetsViewHostingController = UIHostingController(rootView: FriendsGroupPresetsView(groupPresets: mockData))
-        present(friendsGroupPresetsViewHostingController, animated: true)
+        navigationItem.rightBarButtonItem = addFriendButton
     }
     
     @objc private func addFriend() {
-        let ac = UIAlertController(title: "Enter Friend Username", message: nil, preferredStyle: .alert)
+        let ac = UIAlertController(title: "Enter Friend ID", message: nil, preferredStyle: .alert)
         ac.view.tintColor = .systemGreen
         ac.addTextField()
         
         let submitAction = UIAlertAction(title: "Send Request", style: .default) { [unowned ac] _ in
-            let friendUsername = ac.textFields![0].text ?? ""
+            let friendID = ac.textFields![0].text ?? ""
             
-            if friendUsername.isEmpty {
-                self.presentTTAlert(title: "Username Cannot Be Empty", message: "Please enter a valid username", buttonTitle: "OK")
+            if friendID.isEmpty {
+                self.presentTTAlert(title: "Id Cannot Be Empty", message: "Please enter a valid ID", buttonTitle: "OK")
             } else {
-                FirebaseManager.shared.fetchUserDocumentData(with: friendUsername) { [weak self] result in
+                FirebaseManager.shared.fetchUserDocumentData(with: friendID) { [weak self] result in
                     guard let self = self else { return }
                     switch result {
                     case .success(let user):

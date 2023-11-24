@@ -7,7 +7,6 @@
 
 import SwiftUI
 import UIKit
-import Setting
 
 struct CreateAccountView: View {
     @Environment(\.dismiss) private var dismiss
@@ -16,9 +15,9 @@ struct CreateAccountView: View {
     
     @State private var firstNameText = ""
     @State private var lastNameText = ""
-    @State private var userNameText = ""
     @State private var emailText = ""
     @State private var passwordText = ""
+    @State private var phoneNumberText = ""
     @State private var confirmPasswordText = ""
     
     @State private var showError = false
@@ -26,58 +25,30 @@ struct CreateAccountView: View {
     
     var body: some View {
         NavigationStack {
-            SettingStack(isSearchable: false, embedInNavigationStack: true) {
-                SettingPage(title: "Create Account", navigationTitleDisplayMode: .inline) {
-                    //MARK: First and Last Names
-                    SettingGroup(id: "Names", header: "Name") {
-                        SettingCustomView(id: "First Name") {
-                            TTSwiftUITextField(textFieldText: $firstNameText, leftTitle: "First Name:", textFieldPlaceholder: "John")
-                        }
-                        SettingCustomView(id: "Last Name") {
-                            TTSwiftUITextField(textFieldText: $lastNameText, leftTitle: "Last Name:", textFieldPlaceholder: "Appleseed")
-                        }
-                    }
-                    
-                    //MARK: - Info
-                    SettingGroup(id: "Info", header: "Info") {
-                        SettingCustomView(id: "Username") {
-                            TTSwiftUITextField(textFieldText: $userNameText, leftTitle: "Username:", textFieldPlaceholder: "jonnyapple")
-                        }
-                        SettingCustomView(id: "Email") {
-                            TTSwiftUITextField(textFieldText: $emailText, leftTitle: "Email:", textFieldPlaceholder: "jonny@apple.com")
-                        }
-                    }
-                    
-                    //MARK: - Password
-                    SettingGroup(id: "Passwords", header: "Password") {
-                        SettingCustomView(id: "Passwords") {
-                            TTSwiftUITextField(textFieldText: $passwordText, leftTitle: "Password:", textFieldPlaceholder: "", isSecureTextField: true)
-                        }
-                        SettingCustomView(id: "Confirm Password") {
-                            TTSwiftUITextField(textFieldText: $confirmPasswordText, leftTitle: "Confirm Password:", textFieldPlaceholder: "", isSecureTextField: true)
-                        }
-                    }
-                    
-                    SettingCustomView(id: "CreateAccountButton") {
-                        Button(action: { createAccount() }) {
-                            Text("Create Account")
-                                .padding()
-                                .bold()
-                                .foregroundColor(.white)
-                                .background(.green)
-                                .cornerRadius(10)
-                                .centered()
-                        }
-                        .onChange(of: showError) { newValue in
-                            config.hostingController?.presentTTAlert(title: "Create Account Error", message: ttError?.rawValue ?? "No Message", buttonTitle: "OK")
-                        }
-                    }
+            Form {
+                Section("Create Account") {
+                    TTSwiftUITextField(textFieldText: $firstNameText, leftTitle: "First Name:", textFieldPlaceholder: "")
+                    TTSwiftUITextField(textFieldText: $lastNameText, leftTitle: "Last Name:", textFieldPlaceholder: "")
                 }
+                
+                Section("Info") {
+                    TTSwiftUITextField(textFieldText: $emailText, leftTitle: "Email:", textFieldPlaceholder: "")
+                    TTSwiftUITextField(textFieldText: $phoneNumberText, leftTitle: "Phone Number:", textFieldPlaceholder: "")
+                }
+                
+                Section("Password") {
+                    TTSwiftUITextField(textFieldText: $passwordText, leftTitle: "Password:", textFieldPlaceholder: "", isSecureTextField: true)
+                    TTSwiftUITextField(textFieldText: $confirmPasswordText, leftTitle: "Confirm Password:", textFieldPlaceholder: "", isSecureTextField: true)
+                }
+                
+                createAccountButton
+                    .listRowBackground(Color.clear)
             }
+            .navigationTitle("Create Account")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: {
-                        print("Hello")
                         dismiss()
                     }) {
                         Text("Cancel")
@@ -85,10 +56,23 @@ struct CreateAccountView: View {
                 }
             }
         }
+        .tint(.green)
     }
     
     private func createAccount() {
-        FirebaseManager.shared.createUser(firstName: firstNameText, lastName: lastNameText, email: emailText, password: passwordText, username: userNameText) { result in
+        guard !firstNameText.isEmpty, !lastNameText.isEmpty, !emailText.isEmpty, !phoneNumberText.isEmpty else {
+            ttError = .textFieldsCannotBeEmpty
+            showError.toggle()
+            return
+        }
+        
+        guard passwordText == confirmPasswordText else {
+            ttError = .passwordsDoNotMatch
+            showError.toggle()
+            return
+        }
+        
+        FirebaseManager.shared.createUser(firstName: firstNameText, lastName: lastNameText, email: emailText, password: passwordText, phoneNumber: phoneNumberText) { result in
             switch result {
             case .success():
                 break
@@ -96,6 +80,21 @@ struct CreateAccountView: View {
                 showError.toggle()
                 ttError = error
             }
+        }
+    }
+    
+    private var createAccountButton : some View {
+        Button(action: { createAccount() }) {
+            Text("Create Account")
+                .padding()
+                .bold()
+                .foregroundColor(.white)
+                .background(.green)
+                .cornerRadius(10)
+                .centered()
+        }
+        .onChange(of: showError) {
+            config.hostingController?.presentTTAlert(title: "Create Account Error", message: ttError?.rawValue ?? "No Message", buttonTitle: "OK")
         }
     }
 }
@@ -117,7 +116,7 @@ struct TTSwiftUITextField: View {
                     .padding(8)
                     .overlay(
                         RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.gray, lineWidth: 2)
+                            .stroke(Color.gray, lineWidth: 1)
                     )
                     .leftAligned()
             } else {
@@ -125,17 +124,14 @@ struct TTSwiftUITextField: View {
                     .padding(8)
                     .overlay(
                         RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.gray, lineWidth: 2)
+                            .stroke(Color.gray, lineWidth: 1)
                     )
                     .leftAligned()
             }
         }
-        .padding(EdgeInsets(top: 15, leading: 15, bottom: 15, trailing: 15))
     }
 }
 
-//struct CreateAccountView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        CreateAccountView()
-//    }
-//}
+#Preview {
+    CreateAccountView(config: Configuration())
+}

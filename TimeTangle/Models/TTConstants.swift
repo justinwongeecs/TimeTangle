@@ -18,7 +18,7 @@ struct TTConstants {
     static let friendRequests = "friendRequests"
     static let friends = "friends"
     static let lastname = "lastname"
-    static let username = "username"
+    static let id = "id"
     static let groupCodes = "groupCodes"
     static let profilePictureURL = "profilePictureURL"
     static let profilePictureData = "profilePictureData"
@@ -26,9 +26,9 @@ struct TTConstants {
     static let phoneNumber = "phoneNumber"
     
     //MARK: - TTFriendRequest
-    static let recipientUsername = "recipientUsername"
+    static let recipientID = "recipientID"
     static let requestType = "requestType"
-    static let senderUsername = "senderUsername"
+    static let senderID = "senderID"
     
     //MARK: - TTGroup
     static let groupCode = "code"

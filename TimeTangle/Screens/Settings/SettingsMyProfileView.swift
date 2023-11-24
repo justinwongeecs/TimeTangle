@@ -15,17 +15,17 @@ struct TTAlert {
 }
 
 struct SettingsMyProfileView: View {
-    
     @State private var profileImage: UIImage?
+    //TODO: Encapsulate this into one single error via an error struct 
     @State private var showChangeNameAlert = false
-    @State private var showChangeUsernameAlert = false
+    @State private var showChangeIDAlert = false
     @State private var showChangeEmailAlert = false
     @State private var showChangePhoneNumberAlert = false
     @State private var showLogoutConfirmationAlert = false
     
     @State private var firstname = ""
     @State private var lastname = ""
-    @State private var username = ""
+    @State private var id = ""
     @State private var email = ""
     @State private var phoneNumber = ""
     
@@ -48,9 +48,22 @@ struct SettingsMyProfileView: View {
                     }
                 }
                 
-                //Username Section
-                SettingGroup(id: "Username", header: "Username") {
-                    SettingText(title: username)
+                //Id Section
+                SettingGroup(id: "User ID", header: "User ID") {
+                    SettingCustomView(id: "id") {
+                        HStack {
+                            Text(id)
+                            Spacer()
+                            Button(action: {
+                                UIPasteboard.general.string = id
+                            }) {
+                                Image(systemName: "clipboard")
+                                    .foregroundStyle(.green)
+                                    .roundedRectangleBackgroundStyle(cornerRadius: 10, fillColor: .green.opacity(0.2), strokeColor: .clear, frameWidth: 35, frameHeight: 35)
+                            }
+                        }
+                        .padding(15)
+                    }
                 }
                 
                 SettingGroup(id: "Email", header: "Email") {
@@ -77,7 +90,7 @@ struct SettingsMyProfileView: View {
                                     ttError = TTError(rawValue: error.localizedDescription)
                                     showErrorAlert.toggle()
                                 } else {
-                                    
+                                    showPasswordResetConfirmationAlert.toggle()
                                 }
                             }
                         }
@@ -100,7 +113,7 @@ struct SettingsMyProfileView: View {
                 }
             }
         }
-        .onChange(of: imageSelection) { _ in
+        .onChange(of: imageSelection) {
             Task {
                 if let data = try? await imageSelection.first?.loadTransferable(type: Data.self) {
                     if let uiImage = UIImage(data: data) {
@@ -113,8 +126,7 @@ struct SettingsMyProfileView: View {
                 showErrorAlert.toggle()
             }
         }
-       
-        .alert("Password Reset Sent To Email", isPresented: $showPasswordResetConfirmationAlert) {
+        .alert("Password Reset Sent", isPresented: $showPasswordResetConfirmationAlert) {
             Button(action: { showPasswordResetConfirmationAlert.toggle() }) {
                 Text("OK")
             }
@@ -131,26 +143,21 @@ struct SettingsMyProfileView: View {
     //MARK: - Profile Picture Section
     @SettingBuilder private var profilePictureSection: some Setting {
         SettingCustomView(id: "ProfilePicture") {
-            VStack(spacing: 10) {
+            VStack(spacing: 5) {
                 profileImageView
                 PhotosPicker(selection: $imageSelection, maxSelectionCount: 1, matching: .images, photoLibrary: .shared()) {
                     Text("Edit Picture")
                         .font(.system(size: 15).bold())
-                        .foregroundColor(.white)
+                        .foregroundColor(.green)
                 }
-                .padding(10)
-                .background(Color(.systemGray3))
-                .cornerRadius(10)
             }
             .onAppear {
                 guard let currentUser = FirebaseManager.shared.currentUser else { return }
-                print(currentUser)
-                if let imageData = currentUser.profilePictureData, let image = UIImage(data: imageData) {
-                    profileImage = image
-                }
+
+                profileImage = currentUser.getProfilePictureUIImage()
                 firstname = currentUser.firstname
                 lastname = currentUser.lastname
-                username = currentUser.username
+                id = currentUser.id
                 email = currentUser.email
                 phoneNumber = currentUser.phoneNumber
             }
@@ -173,7 +180,7 @@ struct SettingsMyProfileView: View {
             TextField("Last Name", text: $lastname)
             Button("OK", action: {
                 guard let currentUser = FirebaseManager.shared.currentUser else { return }
-                FirebaseManager.shared.updateUserData(for: currentUser.username, with: [
+                FirebaseManager.shared.updateUserData(for: currentUser.id, with: [
                     TTConstants.firstname: firstname.trimmingCharacters(in: .whitespacesAndNewlines),
                     TTConstants.lastname: lastname.trimmingCharacters(in: .whitespacesAndNewlines)
                 ]) { error in
@@ -204,7 +211,7 @@ struct SettingsMyProfileView: View {
                 .textCase(.lowercase)
             Button("OK", action: {
                 guard let currentUser = FirebaseManager.shared.currentUser else { return }
-                FirebaseManager.shared.updateUserData(for: currentUser.username, with: [
+                FirebaseManager.shared.updateUserData(for: currentUser.id, with: [
                     TTConstants.email: email.trimmingCharacters(in: .whitespacesAndNewlines)
                 ]) { error in
                     guard let error = error else { return }
@@ -231,7 +238,7 @@ struct SettingsMyProfileView: View {
             TextField("📞", text: $phoneNumber)
             Button("OK", action: {
                 guard let currentUser = FirebaseManager.shared.currentUser else { return }
-                FirebaseManager.shared.updateUserData(for: currentUser.username, with: [
+                FirebaseManager.shared.updateUserData(for: currentUser.id, with: [
                     TTConstants.phoneNumber: phoneNumber.trimmingCharacters(in: .whitespacesAndNewlines)
                 ]) { error in
                     guard let error = error else { return }
@@ -280,7 +287,7 @@ struct SettingsMyProfileView: View {
     private var profileImageView: some View {
         HStack {
             Spacer()
-            TTSwiftUIProfileImageView(image: profileImage, size: 120)
+            TTSwiftUIProfileImageView(image: profileImage, size: 180)
             Spacer()
         }
     }
@@ -288,9 +295,9 @@ struct SettingsMyProfileView: View {
     private func uploadProfileImageDataToFirestore(for image: UIImage) {
         guard let currentUser = FirebaseManager.shared.currentUser else { return }
 
-        guard let compressedImageData = image.jpegData(compressionQuality: 0.1) else { return }
+        guard let compressedImageData = image.jpegData(compressionQuality: 0.05) else { return }
 
-        FirebaseManager.shared.updateUserData(for: currentUser.username, with: [
+        FirebaseManager.shared.updateUserData(for: currentUser.id, with: [
             TTConstants.profilePictureData: compressedImageData
         ]) { error in
             guard let error = error else { return }
@@ -299,9 +306,7 @@ struct SettingsMyProfileView: View {
     }
 }
 
-struct SettingsMyProfilePreviewProvider_Previews: PreviewProvider {
-    static var previews: some View {
-        SettingsMyProfileView()
-    }
+#Preview {
+    SettingsMyProfileView()
 }
 

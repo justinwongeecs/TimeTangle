@@ -7,7 +7,7 @@
 
 import UIKit
 
-class CreateGroupUserQueueCell: ProfileUsernameCell {
+class CreateGroupUserQueueCell: ProfileAndNameCell {
     
     private let deleteButton = UIButton(type: .custom)
     private var deleteCompletionHandler: (() -> Void)?
@@ -26,7 +26,7 @@ class CreateGroupUserQueueCell: ProfileUsernameCell {
         super.set(for: user)
         
         guard let currentUser = FirebaseManager.shared.currentUser else { return }
-        if user.username == currentUser.username {
+        if user.id == currentUser.id {
             deleteButton.removeFromSuperview()
         }
     }

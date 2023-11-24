@@ -197,7 +197,7 @@ class GroupAggregateResultVC: DayViewController {
 
         for ttEvent in groupNonAllDayEvents {
             let newEvent = Event()
-            newEvent.text = "Not Available: \(getUserFullNameFromUsername(for: ttEvent.createdBy))"
+            newEvent.text = "Not Available: \(getUserFullNameFromID(for: ttEvent.createdBy))"
             newEvent.dateInterval = DateInterval(start: ttEvent.startDate, end: ttEvent.endDate)
             newEvent.color = .systemRed
             newEvent.isAllDay = ttEvent.isAllDay
@@ -231,21 +231,21 @@ class GroupAggregateResultVC: DayViewController {
         return events
     }
     
-    func getUserFullNameFromUsername(for username: String) -> String {
-        if let user = groupsUsersCache.value(forKey: username) {
+    func getUserFullNameFromID(for id: String) -> String {
+        if let user = groupsUsersCache.value(forKey: id) {
             return user.getFullName().uppercased()
         } else {
             //Fetch User
-            FirebaseManager.shared.fetchUserDocumentData(with: username) { [weak self] result in
+            FirebaseManager.shared.fetchUserDocumentData(with: id) { [weak self] result in
                 switch result {
                 case .success(let ttUser):
-                    self?.groupsUsersCache.insert(ttUser, forKey: username)
+                    self?.groupsUsersCache.insert(ttUser, forKey: id)
                 case .failure(let error):
                     print(error.localizedDescription)
                 }
             }
         }
-        return username.uppercased()
+        return id.uppercased()
     }
     
     func createEventsForOpenIntervals(with occupiedEvents: [TTEvent]) -> [Event] {

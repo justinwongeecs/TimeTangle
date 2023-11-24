@@ -325,7 +325,7 @@ class GroupOverviewCell: UITableViewCell {
         if event.isCreatedByUser {
             groupNameAndTimeLabel.textColor = .systemRed
             createdByUserLabel.isHidden = false
-            createdByUserLabel.text = getUserFullNameFromUsername(for: event.createdBy)
+            createdByUserLabel.text = getUserFullNameFromID(for: event.createdBy)
             backgroundColor = .systemRed.withAlphaComponent(0.15)
         } else {
             groupNameAndTimeLabel.textColor = .systemGreen
@@ -340,21 +340,21 @@ class GroupOverviewCell: UITableViewCell {
         }
     }
     
-    func getUserFullNameFromUsername(for username: String) -> String {
-        if let user = groupsUsersCache.value(forKey: username) {
+    func getUserFullNameFromID(for id: String) -> String {
+        if let user = groupsUsersCache.value(forKey: id) {
             return user.getFullName().uppercased()
         } else {
             //Fetch User
-            FirebaseManager.shared.fetchUserDocumentData(with: username) { [weak self] result in
+            FirebaseManager.shared.fetchUserDocumentData(with: id) { [weak self] result in
                 switch result {
                 case .success(let ttUser):
-                    self?.groupsUsersCache.insert(ttUser, forKey: username)
+                    self?.groupsUsersCache.insert(ttUser, forKey: id)
                 case .failure(let error):
                     print(error.localizedDescription)
                 }
             }
         }
-        return username.uppercased()
+        return id.uppercased()
     }
     
     private func configureCell() {

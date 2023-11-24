@@ -135,7 +135,7 @@ class CreateGroupConfirmationVC: TTModalCardVC {
         //Create a group instance in Firestore
         let dateAMonthAgoFromToday = Date().getDateWithMonthOffset(by: -1) ?? Date()
         let dateAMonthFromToday = Date().getDateWithMonthOffset(by: 1) ?? Date()
-        let newGroup = TTGroup(name: textField.text!, users: usersInQueue.map{$0.username}, code: groupCode, startingDate: Date(), endingDate: Date(), histories: [], events: [], admins: [currentUser.username], setting: TTGroupSetting(minimumNumOfUsers: 2, maximumNumOfUsers: 10, boundedStartDate: dateAMonthAgoFromToday, boundedEndDate: dateAMonthFromToday, lockGroupChanges: false, allowGroupJoin: true))
+        let newGroup = TTGroup(name: textField.text!, users: usersInQueue.map{$0.id}, code: groupCode, startingDate: Date(), endingDate: Date(), histories: [], events: [], admins: [currentUser.id], setting: TTGroupSetting(minimumNumOfUsers: 2, maximumNumOfUsers: 10, boundedStartDate: dateAMonthAgoFromToday, boundedEndDate: dateAMonthFromToday, lockGroupChanges: false, allowGroupJoin: true))
         FirebaseManager.shared.createGroup(for: newGroup) { [weak self] result in
             switch result {
             case .success(_):
@@ -146,16 +146,16 @@ class CreateGroupConfirmationVC: TTModalCardVC {
         }
         
         //add group code to groupCodes property of all of the usersInQueue
-        for username in usersInQueue.map({ $0.username }) {
+        for id in usersInQueue.map({ $0.id }) {
             //fetch the data of each user to get the groupCodes property
-            FirebaseManager.shared.fetchUserDocumentData(with: username) { [weak self] result in
+            FirebaseManager.shared.fetchUserDocumentData(with: id) { [weak self] result in
                 switch result {
                 case .success(let user):
                     let groupCodesField = [
                         TTConstants.groupCodes: user.groupCodes.arrayByAppending(groupCode)
                     ]
                     //update the groupCodes property of each user
-                    FirebaseManager.shared.updateUserData(for: username, with: groupCodesField) { error in
+                    FirebaseManager.shared.updateUserData(for: id, with: groupCodesField) { error in
                         guard let error = error else { return }
                         self?.presentTTAlert(title: "Cannot update user", message: error.rawValue, buttonTitle: "Ok")
                     }

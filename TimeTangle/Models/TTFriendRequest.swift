@@ -14,12 +14,16 @@ struct TTFriendRequest: Codable {
     var recipientProfilePictureData: Data?
     var senderName: String
     var recipientName: String
+    var senderID: String
+    var recipientID: String
     var requestType: TTFriendRequestType
     
     var dictionary: [String: Any] {
         return [
             "senderName": senderName,
             "recipientName": recipientName,
+            "senderID": senderID,
+            "recipientID": recipientID,
             "requestType": requestType.description,
             "recipientProfilePictureData": recipientProfilePictureData,
             "senderProfilePictureData": senderProfilePictureData

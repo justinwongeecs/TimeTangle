@@ -70,7 +70,7 @@ class GroupHistoryVC: UIViewController {
          
         guard let currentUser = FirebaseManager.shared.currentUser else { return }
 
-        if group.doesContainsAdmin(for: currentUser.username) && !group.histories.isEmpty {
+        if group.doesContainsAdmin(for: currentUser.id) && !group.histories.isEmpty {
             navigationItem.rightBarButtonItems = [sortButton, deleteGroupHistoryButton]
         } else {
             navigationItem.rightBarButtonItems = [sortButton]
@@ -148,7 +148,7 @@ extension GroupHistoryVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = groupHistoryTableView.dequeueReusableCell(withIdentifier: GroupHistoryCell.reuseID) as! GroupHistoryCell
         let groupHistory = group.histories[indexPath.row]
-        if let authorUserIndex = groupUsers.firstIndex(where: { $0.username == groupHistory.author }) {
+        if let authorUserIndex = groupUsers.firstIndex(where: { $0.id == groupHistory.author }) {
             cell.setCell(for: groupHistory, authorUser: groupUsers[authorUserIndex])
         }
         return cell

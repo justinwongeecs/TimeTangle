@@ -27,9 +27,6 @@ struct SettingsView: View {
     @State private var size: CGSize = .zero
     @State private var isPresentingSubscriptionSheet = false
     
-//    @State private var currentSubscription: Product? = nil
-//    @State private var subscriptionStatus: Product.SubscriptionInfo.Status? = nil
-    
     init(storeViewModel: StoreViewModel) {
         _storeViewModel = StateObject(wrappedValue: storeViewModel)
     }
@@ -54,7 +51,6 @@ struct SettingsView: View {
                     
                     
                     SettingGroup {
-                        privacySection
                         if storeViewModel.currentSubscription != nil {
                             subscriptionSection
                         }
@@ -93,17 +89,6 @@ struct SettingsView: View {
                 SettingsProfileHeaderView(currentSubscription: storeViewModel.currentSubscription)
             }
         }
-    }
-   
-    //MARK: - Privacy Section
-    @SettingBuilder private var privacySection: some Setting {
-        SettingPage(title: "Privacy") {
-            SettingGroup {
-                SettingToggle(title: "Automatically Pulls From Calendar", isOn: $settingsViewModel.automaticallyPullsFromCalendar)
-                SettingToggle(title: "Enable Public Discoverability", isOn: $settingsViewModel.friendsDiscoverability)
-            }
-        }
-        .previewIcon("lock.fill", foregroundColor: .white, backgroundColor: .gray.opacity(0.7))
     }
     
     //MARK: - Subscription Section
@@ -328,19 +313,18 @@ struct SettingsProfileHeaderView: View {
     
     @State private var profileImage: UIImage?
     @State private var name: String = ""
-    @State private var username: String = ""
+    @State private var id: String = ""
     
     var body: some View {
         NavigationLink(destination: SettingsMyProfileView()) {
             HStack(spacing: 20) {
-                TTSwiftUIProfileImageView(image: profileImage, size: 70)
+                TTSwiftUIProfileImageView(image: profileImage, size: 100)
                 VStack(alignment: .leading) {
                     Text(name)
+                        .multilineTextAlignment(.leading)
                         .lineLimit(2)
                         .foregroundColor(.primary)
                         .font(.title2.bold())
-                    Text(username)
-                        .foregroundColor(.secondary)
                     if currentSubscription == nil {
                         SubscriptionPlanBadgeView(isPro: false)
                     } else {
@@ -358,7 +342,7 @@ struct SettingsProfileHeaderView: View {
                 profileImage = image
             }
             name = currentUser.getFullName()
-            username = currentUser.username
+            id = currentUser.id
         }
     }
 }

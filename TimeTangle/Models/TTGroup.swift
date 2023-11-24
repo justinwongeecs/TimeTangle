@@ -30,8 +30,8 @@ struct TTGroup: Codable, Equatable, Hashable {
         lhs.events == rhs.events
     }
     
-    func doesContainsAdmin(for username: String) -> Bool {
-        return admins.contains(where: { $0 == username })
+    func doesContainsAdmin(for id: String) -> Bool {
+        return admins.contains(where: { $0 == id })
     }
 }
 

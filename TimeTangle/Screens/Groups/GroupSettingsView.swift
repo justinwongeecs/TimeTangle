@@ -272,7 +272,7 @@ struct GroupSettingsView: View {
     
     @ViewBuilder
     private var deleteGroupSection: some View {
-        if let currentUser = FirebaseManager.shared.currentUser, group.doesContainsAdmin(for: currentUser.username) {
+        if let currentUser = FirebaseManager.shared.currentUser, group.doesContainsAdmin(for: currentUser.id) {
             Section {
                 deleteGroupButton
             }
@@ -351,8 +351,8 @@ struct GroupSettingsView: View {
             if let err = error {
                 showError(for: err)
             } else {
-                for username in group.users {
-                    FirebaseManager.shared.updateUserData(for: username, with: [
+                for id in group.users {
+                    FirebaseManager.shared.updateUserData(for: id, with: [
                         TTConstants.groupCodes: FieldValue.arrayRemove([group.code])
                     ]) { error in
                         if let err = error {
@@ -372,12 +372,12 @@ struct GroupSettingsView: View {
         guard let currentUser = FirebaseManager.shared.currentUser else { return }
         
         FirebaseManager.shared.updateGroup(for: group.code, with: [
-            TTConstants.groupUsers: FieldValue.arrayRemove([currentUser.username])
+            TTConstants.groupUsers: FieldValue.arrayRemove([currentUser.id])
         ]) { error in
             if let err = error {
                 showError(for: err)
             } else {
-                FirebaseManager.shared.updateUserData(for: currentUser.username, with: [
+                FirebaseManager.shared.updateUserData(for: currentUser.id, with: [
                     TTConstants.groupCodes: FieldValue.arrayRemove([group.code])
                 ]) { error in
                     if let err = error {

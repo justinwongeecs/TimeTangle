@@ -1,5 +1,5 @@
 //
-//  ProfileUsernameCell.swift
+//  ProfileAndNameCell.swift
 //  TimeTangle
 //
 //  Created by Justin Wong on 12/26/22.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-class ProfileUsernameCell: UITableViewCell {
+class ProfileAndNameCell: UITableViewCell {
     
     static let reuseID = "AddFriendSearchResultCell"
     
@@ -15,7 +15,7 @@ class ProfileUsernameCell: UITableViewCell {
     
     private var hStackView = UIStackView()
     internal var avatarImageView = TTProfileImageView(widthHeight: TTConstants.profileImageViewInCellHeightAndWidth)
-    internal let usernameLabel = TTTitleLabel(textAlignment: .left, fontSize: 15)
+    internal let idLabel = TTTitleLabel(textAlignment: .left, fontSize: 15)
     
     private var hStackViewLeadingConstraint: NSLayoutConstraint!
         
@@ -39,7 +39,7 @@ class ProfileUsernameCell: UITableViewCell {
         self.layer.borderColor = backgroundColor?.cgColor
         self.layer.borderWidth = 1
         
-        usernameLabel.text = user.getFullName()
+        idLabel.text = user.getFullName()
     
         if let imageData = user.profilePictureData, let image = UIImage(data: imageData) {
             avatarImageView.setImage(to: image)
@@ -62,7 +62,7 @@ class ProfileUsernameCell: UITableViewCell {
         
         avatarImageView.translatesAutoresizingMaskIntoConstraints = false
         hStackView.addArrangedSubview(avatarImageView)
-        hStackView.addArrangedSubview(usernameLabel)
+        hStackView.addArrangedSubview(idLabel)
         
         hStackViewLeadingConstraint = hStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10)
         hStackViewLeadingConstraint.isActive = true
@@ -89,7 +89,7 @@ class ProfileUsernameCell: UITableViewCell {
         }
     }
     
-    internal func getUsername() -> String {
-        return user?.username ?? ""
+    internal func getID() -> String {
+        return user?.id ?? ""
     }
 }

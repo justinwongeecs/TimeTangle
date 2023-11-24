@@ -72,7 +72,7 @@ class GroupUsersVC: UIViewController {
         //Need to create a copy to avoid "simultaneous access error"
         var users = groupUsers
         users?.sort(by: {
-            self.group.doesContainsAdmin(for: $0.username) && !self.group.doesContainsAdmin(for: $1.username)
+            self.group.doesContainsAdmin(for: $0.id) && !self.group.doesContainsAdmin(for: $1.id)
         })
         groupUsers = users
     }
@@ -124,17 +124,17 @@ extension GroupUsersVC: UITableViewDelegate, UITableViewDataSource {
         usersTableView.setEditing(editing, animated: true)
     }
     
-    private func removeUser(for username: String, completion: @escaping((Bool) -> Void)) {
-        let alertController = UIAlertController(title: "Delete User?", message: "Are you sure you want to remove \(username)", preferredStyle: .alert)
+    private func removeUser(for id: String, completion: @escaping((Bool) -> Void)) {
+        let alertController = UIAlertController(title: "Delete User?", message: "Are you sure you want to remove \(id)", preferredStyle: .alert)
         
         let removeAction = UIAlertAction(title: "Remove", style: .destructive) { [weak self] _ in
             guard let self = self else { return }
             let newGroupData = [
                 TTConstants.groupUsers:
-                    FieldValue.arrayRemove([username])
+                    FieldValue.arrayRemove([id])
             ]
             
-            if let removeIndex = group.users.firstIndex(of: username), let delegate = delegate {
+            if let removeIndex = group.users.firstIndex(of: id), let delegate = delegate {
                 group.users.remove(at: removeIndex)
                 delegate.groupDidUpdate(for: group)
             }
@@ -144,7 +144,7 @@ extension GroupUsersVC: UITableViewDelegate, UITableViewDataSource {
                 if let error = error {
                     self.presentTTAlert(title: "Cannot update group", message: error.rawValue, buttonTitle: "OK")
                 } else {
-                    FirebaseManager.shared.updateUserData(for: username, with: [
+                    FirebaseManager.shared.updateUserData(for: id, with: [
                         TTConstants.groupCodes: FieldValue.arrayRemove([self.group.code])
                     ]) { [weak self] error in
                         if let error = error {
@@ -169,33 +169,33 @@ extension GroupUsersVC: UITableViewDelegate, UITableViewDataSource {
         present(alertController, animated: true)
     }
     
-    private func toggleUserAdminAccess(for username: String, completion: @escaping((Bool) -> Void)) {
+    private func toggleUserAdminAccess(for id: String, completion: @escaping((Bool) -> Void)) {
         //Show Confirmation Alert
         
-        let isUserAdmin = group.doesContainsAdmin(for: username)
+        let isUserAdmin = group.doesContainsAdmin(for: id)
         let alertController: UIAlertController!
         
         if !isUserAdmin {
-            alertController = UIAlertController(title: "Grant Admin Access?", message: "Do you want to grant access to \(username)", preferredStyle: .alert)
+            alertController = UIAlertController(title: "Grant Admin Access?", message: "Do you want to grant access to \(id)", preferredStyle: .alert)
         } else {
-            alertController =  UIAlertController(title: "Revoke Admin Access?", message: "Do you want to revoke access to \(username)", preferredStyle: .alert)
+            alertController =  UIAlertController(title: "Revoke Admin Access?", message: "Do you want to revoke access to \(id)", preferredStyle: .alert)
         }
         
         let okAction = UIAlertAction(title: "OK", style: .default) { [weak self] _ in
             guard let self = self else { return }
             let newGroupData = isUserAdmin ? [
-                TTConstants.groupAdmins: FieldValue.arrayRemove([username])
+                TTConstants.groupAdmins: FieldValue.arrayRemove([id])
             ] : [
-                TTConstants.groupAdmins: FieldValue.arrayUnion([username])
+                TTConstants.groupAdmins: FieldValue.arrayUnion([id])
             ]
             
             if isUserAdmin {
-                if let removeIndex = group.admins.firstIndex(of: username) {
+                if let removeIndex = group.admins.firstIndex(of: id) {
                     group.admins.remove(at: removeIndex)
                 }
                 
             } else {
-                group.admins.append(username)
+                group.admins.append(id)
             }
             
             //GroupUpdateDelegate to update GroupDetailVC's group
@@ -226,11 +226,11 @@ extension GroupUsersVC: UITableViewDelegate, UITableViewDataSource {
 //MARK: - GroupUserCellDelegate
 extension GroupUsersVC: GroupUserCellDelegate {
     func groupUserCellVisibilityDidChange(for user: TTUser) {
-        delegate?.groupUserVisibilityDidUpdate(for: user.username)
+        delegate?.groupUserVisibilityDidUpdate(for: user.id)
     }
     
     func groupUserCellDidToggleAdmin(for user: TTUser) {
-        toggleUserAdminAccess(for: user.username) { [weak self] _ in
+        toggleUserAdminAccess(for: user.id) { [weak self] _ in
             guard let self = self else { return }
             DispatchQueue.main.async {
                 self.usersTableView.reloadData()
@@ -239,7 +239,7 @@ extension GroupUsersVC: GroupUserCellDelegate {
     }
     
     func groupUserCellDidRemoveUser(for user: TTUser) {
-        removeUser(for: user.username) { [weak self] _ in
+        removeUser(for: user.id) { [weak self] _ in
             guard let self = self else { return }
             if let groupUsersIndex = self.groupUsers.firstIndex(of: user) {
                 self.groupUsers.remove(at: groupUsersIndex)

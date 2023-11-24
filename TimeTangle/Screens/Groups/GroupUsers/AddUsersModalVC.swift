@@ -102,7 +102,7 @@ class AddUsersModalVC: TTModalCardVC {
         filteredFriendsTableView.translatesAutoresizingMaskIntoConstraints = false
         filteredFriendsTableView.delegate = self
         filteredFriendsTableView.dataSource = self
-        filteredFriendsTableView.register(ProfileUsernameCell.self, forCellReuseIdentifier: ProfileUsernameCell.reuseID)
+        filteredFriendsTableView.register(ProfileAndNameCell.self, forCellReuseIdentifier: ProfileAndNameCell.reuseID)
         
         let padding: CGFloat = 10
         
@@ -149,9 +149,9 @@ class AddUsersModalVC: TTModalCardVC {
             self.friends = []
             filteredFriends = []
             
-            for friendUsername in filteredFriendsNotAddedToGroup {
-                print("Friend username: \(friendUsername)")
-                FirebaseManager.shared.fetchUserDocumentData(with: friendUsername) { [weak self] result in
+            for friendID in filteredFriendsNotAddedToGroup {
+                print("Friend id: \(friendID)")
+                FirebaseManager.shared.fetchUserDocumentData(with: friendID) { [weak self] result in
                     switch result {
                     case .success(let ttUser):
                         self?.friends.append(ttUser)
@@ -190,7 +190,7 @@ extension AddUsersModalVC: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let friend = filteredFriends[indexPath.section]
-        let cell = filteredFriendsTableView.dequeueReusableCell(withIdentifier: ProfileUsernameCell.reuseID) as! ProfileUsernameCell
+        let cell = filteredFriendsTableView.dequeueReusableCell(withIdentifier: ProfileAndNameCell.reuseID) as! ProfileAndNameCell
         cell.set(for: friend)
 
         return cell
@@ -198,7 +198,7 @@ extension AddUsersModalVC: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedFriend = filteredFriends[indexPath.section]
-        addUserCompletionHandler(selectedFriend.username)
+        addUserCompletionHandler(selectedFriend.id)
     }
     
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
@@ -225,7 +225,7 @@ extension AddUsersModalVC: UISearchBarDelegate {
         if searchText.isEmpty {
             self.filteredFriends = friends
         } else {
-            self.filteredFriends = friends.filter { $0.username.lowercased().contains(searchText.lowercased()) }
+            self.filteredFriends = friends.filter { $0.id.lowercased().contains(searchText.lowercased()) }
         }
  
         reloadVC()

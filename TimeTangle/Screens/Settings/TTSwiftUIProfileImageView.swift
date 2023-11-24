@@ -18,10 +18,10 @@ struct TTSwiftUIProfileImageView: View {
             if let profileImage = image {
                 Image(uiImage: profileImage)
                     .resizable()
-                    .frame(width: size, height: size)
                     .aspectRatio(contentMode: .fit)
                     .clipShape(Circle())
                     .shadow(color: colorScheme == .dark ? .white : .black, radius: 7)
+                    .frame(width: size, height: size)
             } else {
                 Image(systemName: "person.crop.circle")
             }

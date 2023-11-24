@@ -154,9 +154,9 @@ class CreateGroupVC: UIViewController {
         self.present(joinGroupVC, animated: true)
     }
     
-    @objc private func fetchUpdatedUser() {   
+    @objc private func fetchUpdatedUser() {
         if !usersQueueForGroupCreation.isEmpty {
-            FirebaseManager.shared.fetchMultipleUsersDocumentData(with: usersQueueForGroupCreation.map{ $0.username }) { [weak self] result in
+            FirebaseManager.shared.fetchMultipleUsersDocumentData(with: usersQueueForGroupCreation.map{ $0.id }) { [weak self] result in
                 switch result {
                 case .success(let users):
                     self?.usersQueueForGroupCreation = users
@@ -166,6 +166,8 @@ class CreateGroupVC: UIViewController {
                 }
             }
         }
+        
+        refreshTableView()
     }
     
     private func configureSearchController() {
@@ -277,7 +279,7 @@ extension CreateGroupVC: UITableViewDataSource, UITableViewDelegate {
         let cell = usersQueueTable.dequeueReusableCell(withIdentifier: CreateGroupUserQueueCell.getReuseID()) as! CreateGroupUserQueueCell
         let userInQueue = usersQueueForGroupCreation[indexPath.section]
         cell.set(for: userInQueue) {
-            if userInQueue.username != FirebaseManager.shared.currentUser?.username {
+            if userInQueue.id != FirebaseManager.shared.currentUser?.id {
                 self.usersQueueForGroupCreation.remove(at: indexPath.section)
                 self.usersQueueTable.beginUpdates()
                 self.usersQueueTable.deleteSections([indexPath.section], with: .fade)

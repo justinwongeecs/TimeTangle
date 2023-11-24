@@ -11,11 +11,11 @@ import FirebaseFirestore
 
 protocol GroupUpdateDelegate: AnyObject {
     func groupDidUpdate(for group: TTGroup)
-    func groupUserVisibilityDidUpdate(for username: String)
+    func groupUserVisibilityDidUpdate(for id: String)
 }
 
 extension GroupUpdateDelegate {
-    func groupUserVisibilityDidUpdate(for username: String) {}
+    func groupUserVisibilityDidUpdate(for id: String) {}
 }
 
 class GroupDetailVC: UIViewController {
@@ -71,7 +71,7 @@ class GroupDetailVC: UIViewController {
     
 //    private func configureAdminEnability() {
 //        guard let currentUser = FirebaseManager.shared.currentUser else { return }
-//        if !group.doesContainsAdmin(for: currentUser.username) {
+//        if !group.doesContainsAdmin(for: currentUser.id) {
 //            startingDatePicker.isEnabled = false
 //            startingDatePicker.isUserInteractionEnabled = false
 //            endingDatePicker.isEnabled = false
@@ -86,23 +86,23 @@ class GroupDetailVC: UIViewController {
     
     //MARK: - Load Group Users
     private func loadGroupUsers() {
-        for username in group.users {
-            if let cachedUser = groupsUsersCache[username] {
+        for id in group.users {
+            if let cachedUser = groupsUsersCache[id] {
                 groupMembers.append(cachedUser)
             } else {
-                fetchGroupTTUser(for: username)
+                fetchGroupTTUser(for: id)
             }
         }
     }
     
-    private func fetchGroupTTUser(for username: String) {
-        FirebaseManager.shared.fetchUserDocumentData(with: username) { [weak self] result in
+    private func fetchGroupTTUser(for id: String) {
+        FirebaseManager.shared.fetchUserDocumentData(with: id) { [weak self] result in
             guard let self = self else { return }
             
             switch result {
             case .success(let ttUser):
                 self.groupMembers.append(ttUser)
-                self.groupsUsersCache.insert(ttUser, forKey: ttUser.username)
+                self.groupsUsersCache.insert(ttUser, forKey: ttUser.id)
                 self.groupAggregateVC.setView(usersNotVisible: usersNotVisible, group: group)
             case .failure(let error):
                 self.presentTTAlert(title: "Fetch Error", message: error.rawValue, buttonTitle: "OK")
@@ -153,8 +153,8 @@ class GroupDetailVC: UIViewController {
         let destVC = AddUsersModalVC(group: group) { [weak self] in
             guard let self = self else { return }
             self.dismiss(animated: true)
-        } addUserCompletionHandler: { [weak self] username in
-            self?.addUserCompletionHandler(username: username)
+        } addUserCompletionHandler: { [weak self] id in
+            self?.addUserCompletionHandler(id: id)
         }
         
         destVC.modalPresentationStyle = .overFullScreen
@@ -162,9 +162,9 @@ class GroupDetailVC: UIViewController {
         self.present(destVC, animated: true)
     }
     
-    private func addUserCompletionHandler(username: String) {
+    private func addUserCompletionHandler(id: String) {
         let updatedGroupFields = [
-            TTConstants.groupUsers: FieldValue.arrayUnion([username])
+            TTConstants.groupUsers: FieldValue.arrayUnion([id])
         ]
         
         FirebaseManager.shared.updateGroup(for: self.group.code, with: updatedGroupFields) { [weak self] error in
@@ -174,15 +174,15 @@ class GroupDetailVC: UIViewController {
                 self.presentTTAlert(title: "Error updating group", message: error.rawValue, buttonTitle: "Ok")
             } else {
                 //update added user groupcodes field
-                FirebaseManager.shared.updateUserData(for: username, with: [
+                FirebaseManager.shared.updateUserData(for: id, with: [
                     TTConstants.groupCodes: FieldValue.arrayUnion([self.group.code])
                 ]) { [weak self] error in
                     if let error = error {
                         self?.presentTTAlert(title: "Cannot add user to group", message: error.rawValue, buttonTitle: "OK")
                     } else {
                         //add to group edit history
-                        self?.addGroupHistory(of: .addedUserToGroup, before: nil, after: username)
-                        self?.group.users.append(username)
+                        self?.addGroupHistory(of: .addedUserToGroup, before: nil, after: id)
+                        self?.group.users.append(id)
 
                         DispatchQueue.main.async {
                             self?.updateView()
@@ -375,9 +375,9 @@ class GroupDetailVC: UIViewController {
     
     //Should be triggered after every group edit
     private func addGroupHistory(of editType: TTGroupEditType, before: String?, after: String?) {
-        guard let currentUserUsername = FirebaseManager.shared.currentUser?.username else { return }
+        guard let currentUserID = FirebaseManager.shared.currentUser?.id else { return }
         let editDifference = TTGroupEditDifference(before: before, after: after)
-        let newGroupEdit = TTGroupEdit(author: currentUserUsername, createdDate: Date(), editDifference: editDifference, editType: editType)
+        let newGroupEdit = TTGroupEdit(author: currentUserID, createdDate: Date(), editDifference: editDifference, editType: editType)
         group.histories.append(newGroupEdit)
         do {
             let newGroupHistory = try group.histories.arrayByAppending(newGroupEdit).map{ try Firestore.Encoder().encode($0) }
@@ -455,11 +455,11 @@ extension GroupDetailVC: GroupUpdateDelegate {
         updateSaveOrCancelIsland()
     }
     
-    func groupUserVisibilityDidUpdate(for username: String) {
-        if usersNotVisible.contains(username), let removeIndex = usersNotVisible.firstIndex(of: username) {
+    func groupUserVisibilityDidUpdate(for id: String) {
+        if usersNotVisible.contains(id), let removeIndex = usersNotVisible.firstIndex(of: id) {
             usersNotVisible.remove(at: removeIndex)
         } else {
-            usersNotVisible.append(username)
+            usersNotVisible.append(id)
         }
         updateGroupAggregateVC()
     }

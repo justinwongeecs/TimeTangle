@@ -10,7 +10,7 @@ import UIKit
 
 class LoginVC: UIViewController {
     private let titleLabel = TTTitleLabel(textAlignment: .center, fontSize: 50)
-    private let usernameTextField = TTTextField()
+    private let idTextField = TTTextField()
     private let passwordTextField = TTTextField()
     private let loginButton = TTButton(backgroundColor: .systemGreen, title: "Login")
     private let createAccountButton = TTButton(backgroundColor: .clear, title: "Create Account?")
@@ -20,7 +20,7 @@ class LoginVC: UIViewController {
         view.backgroundColor = .systemBackground
         createDismissKeyboardTapGesture()
         configureTitleLabel()
-        configureUserNameTextField()
+        configureIDTextField()
         configurePasswordTextField()
         configureLoginButton()
         configureCreateAccountButton()
@@ -38,16 +38,16 @@ class LoginVC: UIViewController {
         ])
     }
 
-    private func configureUserNameTextField() {
-        view.addSubview(usernameTextField)
+    private func configureIDTextField() {
+        view.addSubview(idTextField)
 
-        usernameTextField.placeholder = "Enter email"
+        idTextField.placeholder = "Enter email"
 
         NSLayoutConstraint.activate([
-            usernameTextField.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 100),
-            usernameTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 50),
-            usernameTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -50),
-            usernameTextField.heightAnchor.constraint(equalToConstant: 50)
+            idTextField.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 100),
+            idTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 50),
+            idTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -50),
+            idTextField.heightAnchor.constraint(equalToConstant: 50)
         ])
     }
 
@@ -59,7 +59,7 @@ class LoginVC: UIViewController {
         passwordTextField.delegate = self
 
         NSLayoutConstraint.activate([
-            passwordTextField.topAnchor.constraint(equalTo: usernameTextField.bottomAnchor, constant: 50),
+            passwordTextField.topAnchor.constraint(equalTo: idTextField.bottomAnchor, constant: 50),
             passwordTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 50),
             passwordTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -50),
             passwordTextField.heightAnchor.constraint(equalToConstant: 50)
@@ -93,7 +93,7 @@ class LoginVC: UIViewController {
     }
 
     @objc private func login() {
-        FirebaseManager.shared.signInUser(email: usernameTextField.text!, password: passwordTextField.text!) { [weak self] result in
+        FirebaseManager.shared.signInUser(email: idTextField.text!, password: passwordTextField.text!) { [weak self] result in
 
             guard let self = self else { return }
             switch result {

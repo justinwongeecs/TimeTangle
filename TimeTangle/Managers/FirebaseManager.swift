@@ -19,6 +19,7 @@ class FirebaseManager {
     private var currentUserGroupsListener: ListenerRegistration?
     private let sceneWindow = (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.window
     private let notificationCenter = NotificationCenter.default
+    let usersCache = TTCache<String, TTUser>()
     let storeViewModel = StoreViewModel()
     
     var currentUser: TTUser?
@@ -27,7 +28,7 @@ class FirebaseManager {
         handle = Auth.auth().addStateDidChangeListener { [weak self] (auth, user) in
             print("auth changed")
             if let user = user, let displayName = user.displayName {
-                print(displayName)
+                print("DisplayName: \(displayName)")
                 self?.fetchUserDocumentData(with: displayName) { result in
                     switch result {
                     case .success(let user):
@@ -50,9 +51,9 @@ class FirebaseManager {
     private var currentUserListener: ListenerRegistration?
     
     private func listenToCurrentUser() {
-        guard let username = currentUser?.username else { return }
+        guard let userID = currentUser?.id else { return }
         
-        currentUserListener = db.collection(TTConstants.usersCollection).document(username).addSnapshotListener { [weak self] docSnapshot, error in
+        currentUserListener = db.collection(TTConstants.usersCollection).document(userID).addSnapshotListener { [weak self] docSnapshot, error in
             guard let document = docSnapshot else { return }
             do {
                 print("Update to current user")
@@ -148,9 +149,9 @@ class FirebaseManager {
         }
     }
     
-    func fetchMultipleUsersDocumentData(with usernames: [String], completed: @escaping(Result<[TTUser], TTError>) -> Void) {
-        if !usernames.isEmpty {
-            db.collection("users").whereField("username", in: usernames).getDocuments() { querySnapshot, err in
+    func fetchMultipleUsersDocumentData(with ids: [String], completed: @escaping(Result<[TTUser], TTError>) -> Void) {
+        if !ids.isEmpty {
+            db.collection("users").whereField("id", in: ids).getDocuments() { querySnapshot, err in
                 if let _ = err {
                     completed(.failure(TTError.unableToFetchUsers))
                 } else {
@@ -168,15 +169,15 @@ class FirebaseManager {
         }
     }
     
-    func updateUserData(for username: String, with fields: [String: Any], completed: @escaping(TTError?) -> Void) {
+    func updateUserData(for id: String, with fields: [String: Any], completed: @escaping(TTError?) -> Void) {
         
-        db.collection(TTConstants.usersCollection).document(username).updateData(fields) { [weak self] error in
+        db.collection(TTConstants.usersCollection).document(id).updateData(fields) { [weak self] error in
             guard error == nil else {
                 completed(TTError.unableToUpdateUser)
                 return
             }
             
-            self?.fetchUserDocumentData(with: username) { result in
+            self?.fetchUserDocumentData(with: id) { result in
                 switch result {
                 case .success(_):
                     completed(nil)
@@ -276,7 +277,7 @@ class FirebaseManager {
     
     //MARK: - Authentication
     
-    func createUser(firstName: String, lastName: String, email: String, password: String, username: String, completed: @escaping(Result<Void, TTError>) -> Void) {
+    func createUser(firstName: String, lastName: String, email: String, password: String, phoneNumber: String, completed: @escaping(Result<Void, TTError>) -> Void) {
         //check to see if email and or password fields are empty
         guard email != "", password != "" else {
             completed(.failure(.textFieldsCannotBeEmpty))
@@ -292,13 +293,13 @@ class FirebaseManager {
             }
             
             //update displayname (separate from data in firestore as it's part of the authentication)
-            self.updateUserProfile(displayName: username)
+            self.updateUserProfile(displayName: newUser.uid)
             
-            self.createUserDocument(firstName: firstName, lastName: lastName, email: email, username: username, uid: newUser.uid) { result in
+            self.createUserDocument(firstName: firstName, lastName: lastName, email: email, uid: newUser.uid, phoneNumber: phoneNumber) { result in
                 switch result {
                 case .success(_):
                     //get user data
-                    self.fetchUserDocumentData(with: username) { result in
+                    self.fetchUserDocumentData(with: newUser.uid) { result in
                         switch result {
                         case .success(let user):
                             self.currentUser = user
@@ -315,17 +316,18 @@ class FirebaseManager {
         }
     }
     
-    private func createUserDocument(firstName: String, lastName: String, email: String, username: String, uid: String, completed: @escaping(Result<Void, TTError>) -> Void) {
+    private func createUserDocument(firstName: String, lastName: String, email: String, uid: String, phoneNumber: String, completed: @escaping(Result<Void, TTError>) -> Void) {
         
-        db.collection(TTConstants.usersCollection).document(username).setData([
-            "uid": uid,
+        db.collection(TTConstants.usersCollection).document(uid).setData([
+            "id": uid,
             "firstname": firstName,
             "lastname": lastName,
-            "username": username,
             "friends": [],
             "friendRequests": [],
             "groupCodes": [],
-            "email": email
+            "email": email,
+            "groupPresets": [],
+            "phoneNumber": phoneNumber
         ]) { err in
             if let _ = err {
                 completed(.failure(.unableToCreateFirestoreAssociatedUser))
@@ -412,14 +414,14 @@ class FirebaseManager {
     }
     
     private func createGroupsNC() -> UINavigationController {
-        let groupsVC = GroupsVC()
+        let groupsVC = GroupsVC(usersCache: usersCache)
         groupsVC.title = "Groups"
         groupsVC.tabBarItem = UITabBarItem(title: "Groups", image: UIImage(systemName: "rectangle.on.rectangle"), tag: 1)
         return UINavigationController(rootViewController: groupsVC)
     }
     
     private func createFriendsNC() -> UINavigationController {
-        let friendsVC = FriendsVC(storeViewModel: storeViewModel)
+        let friendsVC = FriendsVC(storeViewModel: storeViewModel, usersCache: usersCache)
         friendsVC.tabBarItem = UITabBarItem(title: "Friends", image: UIImage(systemName: "person.3"), tag: 2)
         return UINavigationController(rootViewController: friendsVC)
     }

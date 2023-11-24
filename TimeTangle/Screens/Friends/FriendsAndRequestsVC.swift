@@ -111,7 +111,7 @@ class FriendsAndRequestsVC: UIViewController {
             filteredFriends = friends
             displaySearchCountLabel(isHidden: true)
         } else {
-            filteredFriends = friends.filter({ $0.username.lowercased().contains(searchWord.lowercased()) })
+            filteredFriends = friends.filter({ $0.id.lowercased().contains(searchWord.lowercased()) })
             
             if filteredFriends.isEmpty {
                 displaySearchCountLabel(isHidden: true)
@@ -267,7 +267,7 @@ class FriendsAndRequestsVC: UIViewController {
         }
         
         //catch if friend has not been added yet officially but has been requested
-        guard friendRequests.filter({ $0.senderName == user.username }).count == 0 else {
+        guard friendRequests.filter({ $0.senderName == user.getFullName() }).count == 0 else {
             presentTTAlert(title: "Cannot Friend Request", message: TTError.friendAlreadyRequested.rawValue, buttonTitle: "Ok")
             return
         }
@@ -275,8 +275,8 @@ class FriendsAndRequestsVC: UIViewController {
         //current user is the SENDER
         //parameter user is the RECEIPIENT
         guard let currentUser = FirebaseManager.shared.currentUser else { return }
-                
-        let senderFriendRequest = TTFriendRequest(senderProfilePictureData: currentUser.profilePictureData, recipientProfilePictureData: user.profilePictureData, senderName: currentUser.getFullName(), recipientName: user.getFullName(), requestType: .outgoing)
+        
+        let senderFriendRequest = TTFriendRequest(senderProfilePictureData: currentUser.getCompressedProfilePictureData(withQuality: 0.05), recipientProfilePictureData: user.getCompressedProfilePictureData(withQuality: 0.05), senderName: currentUser.getFullName(), recipientName: user.getFullName(), senderID: currentUser.id, recipientID: user.id, requestType: .outgoing)
         var recipientFriendRequest = senderFriendRequest
         recipientFriendRequest.requestType = .receiving
         
@@ -290,14 +290,15 @@ class FriendsAndRequestsVC: UIViewController {
         let db = Firestore.firestore()
         let batch = db.batch()
         
-        let currentUserRef = db.collection(TTConstants.usersCollection).document(currentUser.username)
+        let currentUserRef = db.collection(TTConstants.usersCollection).document(currentUser.id)
         batch.updateData(senderUpdateData, forDocument: currentUserRef)
         
-        let recipientUserRef = db.collection(TTConstants.usersCollection).document(user.username)
+        let recipientUserRef = db.collection(TTConstants.usersCollection).document(user.id)
         batch.updateData(recipientUpdateData, forDocument: recipientUserRef)
         
         batch.commit() { [weak self] error in
             if let error = error {
+                print("Update User Error: \(error)")
                 self?.presentTTAlert(title: "Update User Error", message: error.localizedDescription, buttonTitle: "OK")
             } else {
                 self?.dismiss(animated: true)

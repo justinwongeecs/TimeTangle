@@ -53,18 +53,18 @@ class SearchFriendsResultController: UIViewController {
         allFriends.removeAll()
         filteredFriends.removeAll()
         
-        for friendUsername in currentUser.friends {
-            if let cachedFriend = usersInQueueCache.value(forKey: friendUsername) {
+        for friendID in currentUser.friends {
+            if let cachedFriend = usersInQueueCache.value(forKey: friendID) {
                 validateFriend(for: cachedFriend)
             } else {
                 activityIndicator.startAnimating()
-                FirebaseManager.shared.fetchUserDocumentData(with: friendUsername) { [weak self] result in
+                FirebaseManager.shared.fetchUserDocumentData(with: friendID) { [weak self] result in
                     self?.activityIndicator.stopAnimating()
                     guard let self = self else { return }
                     switch result {
                     case .success(let fetchedFriend):
                         validateFriend(for: fetchedFriend)
-                        usersInQueueCache.insert(fetchedFriend, forKey: fetchedFriend.username )
+                        usersInQueueCache.insert(fetchedFriend, forKey: fetchedFriend.id )
                     case .failure(let error):
                         self.presentTTAlert(title: "Fetch Error", message: error.rawValue, buttonTitle: "OK")
                     }
@@ -75,9 +75,9 @@ class SearchFriendsResultController: UIViewController {
     }
     
     private func validateFriend(for friend: TTUser) {
-        let usersInQueueUsernames = searchVCRef.getUsersQueueForGroupCreation().getUsernames()
+        let usersInQueueIDs = searchVCRef.getUsersQueueForGroupCreation().getIDs()
         
-        if !usersInQueueUsernames.contains(friend.username) {
+        if !usersInQueueIDs.contains(friend.id) {
             allFriends.append(friend)
             filteredFriends.append(friend)
         }
@@ -92,7 +92,7 @@ class SearchFriendsResultController: UIViewController {
         searchFriendsResultTable.translatesAutoresizingMaskIntoConstraints = false
         searchFriendsResultTable.delegate = self
         searchFriendsResultTable.dataSource = self
-        searchFriendsResultTable.register(ProfileUsernameCell.self, forCellReuseIdentifier: ProfileUsernameCell.reuseID)
+        searchFriendsResultTable.register(ProfileAndNameCell.self, forCellReuseIdentifier: ProfileAndNameCell.reuseID)
         
         searchFriendsResultTable.separatorStyle = .none
         
@@ -113,7 +113,7 @@ class SearchFriendsResultController: UIViewController {
         if searchText.isEmpty {
             filteredFriends = allFriends
         } else {
-            filteredFriends = allFriends.filter { $0.username.lowercased().contains(searchText.lowercased()) }
+            filteredFriends = allFriends.filter { $0.id.lowercased().contains(searchText.lowercased()) }
         }
         
         reloadTable()
@@ -153,7 +153,7 @@ extension SearchFriendsResultController: UITableViewDataSource, UITableViewDeleg
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = searchFriendsResultTable.dequeueReusableCell(withIdentifier: ProfileUsernameCell.reuseID) as! ProfileUsernameCell
+        let cell = searchFriendsResultTable.dequeueReusableCell(withIdentifier: ProfileAndNameCell.reuseID) as! ProfileAndNameCell
         
         let filteredFriend = filteredFriends[indexPath.section]
         cell.set(for: filteredFriend)

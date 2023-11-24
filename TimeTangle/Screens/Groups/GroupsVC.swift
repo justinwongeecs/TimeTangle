@@ -6,18 +6,28 @@
 //
 
 import UIKit
+import SwiftUI
 
 class GroupsVC: UIViewController {
     
     private var groups = [TTGroup]()
     private var updatedGroups = Set<TTGroup>()
     private var groupsCache = TTCache<String, TTGroup>()
-    private var groupUsersCache = TTCache<String, TTUser>()
+    private var groupUsersCache: TTCache<String, TTUser>!
     
     private let groupsTable = UITableView()
     private let refreshControl = UIRefreshControl()
     
     private var selectedVCIndex: Int?
+    
+    init(usersCache: TTCache<String, TTUser>) {
+        self.groupUsersCache = usersCache
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -35,6 +45,32 @@ class GroupsVC: UIViewController {
         
         NotificationCenter.default.addObserver(self, selector: #selector(getUpdatedGroups(_:)), name: .updatedCurrentUserGroups, object: nil)
         configureDismissEditingTapGestureRecognizer()
+        
+        let showGroupPresetsViewButton = UIBarButtonItem(image: UIImage(systemName: "person.3"), style: .plain, target: self, action: #selector(showGroupPresetsView))
+        showGroupPresetsViewButton.tintColor = .systemGreen
+        
+        //TODO: Change This Back Later
+//        if storeViewModel.isSubscriptionPro {
+            navigationItem.rightBarButtonItem = showGroupPresetsViewButton
+//        }
+    }
+    
+    @objc private func showGroupPresetsView() {
+        let mockData = [TTGroupPreset(name: "Group 1", users: [
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
+        ]),
+        TTGroupPreset(name: "Group 2", users: [
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
+            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
+        ])]
+        let friendsGroupPresetsViewHostingController = UIHostingController(rootView: FriendsGroupPresetsView(groupPresets: mockData))
+        present(friendsGroupPresetsViewHostingController, animated: true)
     }
     
     private func configureGroupsTable() {
