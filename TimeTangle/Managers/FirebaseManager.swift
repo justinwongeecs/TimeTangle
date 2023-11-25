@@ -231,12 +231,40 @@ class FirebaseManager {
         }
     }
     
-    func createGroup(for group: TTGroup, completed: @escaping(Result<Void, TTError>) -> Void) {
+    func createGroup(name: String, users: [String], groupCode: String?, startingDate: Date, endingDate: Date, completed: @escaping(Result<Void, TTError>) -> Void) {
+        guard let currentUser = currentUser else { return }
+        
+        let dateAMonthAgoFromToday = Date().getDateWithMonthOffset(by: -1) ?? Date()
+        let dateAMonthFromToday = Date().getDateWithMonthOffset(by: 1) ?? Date()
+        let groupCode = groupCode ?? generateRandomGroupCode()
+        
+        let newGroup = TTGroup(name: name, users: users, code: groupCode, startingDate: Date(), endingDate: Date(), histories: [], events: [], admins: [currentUser.id], setting: TTGroupSetting(minimumNumOfUsers: TTConstants.groupMinNumOfUsers, maximumNumOfUsers: TTConstants.groupMaxNumOfUsers, boundedStartDate: dateAMonthAgoFromToday, boundedEndDate: dateAMonthFromToday, lockGroupChanges: false, allowGroupJoin: true))
+        
         do {
-            try db.collection(TTConstants.groupsCollection).document(group.code).setData(from: group)
+            try db.collection(TTConstants.groupsCollection).document(groupCode).setData(from: newGroup)
+            
+            for userID in users {
+                //fetch the data of each user to get the groupCodes property
+                FirebaseManager.shared.fetchUserDocumentData(with: userID) { result in
+                    switch result {
+                    case .success(let user):
+                        let groupCodesField = [
+                            TTConstants.groupCodes: user.groupCodes.arrayByAppending(groupCode)
+                        ]
+                        //update the groupCodes property of each user
+                        FirebaseManager.shared.updateUserData(for: userID, with: groupCodesField) { error in
+                            guard let error = error else { return }
+                            completed(.failure(.unableToUpdateUser))
+                        }
+                    case .failure(_):
+                        //TODO: Create functionality to put custom message into enum
+                        completed(.failure(.unableToFetchUsers))
+                    }
+                }
+            }
+            
             completed(.success(()))
         } catch {
-            //TODO: Catch Firestore Error
             completed(.failure(.unableToCreateGroup))
         }
     }
@@ -275,8 +303,12 @@ class FirebaseManager {
         }
     }
     
-    //MARK: - Authentication
+    func generateRandomGroupCode() -> String {
+        let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        return String((0...5).map{ _ in letters.randomElement()! })
+    }
     
+    //MARK: - Authentication
     func createUser(firstName: String, lastName: String, email: String, password: String, phoneNumber: String, completed: @escaping(Result<Void, TTError>) -> Void) {
         //check to see if email and or password fields are empty
         guard email != "", password != "" else {
@@ -421,7 +453,7 @@ class FirebaseManager {
     }
     
     private func createFriendsNC() -> UINavigationController {
-        let friendsVC = FriendsVC(storeViewModel: storeViewModel, usersCache: usersCache)
+        let friendsVC = FriendsVC(usersCache: usersCache)
         friendsVC.tabBarItem = UITabBarItem(title: "Friends", image: UIImage(systemName: "person.3"), tag: 2)
         return UINavigationController(rootViewController: friendsVC)
     }

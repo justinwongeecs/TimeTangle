@@ -69,7 +69,7 @@ class CreateGroupConfirmationVC: TTModalCardVC {
     }
     
     private func configureGroupCodeView() {
-        groupCode = generateRandomGroupCode()
+        groupCode = FirebaseManager.shared.generateRandomGroupCode()
         groupCodeView = TTGroupCodeView(codeText: groupCode)
         groupCodeView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(groupCodeView)
@@ -118,51 +118,21 @@ class CreateGroupConfirmationVC: TTModalCardVC {
         ])
     }
     
-    private func generateRandomGroupCode() -> String {
-        let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-        return String((0...5).map{ _ in letters.randomElement()! })
-    }
-    
     @objc private func confirmGroup() {
         guard !textField.text!.isEmpty else {
             self.presentTTAlert(title: "Group Name Can't Be Empty", message: TTError.textFieldsCannotBeEmpty.rawValue, buttonTitle: "Ok")
             return
         }
         
-        guard let groupCode = groupCode,
-        let currentUser = FirebaseManager.shared.currentUser else { return }
+        guard let groupCode = groupCode else { return }
         
-        //Create a group instance in Firestore
-        let dateAMonthAgoFromToday = Date().getDateWithMonthOffset(by: -1) ?? Date()
-        let dateAMonthFromToday = Date().getDateWithMonthOffset(by: 1) ?? Date()
-        let newGroup = TTGroup(name: textField.text!, users: usersInQueue.map{$0.id}, code: groupCode, startingDate: Date(), endingDate: Date(), histories: [], events: [], admins: [currentUser.id], setting: TTGroupSetting(minimumNumOfUsers: 2, maximumNumOfUsers: 10, boundedStartDate: dateAMonthAgoFromToday, boundedEndDate: dateAMonthFromToday, lockGroupChanges: false, allowGroupJoin: true))
-        FirebaseManager.shared.createGroup(for: newGroup) { [weak self] result in
+        FirebaseManager.shared.createGroup(name: textField.text!, users: usersInQueue.map{$0.id}, groupCode: groupCode, startingDate: Date(), endingDate: Date()) { [weak self] result in
             switch result {
-            case .success(_):
-                self?.createGroupConfirmationDelegate.didSuccessfullyCreateGroup()
-            case .failure(let error):
-                self?.presentTTAlert(title: "Cannot Create New Group", message: error.rawValue, buttonTitle: "Ok")
-            }
-        }
-        
-        //add group code to groupCodes property of all of the usersInQueue
-        for id in usersInQueue.map({ $0.id }) {
-            //fetch the data of each user to get the groupCodes property
-            FirebaseManager.shared.fetchUserDocumentData(with: id) { [weak self] result in
-                switch result {
-                case .success(let user):
-                    let groupCodesField = [
-                        TTConstants.groupCodes: user.groupCodes.arrayByAppending(groupCode)
-                    ]
-                    //update the groupCodes property of each user
-                    FirebaseManager.shared.updateUserData(for: id, with: groupCodesField) { error in
-                        guard let error = error else { return }
-                        self?.presentTTAlert(title: "Cannot update user", message: error.rawValue, buttonTitle: "Ok")
-                    }
+                case .success(_):
+                    self?.createGroupConfirmationDelegate.didSuccessfullyCreateGroup()
                 case .failure(let error):
-                    self?.presentTTAlert(title: "Cannot fetch user", message: error.rawValue, buttonTitle: "Ok")
+                    self?.presentTTAlert(title: "Cannot Create New Group", message: error.rawValue, buttonTitle: "Ok")
                 }
             }
-        }
     }
 }

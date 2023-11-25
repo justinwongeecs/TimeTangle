@@ -52,6 +52,8 @@ struct GroupSettingsView: View {
             Form {
                 groupNameSection
                 
+                groupCodeSection 
+                
                 setMinAndMaxMembersSection
                 
                 setMinAndMaxDatesSection
@@ -153,6 +155,16 @@ struct GroupSettingsView: View {
                 Button("Cancel", role: .cancel) {
                     showChangeGroupNameAlert.toggle()
                 }
+            }
+        }
+    }
+    
+    private var groupCodeSection : some View {
+        Section("Group Code") {
+            HStack {
+                Text(group.code)
+                Spacer()
+                CopyPasteboardView(text: group.code)
             }
         }
     }

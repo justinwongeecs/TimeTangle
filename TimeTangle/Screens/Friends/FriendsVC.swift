@@ -8,15 +8,13 @@
 import UIKit
 
 class FriendsVC: UIViewController {
-    private var storeViewModel: StoreViewModel
     private var usersCache: TTCache<String, TTUser>
     
     private let searchBarField = UISearchBar()
     private let friendsAndRequestsView = UIView()
     private var friendsAndRequestsVC: FriendsAndRequestsVC!
     
-    init(storeViewModel: StoreViewModel, usersCache: TTCache<String, TTUser>) {
-        self.storeViewModel = storeViewModel
+    init(usersCache: TTCache<String, TTUser>) {
         self.usersCache = usersCache
         super.init(nibName: nil, bundle: nil)
     }

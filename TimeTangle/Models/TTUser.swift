@@ -19,7 +19,7 @@ struct TTUser: Codable, Equatable {
     var friends: [String]
     var friendRequests: [TTFriendRequest]
     var groupCodes: [String]
-    var groupPresets: [[String]]
+    var groupPresets: [TTGroupPreset]
     var profilePictureData: Data?
     
     //Contact Information

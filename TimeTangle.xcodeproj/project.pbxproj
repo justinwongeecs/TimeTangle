@@ -16,6 +16,7 @@
 		E8188FDD2A18811A005AA0BF /* Event+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8188FDC2A18811A005AA0BF /* Event+Ext.swift */; };
 		E81D25062A145217003C65C5 /* UILabel+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E81D25052A145217003C65C5 /* UILabel+Ext.swift */; };
 		E83146662AE0F6D700A5B250 /* GroupViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E83146652AE0F6D700A5B250 /* GroupViewCell.swift */; };
+		E8452F502B11EA2400B5DD38 /* CopyPasteboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8452F4F2B11EA2400B5DD38 /* CopyPasteboardView.swift */; };
 		E84541AF295F818B00CBB430 /* GroupDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84541AE295F818B00CBB430 /* GroupDetailVC.swift */; };
 		E84541B2295FADDC00CBB430 /* EventKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84541B1295FADDC00CBB430 /* EventKitManager.swift */; };
 		E84541B5295FC17500CBB430 /* GroupDetailNib.xib in Resources */ = {isa = PBXBuildFile; fileRef = E84541B4295FC17500CBB430 /* GroupDetailNib.xib */; };
@@ -91,8 +92,9 @@
 		E8CFC22D295D5E55006C23BE /* GroupsVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CFC22C295D5E55006C23BE /* GroupsVC.swift */; };
 		E8D004A62963B02C00907A64 /* GroupUsersVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8D004A52963B02C00907A64 /* GroupUsersVC.swift */; };
 		E8D004A92963B82B00907A64 /* GroupHistoryVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8D004A82963B82B00907A64 /* GroupHistoryVC.swift */; };
-		E8DC69AD2B0DC5D700F3D36F /* FriendsGroupPresetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8DC69AC2B0DC5D700F3D36F /* FriendsGroupPresetsView.swift */; };
+		E8DC69AD2B0DC5D700F3D36F /* GroupPresetsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8DC69AC2B0DC5D700F3D36F /* GroupPresetsView.swift */; };
 		E8E669E02B0EED89001986C5 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = E8E669DF2B0EED89001986C5 /* GoogleService-Info.plist */; };
+		E8EC873C2B1098980092084F /* GroupPresetZoomedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8EC873B2B1098980092084F /* GroupPresetZoomedView.swift */; };
 		E8ECA5672AFA260600907813 /* SubscriptionPlanBadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8ECA5662AFA260600907813 /* SubscriptionPlanBadgeView.swift */; };
 /* End PBXBuildFile section */
 
@@ -106,6 +108,7 @@
 		E8188FDC2A18811A005AA0BF /* Event+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Event+Ext.swift"; sourceTree = "<group>"; };
 		E81D25052A145217003C65C5 /* UILabel+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UILabel+Ext.swift"; sourceTree = "<group>"; };
 		E83146652AE0F6D700A5B250 /* GroupViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupViewCell.swift; sourceTree = "<group>"; };
+		E8452F4F2B11EA2400B5DD38 /* CopyPasteboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopyPasteboardView.swift; sourceTree = "<group>"; };
 		E84541AE295F818B00CBB430 /* GroupDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupDetailVC.swift; sourceTree = "<group>"; };
 		E84541B1295FADDC00CBB430 /* EventKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventKitManager.swift; sourceTree = "<group>"; };
 		E84541B4295FC17500CBB430 /* GroupDetailNib.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = GroupDetailNib.xib; sourceTree = "<group>"; };
@@ -175,9 +178,10 @@
 		E8CFC22C295D5E55006C23BE /* GroupsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupsVC.swift; sourceTree = "<group>"; };
 		E8D004A52963B02C00907A64 /* GroupUsersVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupUsersVC.swift; sourceTree = "<group>"; };
 		E8D004A82963B82B00907A64 /* GroupHistoryVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupHistoryVC.swift; sourceTree = "<group>"; };
-		E8DC69AC2B0DC5D700F3D36F /* FriendsGroupPresetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsGroupPresetsView.swift; sourceTree = "<group>"; };
+		E8DC69AC2B0DC5D700F3D36F /* GroupPresetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupPresetsView.swift; sourceTree = "<group>"; };
 		E8E669DE2B0EEAE4001986C5 /* TimeTangle.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TimeTangle.entitlements; sourceTree = "<group>"; };
 		E8E669DF2B0EED89001986C5 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		E8EC873B2B1098980092084F /* GroupPresetZoomedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupPresetZoomedView.swift; sourceTree = "<group>"; };
 		E8ECA5662AFA260600907813 /* SubscriptionPlanBadgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionPlanBadgeView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -276,6 +280,7 @@
 			children = (
 				E873BCE3296693C70015AE99 /* TTCloseButton.swift */,
 				E8CEE2B82957A0C7000CD7FE /* TTButton.swift */,
+				E8452F4F2B11EA2400B5DD38 /* CopyPasteboardView.swift */,
 			);
 			path = Buttons;
 			sourceTree = "<group>";
@@ -285,7 +290,6 @@
 			children = (
 				E893A26C2959859D004F7BC5 /* FriendsVC.swift */,
 				E893A276295A62EF004F7BC5 /* FriendsAndRequestsVC.swift */,
-				E8DC69AC2B0DC5D700F3D36F /* FriendsGroupPresetsView.swift */,
 			);
 			path = Friends;
 			sourceTree = "<group>";
@@ -461,6 +465,8 @@
 				E873BCF2297910330015AE99 /* GroupOverviewVC.swift */,
 				E8188FCE2A15ED92005AA0BF /* SaveOrCancelIsland.swift */,
 				E8B6BDB92A21D25F00DAFF04 /* GroupSettingsView.swift */,
+				E8DC69AC2B0DC5D700F3D36F /* GroupPresetsView.swift */,
+				E8EC873B2B1098980092084F /* GroupPresetZoomedView.swift */,
 			);
 			path = Groups;
 			sourceTree = "<group>";
@@ -574,7 +580,7 @@
 				E8B6BDBE2A2299C000DAFF04 /* UIApplication+Ext.swift in Sources */,
 				E8CEE2D92957D1FD000CD7FE /* UIViewController+Ext.swift in Sources */,
 				E865A8042A207D7A00F105AA /* View+Ext.swift in Sources */,
-				E8DC69AD2B0DC5D700F3D36F /* FriendsGroupPresetsView.swift in Sources */,
+				E8DC69AD2B0DC5D700F3D36F /* GroupPresetsView.swift in Sources */,
 				E8CEE2D32957C7C7000CD7FE /* TTTitledTextField.swift in Sources */,
 				E8CEE2CA2957B03C000CD7FE /* LoginVC.swift in Sources */,
 				E865A7AD2A1C80C800F105AA /* TTProfileImageView.swift in Sources */,
@@ -582,6 +588,7 @@
 				E865A7F42A1FF30100F105AA /* SettingsView.swift in Sources */,
 				E8B6BDC82A26B01900DAFF04 /* UISearchBar+Ext.swift in Sources */,
 				E893A275295A5DB1004F7BC5 /* TTFriendRequest.swift in Sources */,
+				E8EC873C2B1098980092084F /* GroupPresetZoomedView.swift in Sources */,
 				E8CFC22D295D5E55006C23BE /* GroupsVC.swift in Sources */,
 				E8B6BDBC2A22916E00DAFF04 /* TTSwiftUIAlertView.swift in Sources */,
 				E893A27E295A8793004F7BC5 /* TTGroup.swift in Sources */,
@@ -590,6 +597,7 @@
 				E89AE6012AE23BEC00BDC454 /* Array+Ext.swift in Sources */,
 				E8CFC22B295D3981006C23BE /* CreateGroupConfirmationVC.swift in Sources */,
 				E893A27A295A6D40004F7BC5 /* TTConstants.swift in Sources */,
+				E8452F502B11EA2400B5DD38 /* CopyPasteboardView.swift in Sources */,
 				E865A7A92A1C108A00F105AA /* TTEvent.swift in Sources */,
 				E8B6BE122A2A88EA00DAFF04 /* TTActivityIndicatorView.swift in Sources */,
 				E8188FCF2A15ED92005AA0BF /* SaveOrCancelIsland.swift in Sources */,

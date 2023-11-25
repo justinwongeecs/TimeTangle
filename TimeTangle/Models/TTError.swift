@@ -7,7 +7,11 @@
 
 import Foundation
 
-enum TTError: String, Error {
+enum TTError: String, Error, Identifiable {
+    var id: String {
+        return UUID().uuidString
+    }
+    
     //MARK: - Firebase
     case passwordsDoNotMatch = "Password and Confirm Password do not match."
     case unableToCreateUser = "Unable to create user. Please try again."

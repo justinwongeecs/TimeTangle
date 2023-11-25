@@ -21,10 +21,10 @@ class TTAlertVC: UIViewController {
     let padding: CGFloat = 20
     
     init(alertTitle: String, message: String, buttonTitle: String) {
-        super.init(nibName: nil, bundle: nil)
         self.alertTitle = alertTitle
         self.message = message
         self.buttonTitle = buttonTitle
+        super.init(nibName: nil, bundle: nil)
     }
     
     required init?(coder: NSCoder) {
@@ -86,7 +86,7 @@ class TTAlertVC: UIViewController {
     private func configureMessageLabel() {
         containerView.addSubview(messageLabel)
         messageLabel.text = message ?? "Unable to complete request"
-        messageLabel.numberOfLines = 4
+        messageLabel.numberOfLines = 0
         
         NSLayoutConstraint.activate([
             messageLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),

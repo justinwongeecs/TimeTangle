@@ -54,13 +54,7 @@ struct SettingsMyProfileView: View {
                         HStack {
                             Text(id)
                             Spacer()
-                            Button(action: {
-                                UIPasteboard.general.string = id
-                            }) {
-                                Image(systemName: "clipboard")
-                                    .foregroundStyle(.green)
-                                    .roundedRectangleBackgroundStyle(cornerRadius: 10, fillColor: .green.opacity(0.2), strokeColor: .clear, frameWidth: 35, frameHeight: 35)
-                            }
+                            CopyPasteboardView(text: id)
                         }
                         .padding(15)
                     }

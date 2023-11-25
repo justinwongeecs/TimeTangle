@@ -24,6 +24,7 @@ struct TTConstants {
     static let profilePictureData = "profilePictureData"
     static let email = "email"
     static let phoneNumber = "phoneNumber"
+    static let groupPresets = "groupPresets"
     
     //MARK: - TTFriendRequest
     static let recipientID = "recipientID"
@@ -39,6 +40,9 @@ struct TTConstants {
     static let groupHistories = "histories"
     static let groupAdmins = "admins"
     static let groupEvents = "events"
+    
+    static let groupMinNumOfUsers = 2
+    static let groupMaxNumOfUsers = 10
     
     //MARK: - TTGroupSetting
     static let groupSettingMinimumNumOfUsers = "setting.minimumNumOfUsers"

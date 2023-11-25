@@ -49,27 +49,13 @@ class GroupsVC: UIViewController {
         let showGroupPresetsViewButton = UIBarButtonItem(image: UIImage(systemName: "person.3"), style: .plain, target: self, action: #selector(showGroupPresetsView))
         showGroupPresetsViewButton.tintColor = .systemGreen
         
-        //TODO: Change This Back Later
-//        if storeViewModel.isSubscriptionPro {
+        if FirebaseManager.shared.storeViewModel.isSubscriptionPro {
             navigationItem.rightBarButtonItem = showGroupPresetsViewButton
-//        }
+        }
     }
     
     @objc private func showGroupPresetsView() {
-        let mockData = [TTGroupPreset(name: "Group 1", users: [
-            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
-            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
-            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
-            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
-            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
-            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
-            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
-        ]),
-        TTGroupPreset(name: "Group 2", users: [
-            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
-            TTUser(firstname: "Johnny", lastname: "Appleseed", id: UUID().uuidString, friends: [], friendRequests: [], groupCodes: [], groupPresets: []),
-        ])]
-        let friendsGroupPresetsViewHostingController = UIHostingController(rootView: FriendsGroupPresetsView(groupPresets: mockData))
+        let friendsGroupPresetsViewHostingController = UIHostingController(rootView: GroupPresetsView())
         present(friendsGroupPresetsViewHostingController, animated: true)
     }
     
