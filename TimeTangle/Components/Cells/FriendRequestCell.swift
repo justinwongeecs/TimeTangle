@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SwiftUI
 import FirebaseFirestore
 
 protocol FriendRequestCellDelegate: AnyObject {
@@ -16,7 +17,7 @@ class FriendRequestCell: UITableViewCell {
 
     static let reuseID = "FriendRequestCell"
     
-    let avatarImageView = TTProfileImageView(widthHeight: TTConstants.profileImageViewInCellHeightAndWidth)
+    let avatarImageView = UIView()
     let idLabel = TTTitleLabel(textAlignment: .left, fontSize: 20)
     let friendRequestTypeLabel = TTBodyLabel(textAlignment: .right)
     
@@ -51,20 +52,40 @@ class FriendRequestCell: UITableViewCell {
          
         switch friendRequest.requestType {
         case .outgoing:
-            if let recipientUserImageData = friendRequest.recipientProfilePictureData, let image = UIImage(data: recipientUserImageData) {
-                avatarImageView.setImage(to: image)
+            if let recipientProfilePictureURLString = friendRequest.recipientProfilePictureURLString, let imageURL = URL(string: recipientProfilePictureURLString)  {
+                FirebaseStorageManager.shared.fetchImage(for: friendRequest.recipientID, url: imageURL) { [weak self] result in
+                    DispatchQueue.main.async {
+                        switch result {
+                        case .success(let image):
+                            self?.setAvatarImageView(with: image)
+                        case .failure(_):
+                            self?.setAvatarImageView(name: friendRequest.recipientName)
+                        }
+                    }
+                }
             } else {
-                avatarImageView.setToDefaultImage()
+                self.setAvatarImageView(name: friendRequest.recipientName)
             }
+            
             idLabel.text = friendRequest.recipientName
             friendRequestTypeLabel.textColor = .secondaryLabel
             buttonsStackView.isHidden = true
         case .receiving:
-            if let senderUserImageData = friendRequest.senderProfilePictureData, let image = UIImage(data: senderUserImageData) {
-                avatarImageView.setImage(to: image)
+            if let senderProfilePictureURLString = friendRequest.senderProfilePictureURLString, let imageURL = URL(string: senderProfilePictureURLString)  {
+                FirebaseStorageManager.shared.fetchImage(for: friendRequest.senderID, url: imageURL) { [weak self] result in
+                    DispatchQueue.main.async {
+                        switch result {
+                        case .success(let image):
+                            self?.setAvatarImageView(with: image)
+                        case .failure(_):
+                            self?.setAvatarImageView(name: friendRequest.senderName)
+                        }
+                    }
+                }
             } else {
-                avatarImageView.setToDefaultImage()
+                self.setAvatarImageView(name: friendRequest.senderName)
             }
+            
             idLabel.text = friendRequest.senderName
             //remove friendReqeustTypeLabel because we will show accept or decline buttons instead
             friendRequestTypeLabel.removeFromSuperview()
@@ -73,6 +94,22 @@ class FriendRequestCell: UITableViewCell {
         case .declined:
             friendRequestTypeLabel.textColor = .systemRed
         }
+    }
+    
+    private func setAvatarImageView(with image: UIImage? = nil, name: String? = nil) {
+        let hostingController = UIHostingController(rootView: TTSwiftUIProfileImageView(user: nil, name: name, image: image, size: TTConstants.profileImageViewInCellHeightAndWidth))
+        hostingController.view.backgroundColor = .clear
+        let profilePictureView = hostingController.view!
+        profilePictureView.translatesAutoresizingMaskIntoConstraints = false
+        avatarImageView.subviews.forEach({ $0.removeFromSuperview() })
+        avatarImageView.addSubview(profilePictureView)
+        
+        NSLayoutConstraint.activate([
+            profilePictureView.topAnchor.constraint(equalTo: avatarImageView.topAnchor),
+            profilePictureView.leadingAnchor.constraint(equalTo: avatarImageView.leadingAnchor),
+            profilePictureView.trailingAnchor.constraint(equalTo: avatarImageView.trailingAnchor),
+            profilePictureView.bottomAnchor.constraint(equalTo: avatarImageView.bottomAnchor)
+        ])
     }
     
     private func configureCell() {
@@ -86,6 +123,8 @@ class FriendRequestCell: UITableViewCell {
         layer.borderColor = UIColor.systemGreen.cgColor
         selectionStyle = .none
         
+        avatarImageView.translatesAutoresizingMaskIntoConstraints = false
+        
         let padding: CGFloat = 12
         
         NSLayoutConstraint.activate([
@@ -95,7 +134,7 @@ class FriendRequestCell: UITableViewCell {
             avatarImageView.widthAnchor.constraint(equalToConstant: TTConstants.profileImageViewInCellHeightAndWidth),
             
             idLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
-            idLabel.leadingAnchor.constraint(equalTo: avatarImageView.trailingAnchor, constant: 24),
+            idLabel.leadingAnchor.constraint(equalTo: avatarImageView.trailingAnchor, constant: 10),
             idLabel.trailingAnchor.constraint(equalTo: friendRequestTypeLabel.leadingAnchor),
             idLabel.heightAnchor.constraint(equalToConstant: 30),
             

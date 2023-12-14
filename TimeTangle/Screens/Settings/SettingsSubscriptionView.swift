@@ -23,6 +23,7 @@ struct SettingsSubscriptionView: View {
     
     @State private var currentSubscriptionRenewalDate: String = ""
     @State private var otherSubscriptionRenewalDate: String = ""
+    @State private var showManageSubscriptionSheet = false
     
     var body: some View {
         NavigationStack {
@@ -50,6 +51,7 @@ struct SettingsSubscriptionView: View {
                     }
                 }
                 restorePurchasesButton
+                manageSubscriptionsButton
             }
             .navigationTitle("Subscriptions")
             .navigationBarTitleDisplayMode(.inline)
@@ -61,6 +63,7 @@ struct SettingsSubscriptionView: View {
                 }
             }
         }
+        .manageSubscriptionsSheet(isPresented: $showManageSubscriptionSheet)
     }
     
     private var emptyView: some View {
@@ -82,6 +85,15 @@ struct SettingsSubscriptionView: View {
                 .foregroundStyle(.green)
         }
         .padding()
+    }
+    
+    private var manageSubscriptionsButton: some View {
+        Button(action: {
+            showManageSubscriptionSheet.toggle()
+        }) {
+            Text("Manage Subscriptions")
+                .foregroundStyle(.green)
+        }
     }
     
     private var inBillingRetryPeriodView: some View {

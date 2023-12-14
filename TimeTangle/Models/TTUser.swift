@@ -20,7 +20,7 @@ struct TTUser: Codable, Equatable {
     var friendRequests: [TTFriendRequest]
     var groupCodes: [String]
     var groupPresets: [TTGroupPreset]
-    var profilePictureData: Data?
+    var profilePictureURLString: String?
     
     //Contact Information
     var phoneNumber: String = ""
@@ -30,15 +30,20 @@ struct TTUser: Codable, Equatable {
         return "\(firstname) \(lastname)"
     }
     
-    func getProfilePictureUIImage() -> UIImage? {
-        if let imageData = profilePictureData, let image = UIImage(data: imageData) {
-            return image
+    func getProfilePictureUIImage(completion: @escaping(UIImage?) -> Void) {
+        guard let profilePictureURLString = profilePictureURLString, let profilePictureURL = URL(string: profilePictureURLString) else { return completion(nil) }
+        if let image = FirebaseStorageManager.shared.userImagesCache.value(forKey: profilePictureURL) {
+            return completion(image)
+        } else {
+            FirebaseStorageManager.shared.fetchImage(for: id, url: profilePictureURL) { result in
+                switch result {
+                case .success(let image):
+                    FirebaseStorageManager.shared.userImagesCache.insert(image, forKey: profilePictureURL)
+                    completion(image)
+                case .failure(_):
+                    completion(nil)
+                }
+            }
         }
-        return nil
-    }
-    
-    func getCompressedProfilePictureData(withQuality compressionQuality: CGFloat) -> Data? {
-        guard let image = getProfilePictureUIImage() else { return nil }
-        return image.jpegData(compressionQuality: compressionQuality)
     }
 }

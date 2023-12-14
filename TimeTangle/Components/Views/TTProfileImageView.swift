@@ -121,9 +121,10 @@ class TTProfileImageView: UIView {
     //MARK: - Public Methods
     
     func setImageForUser(for user: TTUser) {
-        if let imageData = user.profilePictureData, let image = UIImage(data: imageData) {
-            profileImageView.image = image
-            showBorder = true 
+        user.getProfilePictureUIImage { [weak self] image in
+            guard let image = image else { return }
+            self?.profileImageView.image = image
+            self?.showBorder = true
         }
     }
     

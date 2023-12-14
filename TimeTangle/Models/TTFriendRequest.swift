@@ -10,8 +10,8 @@ import Foundation
 typealias TTFriendRequestType = TTFriendRequest.TTFriendRequestType
 
 struct TTFriendRequest: Codable {
-    var senderProfilePictureData: Data?
-    var recipientProfilePictureData: Data?
+    var senderProfilePictureURLString: String?
+    var recipientProfilePictureURLString: String?
     var senderName: String
     var recipientName: String
     var senderID: String
@@ -23,10 +23,10 @@ struct TTFriendRequest: Codable {
             "senderName": senderName,
             "recipientName": recipientName,
             "senderID": senderID,
-            "recipientID": recipientID,
-            "requestType": requestType.description,
-            "recipientProfilePictureData": recipientProfilePictureData,
-            "senderProfilePictureData": senderProfilePictureData
+            TTConstants.recipientID: recipientID,
+            TTConstants.requestType: requestType.description,
+            TTConstants.recipientProfilePictureURLString: recipientProfilePictureURLString,
+            TTConstants.senderProfilePictureURLString: senderProfilePictureURLString
         ]
     }
     

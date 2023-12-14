@@ -276,7 +276,8 @@ class FriendsAndRequestsVC: UIViewController {
         //parameter user is the RECEIPIENT
         guard let currentUser = FirebaseManager.shared.currentUser else { return }
         
-        let senderFriendRequest = TTFriendRequest(senderProfilePictureData: currentUser.getCompressedProfilePictureData(withQuality: 0.05), recipientProfilePictureData: user.getCompressedProfilePictureData(withQuality: 0.05), senderName: currentUser.getFullName(), recipientName: user.getFullName(), senderID: currentUser.id, recipientID: user.id, requestType: .outgoing)
+        let senderFriendRequest = TTFriendRequest(senderProfilePictureURLString: currentUser.profilePictureURLString, recipientProfilePictureURLString: user.profilePictureURLString, senderName: currentUser.getFullName(), recipientName: user.getFullName(), senderID: currentUser.id, recipientID: user.id, requestType: .outgoing)
+        
         var recipientFriendRequest = senderFriendRequest
         recipientFriendRequest.requestType = .receiving
         

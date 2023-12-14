@@ -20,8 +20,7 @@ struct TTConstants {
     static let lastname = "lastname"
     static let id = "id"
     static let groupCodes = "groupCodes"
-    static let profilePictureURL = "profilePictureURL"
-    static let profilePictureData = "profilePictureData"
+    static let profilePictureURLString = "profilePictureURLString"
     static let email = "email"
     static let phoneNumber = "phoneNumber"
     static let groupPresets = "groupPresets"
@@ -30,6 +29,8 @@ struct TTConstants {
     static let recipientID = "recipientID"
     static let requestType = "requestType"
     static let senderID = "senderID"
+    static let senderProfilePictureURLString = "senderProfilePictureURLString"
+    static let recipientProfilePictureURLString = "recipientProfilePictureURLString"
     
     //MARK: - TTGroup
     static let groupCode = "code"
@@ -56,7 +57,7 @@ struct TTConstants {
     
     //MARK: - UI
     static let emptyStateViewTag = 100
-    static let profileImageViewInCellHeightAndWidth: CGFloat = 40
+    static let profileImageViewInCellHeightAndWidth: CGFloat = 48
     static let defaultCellHeight: CGFloat = 60
     static let defaultCellColor: UIColor = .systemGreen
     static let defaultCellHeaderAndFooterHeight: CGFloat = 7

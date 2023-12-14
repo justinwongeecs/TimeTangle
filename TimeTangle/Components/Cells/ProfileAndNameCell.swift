@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SwiftUI
 
 class ProfileAndNameCell: UITableViewCell {
     
@@ -14,7 +15,8 @@ class ProfileAndNameCell: UITableViewCell {
     private var user: TTUser?
     
     private var hStackView = UIStackView()
-    internal var avatarImageView = TTProfileImageView(widthHeight: TTConstants.profileImageViewInCellHeightAndWidth)
+    internal var avatarImageView = UIView()
+
     internal let idLabel = TTTitleLabel(textAlignment: .left, fontSize: 15)
     
     private var hStackViewLeadingConstraint: NSLayoutConstraint!
@@ -40,11 +42,24 @@ class ProfileAndNameCell: UITableViewCell {
         self.layer.borderWidth = 1
         
         idLabel.text = user.getFullName()
-    
-        if let imageData = user.profilePictureData, let image = UIImage(data: imageData) {
-            avatarImageView.setImage(to: image)
-        } else {
-            avatarImageView.setToDefaultImage()
+            
+        user.getProfilePictureUIImage { [weak self] image in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                let hostingController = UIHostingController(rootView: TTSwiftUIProfileImageView(user: user, image: image, size: TTConstants.profileImageViewInCellHeightAndWidth * 1.3))
+                hostingController.view.backgroundColor = .clear
+                let profilePictureView = hostingController.view!
+                profilePictureView.translatesAutoresizingMaskIntoConstraints = false
+                self.avatarImageView.subviews.forEach({ $0.removeFromSuperview() })
+                self.avatarImageView.addSubview(profilePictureView)
+                
+                NSLayoutConstraint.activate([
+                    profilePictureView.topAnchor.constraint(equalTo: self.avatarImageView.topAnchor),
+                    profilePictureView.leadingAnchor.constraint(equalTo: self.avatarImageView.leadingAnchor),
+                    profilePictureView.trailingAnchor.constraint(equalTo: self.avatarImageView.trailingAnchor),
+                    profilePictureView.bottomAnchor.constraint(equalTo: self.avatarImageView.bottomAnchor)
+                ])
+            }
         }
     }
     
@@ -60,13 +75,12 @@ class ProfileAndNameCell: UITableViewCell {
         hStackView.spacing = 10
         addSubview(hStackView)
         
-        avatarImageView.translatesAutoresizingMaskIntoConstraints = false
         hStackView.addArrangedSubview(avatarImageView)
         hStackView.addArrangedSubview(idLabel)
         
         hStackViewLeadingConstraint = hStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10)
         hStackViewLeadingConstraint.isActive = true
-        
+         
         NSLayoutConstraint.activate([
             avatarImageView.widthAnchor.constraint(equalToConstant: TTConstants.profileImageViewInCellHeightAndWidth),
             avatarImageView.heightAnchor.constraint(equalToConstant: TTConstants.profileImageViewInCellHeightAndWidth),

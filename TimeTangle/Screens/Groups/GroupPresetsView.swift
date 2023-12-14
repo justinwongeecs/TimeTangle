@@ -8,32 +8,6 @@
 import SwiftUI
 import Firebase
 
-//MARK: - TTGroupPreset
-struct TTGroupPreset: Codable, Identifiable {
-    var id: String 
-    var name: String
-    var userIDs: [String]
-    private var users: [TTUser]?
-    
-    var dictionary: [String: Any] {
-        return [
-            "id": id,
-            "name": name,
-            "userIDs": userIDs
-        ]
-    }
-    
-    init(id: String, name: String, userIDs: [String]) {
-        self.id = id
-        self.name = name
-        self.userIDs = userIDs
-    }
-    
-    func getUsers() -> [TTUser]? {
-        return users
-    }
-}
-
 //MARK: - GroupPresetsViewModel
 class GroupPresetsViewModel: ObservableObject {
     @Published var groupPresets = [TTGroupPreset]()
@@ -68,15 +42,15 @@ struct GroupPresetsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-//                if !FirebaseManager.shared.storeViewModel.isSubscriptionPro {
-//                    lockedView
-                if groupPresetsVM.groupPresets.isEmpty {
+                if !FirebaseManager.shared.storeViewModel.isSubscriptionPro {
+                    lockedView
+                } else if  groupPresetsVM.groupPresets.isEmpty {
                     GroupPresetsEmptyView()
                 } else {
                     VStack {
                         List {
-                            ForEach(groupPresetsVM.groupPresets) { groupPreset in
-                                GroupPresetDisclosureGroup(selectedGroupPresent: $selectedGroupPreset, isInEditMode: $isInEditMode, isExpanded: $isDisclosureGroupExpanded, groupPreset: groupPreset)
+                            ForEach(groupPresetsVM.groupPresets.sorted(by: { $0.name < $1.name })) { groupPreset in
+                                GroupPresetDisclosureGroup(selectedGroupPreset: $selectedGroupPreset, isInEditMode: $isInEditMode, isExpanded: $isDisclosureGroupExpanded, groupPreset: groupPreset)
                                     .listRowBackground(Color.clear)
                                     .listRowSeparator(.hidden)
                                     .matchedGeometryEffect(id: "\(groupPreset.id)", in: animation)
@@ -86,7 +60,7 @@ struct GroupPresetsView: View {
                         .scrollContentBackground(.hidden)
                         .allowsHitTesting(isShowingZoomedView ? false : true)
                     }
-                    .blur(radius: selectedGroupPreset != nil ? 10 : 0)
+                    .blur(radius: selectedGroupPreset != nil ? 60 : 0)
                     
                     if selectedGroupPreset != nil {
                         GroupPresetZoomedView(selectedGroupPreset: $selectedGroupPreset, isInEditMode: $isInEditMode, isDisclosureGroupExpanded: $isDisclosureGroupExpanded, isTyping: $isTyping, animation: animation)
@@ -123,7 +97,8 @@ struct GroupPresetsView: View {
                     }
                 }
                 
-                if isDisclosureGroupExpanded {
+                if isDisclosureGroupExpanded, let selectedGroupPreset = selectedGroupPreset,
+                   selectedGroupPreset.userIDs.count > 1 {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button(action: {
                             withAnimation {
@@ -156,6 +131,13 @@ struct GroupPresetsView: View {
                 }
             })
             Button("Cancel", role: .cancel) {}
+        }
+        .onChange(of: groupPresetsVM.groupPresets) {
+            //If there we have updates to group presets, and a group preset is selected, update the selected group preset 
+            if let selectedGroupPreset = selectedGroupPreset,
+               let index = groupPresetsVM.groupPresets.firstIndex(where: { $0.id == selectedGroupPreset.id }) {
+                self.selectedGroupPreset = groupPresetsVM.groupPresets[index]
+            }
         }
     }
     
@@ -216,17 +198,18 @@ struct GroupPresetsEmptyView: View {
 
 //MARK: - GroupPresetDisclosureGroup
 struct GroupPresetDisclosureGroup: View {
-    @Binding var selectedGroupPresent: TTGroupPreset?
+    @Binding var selectedGroupPreset: TTGroupPreset?
     @Binding var isInEditMode: Bool
     @Binding var isExpanded: Bool
     
     var groupPreset: TTGroupPreset
     
     @State private var groupPresetUsers = [TTUser]()
-    @State private var errorFetchingUsers = ""
+    @State private var errorFetchingUsers: TTError?
+    @State private var showRemoveMemberConfirmationAlert = false
     
     var showMembersListView: Bool {
-        selectedGroupPresent?.id != groupPreset.id && isExpanded
+        selectedGroupPreset?.id == groupPreset.id && isExpanded
     }
     
     var body: some View {
@@ -248,14 +231,19 @@ struct GroupPresetDisclosureGroup: View {
                 groupPresetMembersListView
             }
         }
+        .fullScreenCover(item: $errorFetchingUsers) { details in
+            TTSwiftUIAlertView(alertTitle: "ERROR", message: details.rawValue, buttonTitle: "OK")
+                .ignoresSafeArea(.all)
+        }
     }
     
     private var groupPresetHeaderView: some View {
         Button(action: {
-            selectedGroupPresent = groupPreset
+            selectedGroupPreset = groupPreset
             
             withAnimation(.bouncy) {
                 isExpanded.toggle()
+                if isInEditMode { isInEditMode = false }
             }
         }) {
             HStack {
@@ -278,8 +266,8 @@ struct GroupPresetDisclosureGroup: View {
     
     @ViewBuilder
     private var groupPresetMembersListView: some View {
-        if !errorFetchingUsers.isEmpty {
-            Text("Could Not Fetch Users: \(errorFetchingUsers)")
+        if errorFetchingUsers != nil  {
+            Text("Could Not Fetch Users: \(errorFetchingUsers!.rawValue)")
             .padding()
             .bold()
             .foregroundStyle(.red)
@@ -287,13 +275,21 @@ struct GroupPresetDisclosureGroup: View {
             List {
                 ForEach(groupPresetUsers.sorted(by: { $0.firstname < $1.firstname}), id: \.id) { member in
                     HStack {
-                        if isInEditMode {
+                        if isInEditMode && member.id != FirebaseManager.shared.currentUser?.id {
                             Button(action: {
-                                //TODO: Delete Member From Group
+                                showRemoveMemberConfirmationAlert.toggle()
                             }) {
                                 Image(systemName: "minus.circle.fill")
                                     .font(.system(size: 25))
                                     .foregroundStyle(.red)
+                            }
+                            .alert("Confirm Remove Member?", isPresented: $showRemoveMemberConfirmationAlert) {
+                                Button("Cancel", role: .cancel) {}
+                                Button("Remove", role: .destructive) {
+                                    deleteMemberFromGroupPreset(for: member)
+                                }
+                            } message: {
+                                Text("Are you sure you want to remove \(member.getFullName()) from this group preset?")
                             }
                         }
                         Spacer()
@@ -308,19 +304,23 @@ struct GroupPresetDisclosureGroup: View {
             .scrollIndicators(.hidden)
             .padding(EdgeInsets(top: -10, leading: isInEditMode ? 0 : 20, bottom: 0, trailing: 0))
             .onAppear {
-                //Fetch groupPreset's TTUsers from userIDs
-                if groupPresetUsers.isEmpty {
-                    fetchGroupPresetsUsers()
-                }
+                groupPresetUsers.removeAll()
+                fetchGroupPresetsUsers()
+            }
+            .onChange(of: selectedGroupPreset) {
+                print("Selected Group Preset Changed")
+                groupPresetUsers.removeAll()
+                fetchGroupPresetsUsers()
             }
         }
     }
     
     private func fetchGroupPresetsUsers() {
+        guard let selectedGroupPreset = selectedGroupPreset else { return }
         let usersCache = FirebaseManager.shared.usersCache
         
         //TODO: Abstract this away as part of TTCache<String, TTUser>
-        for userID in groupPreset.userIDs {
+        for userID in selectedGroupPreset.userIDs {
             if let fetchedUser = usersCache.value(forKey: userID) {
                 groupPresetUsers.append(fetchedUser)
             } else {
@@ -330,8 +330,27 @@ struct GroupPresetDisclosureGroup: View {
                         groupPresetUsers.append(ttUser)
                         usersCache.insert(ttUser, forKey: ttUser.id)
                     case .failure(let error):
-                        errorFetchingUsers = error.rawValue
+                        errorFetchingUsers = error
                     }
+                }
+            }
+        }
+    }
+    
+    private func deleteMemberFromGroupPreset(for member: TTUser) {
+        guard let currentUser = FirebaseManager.shared.currentUser else { return }
+        
+        var currentUserGroupPresets = currentUser.groupPresets
+        if let index = currentUserGroupPresets.firstIndex(where: { $0.id == groupPreset.id }) {
+            var userIDSet = Set(currentUserGroupPresets[index].userIDs)
+            userIDSet.subtract([member.id])
+            currentUserGroupPresets[index].userIDs = Array(userIDSet)
+            
+            FirebaseManager.shared.updateUserData(for: currentUser.id, with: [
+                TTConstants.groupPresets: currentUserGroupPresets.map{ $0.dictionary }
+            ]) { error in
+                if let error = error {
+                    errorFetchingUsers = error
                 }
             }
         }
@@ -341,6 +360,7 @@ struct GroupPresetDisclosureGroup: View {
 //MARK: - GroupPresetMemberView
 struct GroupPresetMemberView: View {
     var member: TTUser
+    @State private var memberUIImage: UIImage?
     
     var body: some View {
         RoundedRectangle(cornerRadius: 10)
@@ -349,13 +369,20 @@ struct GroupPresetMemberView: View {
             .frame(width: 250, height: 50)
             .overlay(
                 HStack {
-                    TTSwiftUIProfileImageView(image: member.getProfilePictureUIImage(), size: TTConstants.profileImageViewInCellHeightAndWidth)
+                    TTSwiftUIProfileImageView(user: member, image: memberUIImage, size: TTConstants.profileImageViewInCellHeightAndWidth)
+                        .frame(width: 50)
                     Text(member.getFullName())
                         .bold()
                     Spacer()
                 }
                 .padding(5)
             )
+            .onAppear {
+                member.getProfilePictureUIImage { image in
+                    guard let image = image else { return }
+                    memberUIImage = image
+                }
+            }
     }
 }
 

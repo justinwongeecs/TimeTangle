@@ -137,7 +137,7 @@ struct SettingsMyProfileView: View {
     //MARK: - Profile Picture Section
     @SettingBuilder private var profilePictureSection: some Setting {
         SettingCustomView(id: "ProfilePicture") {
-            VStack(spacing: 5) {
+            VStack(spacing: 6) {
                 profileImageView
                 PhotosPicker(selection: $imageSelection, maxSelectionCount: 1, matching: .images, photoLibrary: .shared()) {
                     Text("Edit Picture")
@@ -148,7 +148,9 @@ struct SettingsMyProfileView: View {
             .onAppear {
                 guard let currentUser = FirebaseManager.shared.currentUser else { return }
 
-                profileImage = currentUser.getProfilePictureUIImage()
+                currentUser.getProfilePictureUIImage { image in
+                    profileImage = image 
+                }
                 firstname = currentUser.firstname
                 lastname = currentUser.lastname
                 id = currentUser.id
@@ -281,22 +283,30 @@ struct SettingsMyProfileView: View {
     private var profileImageView: some View {
         HStack {
             Spacer()
-            TTSwiftUIProfileImageView(image: profileImage, size: 180)
+            TTSwiftUIProfileImageView(user: FirebaseManager.shared.currentUser, image: profileImage, size: 190)
             Spacer()
         }
     }
     
     private func uploadProfileImageDataToFirestore(for image: UIImage) {
         guard let currentUser = FirebaseManager.shared.currentUser else { return }
-
-        guard let compressedImageData = image.jpegData(compressionQuality: 0.05) else { return }
-
-        FirebaseManager.shared.updateUserData(for: currentUser.id, with: [
-            TTConstants.profilePictureData: compressedImageData
-        ]) { error in
-            guard let error = error else { return }
-            print(error.rawValue)
+        
+        FirebaseStorageManager.shared.uploadProfilePicture(for: image) { result in
+            switch result {
+            case .success(let url):
+                FirebaseManager.shared.updateUserData(for: currentUser.id, with: [
+                    TTConstants.profilePictureURLString: url.absoluteString
+                ]) { error in
+                    guard let error = error else { return }
+                    print(error.rawValue)
+                }
+            case .failure(let error):
+                ttError = error
+                showErrorAlert.toggle()
+            }
         }
+
+       
     }
 }
 

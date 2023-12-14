@@ -51,10 +51,9 @@ struct SettingsView: View {
                     
                     
                     SettingGroup {
-                        if storeViewModel.currentSubscription != nil {
+                        if AppStore.canMakePayments && storeViewModel.currentSubscription != nil {
                             subscriptionSection
                         }
-                        contributionsSection
                         feedbackSection
                         aboutSection
                     }
@@ -102,70 +101,6 @@ struct SettingsView: View {
             }
         }
         .previewIcon("bubbles.and.sparkles", foregroundColor: .white, backgroundColor: .purple)
-    }
-    
-    //MARK: - Contributions Section
-    @SettingBuilder private var contributionsSection: some Setting {
-        SettingPage(title: "Contributions") {
-            SettingGroup(id: "ContributionsExplaination") {
-                SettingCustomView {
-                    Text("Keeping TimeTangle's internal organs up and running is no joke! As a solo student developer, any help would be greatly appreciated! 🙏")
-                        .foregroundColor(.gray)
-                        .centered()
-                        .padding(15)
-                }
-            }
-            
-            SettingGroup(id: "$0.99") {
-                SettingCustomView(id: "$0.99") {
-                    Button(action: {}) {
-                        HStack {
-                            Text("🎁 Gift")
-                            Text("$0.99")
-                                .bold()
-                        }
-                        .leftAligned()
-                        .frame(maxWidth: .infinity)
-                    }
-                    .foregroundColor(.green)
-                   
-                    .padding(15)
-                }
-            }
-            
-            SettingGroup(id: "$1.99") {
-                SettingCustomView(id: "$1.99") {
-                    Button(action: {}) {
-                        HStack {
-                            Text("🎁 Gift")
-                            Text("$1.99")
-                                .bold()
-                        }
-                        .leftAligned()
-                        .frame(maxWidth: .infinity)
-                    }
-                    .foregroundColor(.green)
-                    .padding(15)
-                }
-            }
-            
-            SettingGroup(id: "$2.99") {
-                SettingCustomView(id: "$2.99") {
-                    Button(action: {}) {
-                        HStack {
-                            Text("🎁 Gift")
-                            Text("$2.99")
-                                .bold()
-                        }
-                        .leftAligned()
-                        .frame(maxWidth: .infinity)
-                    }
-                    .foregroundColor(.green)
-                    .padding(15)
-                }
-            }
-        }
-        .previewIcon("dollarsign", foregroundColor: .white, backgroundColor: .green)
     }
     
     //MARK: - Feedback Section
@@ -318,7 +253,7 @@ struct SettingsProfileHeaderView: View {
     var body: some View {
         NavigationLink(destination: SettingsMyProfileView()) {
             HStack(spacing: 20) {
-                TTSwiftUIProfileImageView(image: profileImage, size: 100)
+                TTSwiftUIProfileImageView(user: FirebaseManager.shared.currentUser, image: profileImage, size: 100)
                 VStack(alignment: .leading) {
                     Text(name)
                         .multilineTextAlignment(.leading)
@@ -338,7 +273,9 @@ struct SettingsProfileHeaderView: View {
         }
         .onAppear {
             guard let currentUser = FirebaseManager.shared.currentUser else { return }
-            if let imageData = currentUser.profilePictureData, let image = UIImage(data: imageData) {
+            currentUser.getProfilePictureUIImage { image in
+                guard let image = image else { return }
+                print("Gotten Image")
                 profileImage = image
             }
             name = currentUser.getFullName()

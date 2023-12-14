@@ -56,7 +56,7 @@ class FriendCell: ProfileAndNameCell {
         }, at: moreButtonActions.count)
     
         let moreButton = UIButton(type: .custom)
-        moreButton.setImage(UIImage(systemName: "ellipsis.circle.fill", withConfiguration: UIImage.SymbolConfiguration(scale: .large)), for: .normal)
+        moreButton.setImage(UIImage(systemName: "ellipsis", withConfiguration: UIImage.SymbolConfiguration(scale: .large)), for: .normal)
         moreButton.tintColor = .systemGreen.withAlphaComponent(0.8)
         moreButton.menu = UIMenu(children: moreButtonActions)
         moreButton.showsMenuAsPrimaryAction = true
@@ -103,7 +103,6 @@ class FriendCell: ProfileAndNameCell {
     
     private func emailFriend() {
         guard let friend = friend else { return }
-//        UIView.appearance().tintColor = .systemGreen
         let emailComposeVC = MFMailComposeViewController()
         emailComposeVC.mailComposeDelegate = self
         emailComposeVC.setToRecipients([friend.email])

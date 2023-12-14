@@ -41,6 +41,7 @@
 		E87569042AF2B9A5007E7220 /* SettingsSubscriptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E87569032AF2B9A5007E7220 /* SettingsSubscriptionView.swift */; };
 		E8782E962B083B440088E81D /* FeedbackEmailFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8782E952B083B440088E81D /* FeedbackEmailFormView.swift */; };
 		E88A6CFF2ADD0FB300DE38A6 /* FriendCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E88A6CFE2ADD0FB300DE38A6 /* FriendCell.swift */; };
+		E89042ED2B2BAABB00A1B061 /* TTGroupPreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = E89042EC2B2BAABB00A1B061 /* TTGroupPreset.swift */; };
 		E893A25F2959611B004F7BC5 /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = E893A25E2959611B004F7BC5 /* FirebaseAppCheck */; };
 		E893A2612959611B004F7BC5 /* FirebaseAppDistribution-Beta in Frameworks */ = {isa = PBXBuildFile; productRef = E893A2602959611B004F7BC5 /* FirebaseAppDistribution-Beta */; };
 		E893A2632959611B004F7BC5 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = E893A2622959611B004F7BC5 /* FirebaseAuth */; };
@@ -132,6 +133,7 @@
 		E87569032AF2B9A5007E7220 /* SettingsSubscriptionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSubscriptionView.swift; sourceTree = "<group>"; };
 		E8782E952B083B440088E81D /* FeedbackEmailFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackEmailFormView.swift; sourceTree = "<group>"; };
 		E88A6CFE2ADD0FB300DE38A6 /* FriendCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendCell.swift; sourceTree = "<group>"; };
+		E89042EC2B2BAABB00A1B061 /* TTGroupPreset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTGroupPreset.swift; sourceTree = "<group>"; };
 		E893A26C2959859D004F7BC5 /* FriendsVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsVC.swift; sourceTree = "<group>"; };
 		E893A26E29598E2F004F7BC5 /* TTEmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTEmptyStateView.swift; sourceTree = "<group>"; };
 		E893A272295A3C52004F7BC5 /* ProfileAndNameCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileAndNameCell.swift; sourceTree = "<group>"; };
@@ -395,6 +397,7 @@
 				E893A27D295A8793004F7BC5 /* TTGroup.swift */,
 				E865A7A82A1C108A00F105AA /* TTEvent.swift */,
 				E873C4622ADBC08000FB8ED6 /* TTCache.swift */,
+				E89042EC2B2BAABB00A1B061 /* TTGroupPreset.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -583,6 +586,7 @@
 				E8DC69AD2B0DC5D700F3D36F /* GroupPresetsView.swift in Sources */,
 				E8CEE2D32957C7C7000CD7FE /* TTTitledTextField.swift in Sources */,
 				E8CEE2CA2957B03C000CD7FE /* LoginVC.swift in Sources */,
+				E89042ED2B2BAABB00A1B061 /* TTGroupPreset.swift in Sources */,
 				E865A7AD2A1C80C800F105AA /* TTProfileImageView.swift in Sources */,
 				E8ECA5672AFA260600907813 /* SubscriptionPlanBadgeView.swift in Sources */,
 				E865A7F42A1FF30100F105AA /* SettingsView.swift in Sources */,

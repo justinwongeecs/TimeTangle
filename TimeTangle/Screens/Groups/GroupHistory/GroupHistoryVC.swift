@@ -186,11 +186,14 @@ class GroupHistoryCell: UITableViewCell {
     }
     
     private func configureCell() {
-        if let authorImageData = authorUser.profilePictureData, let image = UIImage(data: authorImageData) {
-            authorImageView.setImage(to: image)
-        } else {
-            authorImageView.setToDefaultImage()
+        authorUser.getProfilePictureUIImage { [weak self] image in
+            if let image = image {
+                self?.authorImageView.setImage(to: image)
+            } else {
+                self?.authorImageView.setToDefaultImage()
+            }
         }
+        
         authorImageView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(authorImageView)
         
