@@ -66,6 +66,10 @@ class GroupAggregateResultVC: DayViewController {
         dayView.reloadData()
     }
     
+    func getCurrentPresentedDate() -> Date {
+        return currentPresentedDate
+    }
+    
     private func configureStepperDayHeaderView() {
         //TODO: maybe subclass in the future?
         view.addSubview(stepperDayHeaderView)

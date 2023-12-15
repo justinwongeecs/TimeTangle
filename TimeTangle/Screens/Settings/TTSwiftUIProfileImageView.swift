@@ -12,7 +12,7 @@ struct TTSwiftUIProfileImageView: View {
     
     var user: TTUser?
     var name: String?
-    var image: UIImage?
+    @State var image: UIImage?
     var size: CGFloat
     
     var initials: String? {
@@ -30,29 +30,38 @@ struct TTSwiftUIProfileImageView: View {
     }
     
     var body: some View {
-        if let profileImage = image {
-            Circle()
-                .stroke(.clear)
-                .overlay(
-                    Image(uiImage: profileImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .clipShape(Circle())
-                )
-                .frame(width: size, height: size)
-        } else if let initials = initials {
-            Circle()
-                .fill(.radialGradient(colors: backgroundColor, center: .center, startRadius: 1, endRadius: 100))
-                .frame(width: size * 0.75, height: size * 0.75)
-                .overlay(
-                    Text(initials)
-                        .font(.system(size: size * 0.35))
-                        .foregroundStyle(.white)
-                        .bold()
-                )
-        } else {
-            Image(systemName: "person.crop.circle")
-                .frame(width: size, height: size)
+        Group {
+            if let profileImage = image {
+                Circle()
+                    .stroke(.clear)
+                    .overlay(
+                        Image(uiImage: profileImage)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .clipShape(Circle())
+                    )
+                    .frame(width: size, height: size)
+            } else if let initials = initials {
+                Circle()
+                    .fill(.radialGradient(colors: backgroundColor, center: .center, startRadius: 1, endRadius: 100))
+                    .frame(width: size * 0.78, height: size * 0.78)
+                    .overlay(
+                        Text(initials)
+                            .font(.system(size: size * 0.35))
+                            .foregroundStyle(.white)
+                            .bold()
+                    )
+            } else {
+                Image(systemName: "person.crop.circle")
+                    .font(.system(size: size * 0.75))
+            }
+        }
+        .onAppear {
+            if image == nil, let user = user {
+                user.getProfilePictureUIImage { image in
+                    self.image = image
+                }
+            }
         }
     }
     

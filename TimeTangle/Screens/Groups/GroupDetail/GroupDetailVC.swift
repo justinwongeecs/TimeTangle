@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SwiftUI
 import CalendarKit
 import FirebaseFirestore
 
@@ -151,46 +152,18 @@ class GroupDetailVC: UIViewController {
     }
     
     @objc private func showAddUserModal() {
-        let destVC = AddUsersModalVC(group: group) { [weak self] in
-            guard let self = self else { return }
-            self.dismiss(animated: true)
-        } addUserCompletionHandler: { [weak self] user in
-            self?.addUserCompletionHandler(user: user)
-        }
-        
-        destVC.modalPresentationStyle = .overFullScreen
-        destVC.modalTransitionStyle = .crossDissolve
-        self.present(destVC, animated: true)
+        let addGroupUsersVC = UIHostingController(rootView: AddGroupUsersView(group: group) { [weak self] selectedFriends in
+            self?.addUsersCompletionHandler(users: selectedFriends)
+        })
+        present(addGroupUsersVC, animated: true)
     }
     
-    private func addUserCompletionHandler(user: TTUser) {
-        let updatedGroupFields = [
-            TTConstants.groupUsers: FieldValue.arrayUnion([user.id])
-        ]
-        
-        FirebaseManager.shared.updateGroup(for: self.group.code, with: updatedGroupFields) { [weak self] error in
-            guard let self = self else { return }
-            
-            if let error = error {
-                self.presentTTAlert(title: "Error updating group", message: error.rawValue, buttonTitle: "Ok")
-            } else {
-                //update added user groupcodes field
-                FirebaseManager.shared.updateUserData(for: user.id, with: [
-                    TTConstants.groupCodes: FieldValue.arrayUnion([self.group.code])
-                ]) { [weak self] error in
-                    guard let self = self else { return }
-                    if let error = error {
-                        self.presentTTAlert(title: "Cannot add user to group", message: error.rawValue, buttonTitle: "OK")
-                    } else {
-                        //add to group edit history
-                        self.addGroupHistory(of: .addedUserToGroup, after: user.getFullName())
-                        self.group.users.append(user.id)
-                        DispatchQueue.main.async {
-                            self.updateView()
-                        }
-                        self.dismiss(animated: true)
-                    }
-                }
+    private func addUsersCompletionHandler(users: [TTUser]) {
+        for user in users {
+            self.addGroupHistory(of: .addedUserToGroup, after: user.getFullName())
+            self.group.users.append(user.id)
+            DispatchQueue.main.async {
+                self.updateView()
             }
         }
     }
@@ -435,13 +408,24 @@ class GroupDetailVC: UIViewController {
                         self.addGroupHistory(of: .changedStartingDate, before: previousStartingDate.formatted(with: dateFormat), after: self.group.startingDate.formatted(with: dateFormat))
                         
                         //If new group starting date is "greater" than prior, jump to the new date (irrespective of the ending date)
-                        if group.startingDate > previousEndingDate {
-                            groupAggregateVC.move(to: group.startingDate)
+                        if group.startingDate > groupAggregateVC.getCurrentPresentedDate() {
+                            DispatchQueue.main.async {
+                                self.groupAggregateVC.move(to: self.group.startingDate)
+                                self.groupAggregateVC.reloadData()
+                            }
                         }
                     }
                     
                     if group.endingDate != previousEndingDate {
                         self.addGroupHistory(of: .changedEndingDate, before: previousEndingDate.formatted(with: dateFormat), after: self.group.endingDate.formatted(with: dateFormat))
+                        
+                        //If new group ending date is "less" than prior, jump to the new date (irrespective of the starting date)
+                        if group.endingDate < groupAggregateVC.getCurrentPresentedDate() {
+                            DispatchQueue.main.async {
+                                self.groupAggregateVC.move(to: self.group.startingDate)
+                                self.groupAggregateVC.reloadData()
+                            }
+                        }
                     }
             
                     DispatchQueue.main.async {

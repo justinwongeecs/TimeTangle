@@ -77,6 +77,15 @@ struct SettingsLockedView: ViewModifier {
     }
 }
 
+struct NoResultsStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .foregroundStyle(.secondary).bold()
+            .font(.title2)
+    }
+}
+
+//MARK: - View Extension
 extension View {
     func centered() -> some View {
         modifier(CenterView())
@@ -108,5 +117,9 @@ extension View {
     
     func applySettingsLockedStyle(isSubscriptionPro: Bool) -> some View {
         modifier(SettingsLockedView(isSubscriptionPro: isSubscriptionPro))
+    }
+    
+    func applyNoResultsStyle() -> some View {
+        modifier(NoResultsStyle())
     }
 }

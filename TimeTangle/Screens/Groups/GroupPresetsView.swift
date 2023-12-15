@@ -360,13 +360,14 @@ struct GroupPresetDisclosureGroup: View {
 //MARK: - GroupPresetMemberView
 struct GroupPresetMemberView: View {
     var member: TTUser
+    var width: CGFloat? = 250
     @State private var memberUIImage: UIImage?
     
     var body: some View {
         RoundedRectangle(cornerRadius: 10)
             .fill(.indigo.opacity(0.3).gradient)
             .stroke(.indigo, lineWidth: 1)
-            .frame(width: 250, height: 50)
+            .frame(width: width, height: 50)
             .overlay(
                 HStack {
                     TTSwiftUIProfileImageView(user: member, image: memberUIImage, size: TTConstants.profileImageViewInCellHeightAndWidth)

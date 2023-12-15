@@ -109,8 +109,7 @@ struct GroupPresetZoomedView: View {
                 VStack {
                     Spacer()
                     Text("No Matching Results")
-                        .foregroundStyle(.secondary).bold()
-                        .font(.title3)
+                        .applyNoResultsStyle()
                     Spacer()
                 }
             } else {

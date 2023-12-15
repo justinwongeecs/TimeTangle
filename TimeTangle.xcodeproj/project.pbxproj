@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		E80A7F842B2C41ED001F99BE /* GroupHistoryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E80A7F832B2C41ED001F99BE /* GroupHistoryCell.swift */; };
+		E80A7F862B2CD7C4001F99BE /* AddGroupUsersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E80A7F852B2CD7C4001F99BE /* AddGroupUsersView.swift */; };
 		E8188FC52A149160005AA0BF /* UIView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8188FC42A149160005AA0BF /* UIView+Ext.swift */; };
 		E8188FC72A149EA8005AA0BF /* UIImage+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8188FC62A149EA8005AA0BF /* UIImage+Ext.swift */; };
 		E8188FC92A14C641005AA0BF /* UITableView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8188FC82A14C641005AA0BF /* UITableView+Ext.swift */; };
@@ -74,7 +75,6 @@
 		E8CEE2B529579D3A000CD7FE /* CreateGroupVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CEE2B429579D3A000CD7FE /* CreateGroupVC.swift */; };
 		E8CEE2B729579DE3000CD7FE /* TTTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CEE2B629579DE3000CD7FE /* TTTextField.swift */; };
 		E8CEE2B92957A0C7000CD7FE /* TTButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CEE2B82957A0C7000CD7FE /* TTButton.swift */; };
-		E8CEE2BB2957A89C000CD7FE /* AddUsersModalVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CEE2BA2957A89C000CD7FE /* AddUsersModalVC.swift */; };
 		E8CEE2C82957AFF0000CD7FE /* FirebaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CEE2C72957AFF0000CD7FE /* FirebaseManager.swift */; };
 		E8CEE2CA2957B03C000CD7FE /* LoginVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CEE2C92957B03C000CD7FE /* LoginVC.swift */; };
 		E8CEE2CC2957B102000CD7FE /* TTTitleLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8CEE2CB2957B102000CD7FE /* TTTitleLabel.swift */; };
@@ -102,6 +102,7 @@
 
 /* Begin PBXFileReference section */
 		E80A7F832B2C41ED001F99BE /* GroupHistoryCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupHistoryCell.swift; sourceTree = "<group>"; };
+		E80A7F852B2CD7C4001F99BE /* AddGroupUsersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddGroupUsersView.swift; sourceTree = "<group>"; };
 		E8188FC42A149160005AA0BF /* UIView+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Ext.swift"; sourceTree = "<group>"; };
 		E8188FC62A149EA8005AA0BF /* UIImage+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+Ext.swift"; sourceTree = "<group>"; };
 		E8188FC82A14C641005AA0BF /* UITableView+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITableView+Ext.swift"; sourceTree = "<group>"; };
@@ -162,7 +163,6 @@
 		E8CEE2B429579D3A000CD7FE /* CreateGroupVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateGroupVC.swift; sourceTree = "<group>"; };
 		E8CEE2B629579DE3000CD7FE /* TTTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTTextField.swift; sourceTree = "<group>"; };
 		E8CEE2B82957A0C7000CD7FE /* TTButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTButton.swift; sourceTree = "<group>"; };
-		E8CEE2BA2957A89C000CD7FE /* AddUsersModalVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddUsersModalVC.swift; sourceTree = "<group>"; };
 		E8CEE2C72957AFF0000CD7FE /* FirebaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseManager.swift; sourceTree = "<group>"; };
 		E8CEE2C92957B03C000CD7FE /* LoginVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginVC.swift; sourceTree = "<group>"; };
 		E8CEE2CB2957B102000CD7FE /* TTTitleLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TTTitleLabel.swift; sourceTree = "<group>"; };
@@ -222,7 +222,7 @@
 			isa = PBXGroup;
 			children = (
 				E8D004A52963B02C00907A64 /* GroupUsersVC.swift */,
-				E8CEE2BA2957A89C000CD7FE /* AddUsersModalVC.swift */,
+				E80A7F852B2CD7C4001F99BE /* AddGroupUsersView.swift */,
 			);
 			path = GroupUsers;
 			sourceTree = "<group>";
@@ -570,10 +570,10 @@
 				E87569042AF2B9A5007E7220 /* SettingsSubscriptionView.swift in Sources */,
 				E81D25062A145217003C65C5 /* UILabel+Ext.swift in Sources */,
 				E873BCD92964E4200015AE99 /* GroupAggregateResultVC.swift in Sources */,
-				E8CEE2BB2957A89C000CD7FE /* AddUsersModalVC.swift in Sources */,
 				E8D004A92963B82B00907A64 /* GroupHistoryVC.swift in Sources */,
 				E8CEE2E129582A2E000CD7FE /* TTUser.swift in Sources */,
 				E8CEE2B529579D3A000CD7FE /* CreateGroupVC.swift in Sources */,
+				E80A7F862B2CD7C4001F99BE /* AddGroupUsersView.swift in Sources */,
 				E893A26F29598E2F004F7BC5 /* TTEmptyStateView.swift in Sources */,
 				E8188FC72A149EA8005AA0BF /* UIImage+Ext.swift in Sources */,
 				E865A7FA2A2029A400F105AA /* TTSwiftUIProfileImageView.swift in Sources */,
