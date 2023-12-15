@@ -11,22 +11,53 @@ import FirebaseFirestore
 class GroupUsersVC: UIViewController {
     
     private var group: TTGroup!
-    private var groupUsers: [TTUser]!
+    private var groupUsers = [TTUser]()
+    private var groupUsersCache: TTCache<String, TTUser>!
     private let activityIndicator = UIActivityIndicatorView(style: .medium)
     private let usersTableView = UITableView()
     private var usersNotVisible = [String]()
     
-    weak var delegate: GroupUpdateDelegate? 
+    weak var delegate: GroupUpdateDelegate?
     
-    init(group: TTGroup, groupUsers: [TTUser], usersNotVisible: [String]) {
+    init(group: TTGroup, groupUsersCache: TTCache<String, TTUser>, usersNotVisible: [String]) {
         self.group = group
-        self.groupUsers = groupUsers
         self.usersNotVisible = usersNotVisible
+        self.groupUsersCache = groupUsersCache
         super.init(nibName: nil, bundle: nil)
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    func fetchGroupUsers() {
+        groupUsers.removeAll()
+        updateVCTitle()
+        
+        for userID in group.users {
+            if let user = groupUsersCache.value(forKey: userID) {
+                groupUsers.append(user)
+
+                DispatchQueue.main.async {
+                    self.usersTableView.reloadData()
+                }
+            } else {
+                FirebaseManager.shared.fetchUserDocumentData(with: userID) { [weak self] result in
+                    guard let self = self else { return }
+                    switch result {
+                    case .success(let ttUser):
+                        self.groupUsers.append(ttUser)
+                        self.groupUsersCache.insert(ttUser, forKey: userID)
+
+                        DispatchQueue.main.async {
+                            self.usersTableView.reloadData()
+                        }
+                    case .failure(let error):
+                        self.presentTTAlert(title: "Cannot Fetch User", message: error.rawValue, buttonTitle: "OK")
+                    }
+                }
+            }
+        }
     }
     
     override func viewDidLoad() {
@@ -35,6 +66,8 @@ class GroupUsersVC: UIViewController {
         view.backgroundColor = .systemBackground
         configureActivityIndicator()
         configureUsersTableView()
+        
+        fetchGroupUsers()
     }
 
     private func configureActivityIndicator() {
@@ -71,14 +104,14 @@ class GroupUsersVC: UIViewController {
     private func sortUsersByAdminAndName() {
         //Need to create a copy to avoid "simultaneous access error"
         var users = groupUsers
-        users?.sort(by: {
+        users.sort(by: {
             self.group.doesContainsAdmin(for: $0.id) && !self.group.doesContainsAdmin(for: $1.id)
         })
         groupUsers = users
     }
     
     private func updateVCTitle() {
-        title = "\(groupUsers.count) \(groupUsers.count > 1 ? "Members" : "Member")"
+        title = "\(group.users.count) \(group.users.count > 1 ? "Members" : "Member")"
     }
 }
 
@@ -124,19 +157,19 @@ extension GroupUsersVC: UITableViewDelegate, UITableViewDataSource {
         usersTableView.setEditing(editing, animated: true)
     }
     
-    private func removeUser(for id: String, completion: @escaping((Bool) -> Void)) {
-        let alertController = UIAlertController(title: "Delete User?", message: "Are you sure you want to remove \(id)", preferredStyle: .alert)
+    private func removeUser(for user: TTUser, completion: @escaping((Bool) -> Void)) {
+        let alertController = UIAlertController(title: "Delete User?", message: "Are you sure you want to remove \(user.getFullName())?", preferredStyle: .alert)
         
         let removeAction = UIAlertAction(title: "Remove", style: .destructive) { [weak self] _ in
             guard let self = self else { return }
             let newGroupData = [
                 TTConstants.groupUsers:
-                    FieldValue.arrayRemove([id])
+                    FieldValue.arrayRemove([user.id])
             ]
             
-            if let removeIndex = group.users.firstIndex(of: id), let delegate = delegate {
+            if let removeIndex = group.users.firstIndex(of: user.id), let delegate = delegate {
                 group.users.remove(at: removeIndex)
-                delegate.groupDidUpdate(for: group)
+                delegate.groupDidUpdate(for: group, showSaveOrCancel: false)
             }
             
             FirebaseManager.shared.updateGroup(for: self.group.code, with: newGroupData) { [weak self] error in
@@ -144,7 +177,7 @@ extension GroupUsersVC: UITableViewDelegate, UITableViewDataSource {
                 if let error = error {
                     self.presentTTAlert(title: "Cannot update group", message: error.rawValue, buttonTitle: "OK")
                 } else {
-                    FirebaseManager.shared.updateUserData(for: id, with: [
+                    FirebaseManager.shared.updateUserData(for: user.id, with: [
                         TTConstants.groupCodes: FieldValue.arrayRemove([self.group.code])
                     ]) { [weak self] error in
                         if let error = error {
@@ -200,7 +233,7 @@ extension GroupUsersVC: UITableViewDelegate, UITableViewDataSource {
             
             //GroupUpdateDelegate to update GroupDetailVC's group
             if let delegate = delegate {
-                delegate.groupDidUpdate(for: group)
+                delegate.groupDidUpdate(for: group, showSaveOrCancel: false)
             }
             
             FirebaseManager.shared.updateGroup(for: self.group.code, with: newGroupData) { [weak self] error in
@@ -239,10 +272,11 @@ extension GroupUsersVC: GroupUserCellDelegate {
     }
     
     func groupUserCellDidRemoveUser(for user: TTUser) {
-        removeUser(for: user.id) { [weak self] _ in
-            guard let self = self else { return }
+        removeUser(for: user) { [weak self] completion in
+            guard let self = self, completion == true else { return }
             if let groupUsersIndex = self.groupUsers.firstIndex(of: user) {
                 self.groupUsers.remove(at: groupUsersIndex)
+                delegate?.groupAddHistory(of: .removedUserFromGroup, before: nil, after: user.getFullName())
                 DispatchQueue.main.async {
                     self.updateVCTitle()
                     self.usersTableView.reloadData()

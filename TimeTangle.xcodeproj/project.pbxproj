@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E80A7F842B2C41ED001F99BE /* GroupHistoryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E80A7F832B2C41ED001F99BE /* GroupHistoryCell.swift */; };
 		E8188FC52A149160005AA0BF /* UIView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8188FC42A149160005AA0BF /* UIView+Ext.swift */; };
 		E8188FC72A149EA8005AA0BF /* UIImage+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8188FC62A149EA8005AA0BF /* UIImage+Ext.swift */; };
 		E8188FC92A14C641005AA0BF /* UITableView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8188FC82A14C641005AA0BF /* UITableView+Ext.swift */; };
@@ -100,6 +101,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		E80A7F832B2C41ED001F99BE /* GroupHistoryCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupHistoryCell.swift; sourceTree = "<group>"; };
 		E8188FC42A149160005AA0BF /* UIView+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Ext.swift"; sourceTree = "<group>"; };
 		E8188FC62A149EA8005AA0BF /* UIImage+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+Ext.swift"; sourceTree = "<group>"; };
 		E8188FC82A14C641005AA0BF /* UITableView+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITableView+Ext.swift"; sourceTree = "<group>"; };
@@ -411,6 +413,7 @@
 				E8B6BDC52A25B5CB00DAFF04 /* CreateRoomUserQueueCell.swift */,
 				E88A6CFE2ADD0FB300DE38A6 /* FriendCell.swift */,
 				E83146652AE0F6D700A5B250 /* GroupViewCell.swift */,
+				E80A7F832B2C41ED001F99BE /* GroupHistoryCell.swift */,
 			);
 			path = Cells;
 			sourceTree = "<group>";
@@ -576,6 +579,7 @@
 				E865A7FA2A2029A400F105AA /* TTSwiftUIProfileImageView.swift in Sources */,
 				E8CFC222295C183D006C23BE /* SearchFriendsResultController.swift in Sources */,
 				E8CFC227295D0836006C23BE /* JoinGroupVC.swift in Sources */,
+				E80A7F842B2C41ED001F99BE /* GroupHistoryCell.swift in Sources */,
 				E8188FC52A149160005AA0BF /* UIView+Ext.swift in Sources */,
 				E8CFC224295D065B006C23BE /* JoinRoomCodeTextField.swift in Sources */,
 				E8188FD32A1751D5005AA0BF /* CalendarModalCardVC.swift in Sources */,

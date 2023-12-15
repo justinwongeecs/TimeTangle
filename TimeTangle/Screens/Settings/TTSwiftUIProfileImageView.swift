@@ -46,7 +46,7 @@ struct TTSwiftUIProfileImageView: View {
                 .frame(width: size * 0.75, height: size * 0.75)
                 .overlay(
                     Text(initials)
-                        .font(.system(size: size * 0.3))
+                        .font(.system(size: size * 0.35))
                         .foregroundStyle(.white)
                         .bold()
                 )

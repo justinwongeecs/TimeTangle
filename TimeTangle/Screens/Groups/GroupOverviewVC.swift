@@ -67,9 +67,7 @@ class GroupOverviewVC: UIViewController {
         navigationController?.navigationBar.prefersLargeTitles = false
         
         configureGroupSummarySections()
-        DispatchQueue.main.async {
-            self.timesTableView.reloadData()
-        }
+        updateTimesTable()
     }
     
     private func configureVC() {
@@ -133,7 +131,7 @@ class GroupOverviewVC: UIViewController {
                 self.filterIndicatorView.layoutIfNeeded()
             }
             
-            timesTableView.reloadData()
+            updateTimesTable()
         }
     }
     
@@ -154,7 +152,7 @@ class GroupOverviewVC: UIViewController {
             }
             
             filterIndicatorViewLabel.text = "Show Open Intervals"
-            timesTableView.reloadData()
+            updateTimesTable()
         }
     }
     
@@ -176,8 +174,7 @@ class GroupOverviewVC: UIViewController {
                 self.filterIndicatorView.layoutIfNeeded()
             }
             
-            
-            timesTableView.reloadData()
+            updateTimesTable()
         }
     }
     
@@ -231,6 +228,16 @@ class GroupOverviewVC: UIViewController {
             timesTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
+    
+    private func updateTimesTable() {
+        if filteredGroupSummarySections.isEmpty {
+            timesTableView.backgroundView = TTEmptyStateView(message: "No Matching Results")
+        } else {
+            timesTableView.backgroundView = nil
+        }
+        
+        timesTableView.reloadData()
+    }
 }
 
 //MARK: - GroupOverviewVC TableView Delegates
@@ -277,7 +284,7 @@ extension GroupOverviewVC: UITableViewDelegate, UITableViewDataSource {
 extension GroupOverviewVC: GroupOverviewCellDelegate {
     func didSelectInterval(for event: TTEvent?) {
         selectedInterval = event
-        timesTableView.reloadData()
+        updateTimesTable()
     }
 }
 

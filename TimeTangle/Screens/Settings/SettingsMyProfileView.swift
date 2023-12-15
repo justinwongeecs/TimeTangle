@@ -186,6 +186,9 @@ struct SettingsMyProfileView: View {
                 }
             })
             Button("Cancel", role: .cancel) {
+                guard let currentUser = FirebaseManager.shared.currentUser else { return }
+                firstname = currentUser.firstname
+                lastname = currentUser.lastname
                 showChangeNameAlert.toggle()
             }
         }
@@ -215,7 +218,10 @@ struct SettingsMyProfileView: View {
                     showErrorAlert = true
                 }
             })
-            Button("Cancel", role: .cancel) {}
+            Button("Cancel", role: .cancel) {
+                guard let currentUser = FirebaseManager.shared.currentUser else { return }
+                email = currentUser.email
+            }
         }
     }
     
@@ -242,7 +248,10 @@ struct SettingsMyProfileView: View {
                     showErrorAlert = true
                 }
             })
-            Button("Cancel", role: .cancel) {}
+            Button("Cancel", role: .cancel) {
+                guard let currentUser = FirebaseManager.shared.currentUser else { return }
+                phoneNumber = currentUser.phoneNumber
+            }
         }
     }
     

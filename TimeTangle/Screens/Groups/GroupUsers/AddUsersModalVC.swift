@@ -19,9 +19,9 @@ class AddUsersModalVC: TTModalCardVC {
     private let friendsSearchBar = UISearchBar()
     private let filteredFriendsTableView = UITableView()
 
-    private var addUserCompletionHandler: (String) -> Void
+    private var addUserCompletionHandler: (TTUser) -> Void
     
-    init(group: TTGroup, closeButtonClosure: @escaping () -> Void, addUserCompletionHandler: @escaping (String) -> Void) {
+    init(group: TTGroup, closeButtonClosure: @escaping () -> Void, addUserCompletionHandler: @escaping (TTUser) -> Void) {
         self.group = group
         self.addUserCompletionHandler = addUserCompletionHandler
         super.init(closeButtonClosure: closeButtonClosure)
@@ -198,7 +198,7 @@ extension AddUsersModalVC: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedFriend = filteredFriends[indexPath.section]
-        addUserCompletionHandler(selectedFriend.id)
+        addUserCompletionHandler(selectedFriend)
     }
     
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {

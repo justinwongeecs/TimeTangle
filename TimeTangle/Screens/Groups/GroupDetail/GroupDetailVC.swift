@@ -10,7 +10,8 @@ import CalendarKit
 import FirebaseFirestore
 
 protocol GroupUpdateDelegate: AnyObject {
-    func groupDidUpdate(for group: TTGroup)
+    func groupDidUpdate(for group: TTGroup, showSaveOrCancel: Bool)
+    func groupAddHistory(of editType: TTGroupEditType, before: String?, after: String?)
     func groupUserVisibilityDidUpdate(for id: String)
 }
 
@@ -153,8 +154,8 @@ class GroupDetailVC: UIViewController {
         let destVC = AddUsersModalVC(group: group) { [weak self] in
             guard let self = self else { return }
             self.dismiss(animated: true)
-        } addUserCompletionHandler: { [weak self] id in
-            self?.addUserCompletionHandler(id: id)
+        } addUserCompletionHandler: { [weak self] user in
+            self?.addUserCompletionHandler(user: user)
         }
         
         destVC.modalPresentationStyle = .overFullScreen
@@ -162,9 +163,9 @@ class GroupDetailVC: UIViewController {
         self.present(destVC, animated: true)
     }
     
-    private func addUserCompletionHandler(id: String) {
+    private func addUserCompletionHandler(user: TTUser) {
         let updatedGroupFields = [
-            TTConstants.groupUsers: FieldValue.arrayUnion([id])
+            TTConstants.groupUsers: FieldValue.arrayUnion([user.id])
         ]
         
         FirebaseManager.shared.updateGroup(for: self.group.code, with: updatedGroupFields) { [weak self] error in
@@ -174,22 +175,20 @@ class GroupDetailVC: UIViewController {
                 self.presentTTAlert(title: "Error updating group", message: error.rawValue, buttonTitle: "Ok")
             } else {
                 //update added user groupcodes field
-                FirebaseManager.shared.updateUserData(for: id, with: [
+                FirebaseManager.shared.updateUserData(for: user.id, with: [
                     TTConstants.groupCodes: FieldValue.arrayUnion([self.group.code])
                 ]) { [weak self] error in
+                    guard let self = self else { return }
                     if let error = error {
-                        self?.presentTTAlert(title: "Cannot add user to group", message: error.rawValue, buttonTitle: "OK")
+                        self.presentTTAlert(title: "Cannot add user to group", message: error.rawValue, buttonTitle: "OK")
                     } else {
                         //add to group edit history
-                        self?.addGroupHistory(of: .addedUserToGroup, before: nil, after: id)
-                        self?.group.users.append(id)
-
+                        self.addGroupHistory(of: .addedUserToGroup, after: user.getFullName())
+                        self.group.users.append(user.id)
                         DispatchQueue.main.async {
-                            self?.updateView()
-                            self?.updateSaveOrCancelIsland()
+                            self.updateView()
                         }
-
-                        self?.dismiss(animated: true)
+                        self.dismiss(animated: true)
                     }
                 }
             }
@@ -235,21 +234,34 @@ class GroupDetailVC: UIViewController {
     @objc private func syncUserCalendar() {
         //Fetch current user's events within group time frame
         let ekManager = EventKitManager.shared
-        let userEventsWithinGroupRangeSet = Set(ekManager.getUserTTEvents(from: group.startingDate, to: group.endingDate))
-        let currGroupEventsSet = Set(group.events)
-        let unionGroupEvents = Array(currGroupEventsSet.union(userEventsWithinGroupRangeSet))
-
-        group.events = unionGroupEvents
-        updateGroupAggregateVC()
-    
-        let syncUserCalendarSaveOrCancelIsland = SaveOrCancelIsland(parentVC: self) { [weak self] in
-            self?.updateGroupEventsWithCurrentUserEvents(with: unionGroupEvents)
-            self?.addGroupHistory(of: .userSynced, before: nil, after: nil)
-        }
-        syncUserCalendarSaveOrCancelIsland.delegate = self 
-        view.addSubview(syncUserCalendarSaveOrCancelIsland)
         
-        syncUserCalendarSaveOrCancelIsland.present()
+        Task {
+            do {
+                try await ekManager.setupEventStore()
+                
+                let userEventsWithinGroupRangeSet = Set(ekManager.getUserTTEvents(from: group.startingDate, to: group.endingDate))
+                let currGroupEventsSet = Set(group.events)
+                let unionGroupEvents = Array(currGroupEventsSet.union(userEventsWithinGroupRangeSet))
+
+                group.events = unionGroupEvents
+                print("Group Events: \(unionGroupEvents)")
+                updateGroupAggregateVC()
+            
+                let syncUserCalendarSaveOrCancelIsland = SaveOrCancelIsland(parentVC: self) { [weak self] in
+                    print("Save Calendar")
+                    self?.updateGroupEventsWithCurrentUserEvents(with: unionGroupEvents)
+                    self?.addGroupHistory(of: .userSynced)
+                }
+                syncUserCalendarSaveOrCancelIsland.delegate = self
+                view.addSubview(syncUserCalendarSaveOrCancelIsland)
+                
+                syncUserCalendarSaveOrCancelIsland.present()
+            } catch {
+                let ac = UIAlertController(title: "Calendar Authorization Error", message: error.localizedDescription, preferredStyle: .alert)
+                ac.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
+                present(ac, animated: true)
+            }
+        }
     }
     
     private func updateGroupEventsWithCurrentUserEvents(with currUserEvents: [TTEvent]) {
@@ -312,7 +324,7 @@ class GroupDetailVC: UIViewController {
         endingDatePicker.date = group.endingDate
         endingDatePicker.isEnabled = !group.setting.lockGroupChanges
         endingDatePicker.minimumDate = group.setting.boundedStartDate
-        endingDatePicker.maximumDate = group.setting.boundedEndDate 
+        endingDatePicker.maximumDate = group.setting.boundedEndDate
     }
     
     private func configureSaveOrCancelIsland() {
@@ -337,7 +349,7 @@ class GroupDetailVC: UIViewController {
     
     //push new view controller to display list of members view
     @IBAction func clickedUsersCountButton(_ sender: UIButton) {
-        groupUsersVC = GroupUsersVC(group: group, groupUsers: groupMembers, usersNotVisible: usersNotVisible)
+        groupUsersVC = GroupUsersVC(group: group, groupUsersCache: groupsUsersCache, usersNotVisible: usersNotVisible)
         groupUsersVC.delegate = self
         navigationController?.pushViewController(groupUsersVC, animated: true)
     }
@@ -372,17 +384,17 @@ class GroupDetailVC: UIViewController {
         updateSaveOrCancelIsland()
     }
     
-    
     //Should be triggered after every group edit
-    private func addGroupHistory(of editType: TTGroupEditType, before: String?, after: String?) {
-        guard let currentUserID = FirebaseManager.shared.currentUser?.id else { return }
+    private func addGroupHistory(of editType: TTGroupEditType, before: String? = nil, after: String? = nil) {
+        guard let currentUser = FirebaseManager.shared.currentUser else { return }
+        
         let editDifference = TTGroupEditDifference(before: before, after: after)
-        let newGroupEdit = TTGroupEdit(author: currentUserID, createdDate: Date(), editDifference: editDifference, editType: editType)
+        let newGroupEdit = TTGroupEdit(author: currentUser.getFullName(), authorID: currentUser.id, createdDate: Date(), editDifference: editDifference, editType: editType)
         group.histories.append(newGroupEdit)
         do {
-            let newGroupHistory = try group.histories.arrayByAppending(newGroupEdit).map{ try Firestore.Encoder().encode($0) }
+            let newGroupHistory = try Firestore.Encoder().encode(newGroupEdit) 
             FirebaseManager.shared.updateGroup(for: group.code, with: [
-                TTConstants.groupHistories: newGroupHistory
+                TTConstants.groupHistories: FieldValue.arrayUnion([newGroupHistory])
             ]) { [weak self] error in
                 guard let error = error else { return }
                 self?.presentTTAlert(title: "Cannot add group history", message: error.rawValue, buttonTitle: "Ok")
@@ -421,6 +433,11 @@ class GroupDetailVC: UIViewController {
                     
                     if group.startingDate != previousStartingDate {
                         self.addGroupHistory(of: .changedStartingDate, before: previousStartingDate.formatted(with: dateFormat), after: self.group.startingDate.formatted(with: dateFormat))
+                        
+                        //If new group starting date is "greater" than prior, jump to the new date (irrespective of the ending date)
+                        if group.startingDate > previousEndingDate {
+                            groupAggregateVC.move(to: group.startingDate)
+                        }
                     }
                     
                     if group.endingDate != previousEndingDate {
@@ -448,11 +465,14 @@ extension GroupDetailVC: GroupAggregateResultVCDelegate {
 }
 
 extension GroupDetailVC: GroupUpdateDelegate {
-    func groupDidUpdate(for group: TTGroup) {
+    func groupDidUpdate(for group: TTGroup, showSaveOrCancel: Bool = false) {
         self.group = group
         updateView()
         updateGroupAggregateVC()
-        updateSaveOrCancelIsland()
+        
+        if showSaveOrCancel {
+            updateSaveOrCancelIsland()
+        }
     }
     
     func groupUserVisibilityDidUpdate(for id: String) {
@@ -462,6 +482,10 @@ extension GroupDetailVC: GroupUpdateDelegate {
             usersNotVisible.append(id)
         }
         updateGroupAggregateVC()
+    }
+    
+    func groupAddHistory(of editType: TTGroupEditType, before: String? = nil, after: String? = nil) {
+        addGroupHistory(of: editType, before: before, after: after)
     }
 }
 

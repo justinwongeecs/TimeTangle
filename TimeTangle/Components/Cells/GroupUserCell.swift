@@ -126,7 +126,7 @@ class GroupUserCell: ProfileAndNameCell {
         guard let group = group, let user = user, let currentUser = FirebaseManager.shared.currentUser else { return }
         
         menuButton.setImage(UIImage(systemName: "ellipsis"), for: .normal)
-        menuButton.tintColor = .lightGray
+        menuButton.tintColor = .systemGreen
         menuButton.translatesAutoresizingMaskIntoConstraints = false
         addSubview(menuButton)
         
@@ -172,6 +172,4 @@ class GroupUserCell: ProfileAndNameCell {
             menuButton.widthAnchor.constraint(equalToConstant: 20)
         ])
     }
-    
-    
 }

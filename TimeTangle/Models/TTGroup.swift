@@ -38,6 +38,7 @@ struct TTGroup: Codable, Equatable, Hashable {
 //MARK: - TTGroupEdit
 struct TTGroupEdit: Codable, Hashable {
     var author: String
+    var authorID: String
     var createdDate: Date
     var editDifference: TTGroupEditDifference
     var editType: TTGroupEditType
@@ -45,6 +46,7 @@ struct TTGroupEdit: Codable, Hashable {
     var dictionary: [String: Any] {
          return [
             "author": author,
+            "authorID": authorID,
             "createdDate": createdDate,
             "editDifference": editDifference,
             "editType": editType
@@ -58,6 +60,7 @@ struct TTGroupEdit: Codable, Hashable {
     
     enum TTGroupEditType: String, Hashable {
         case addedUserToGroup
+        case removedUserFromGroup
         case changedStartingDate
         case changedEndingDate
         case userSynced
@@ -67,6 +70,7 @@ struct TTGroupEdit: Codable, Hashable {
             get {
                 switch self {
                 case .addedUserToGroup: return "addedUserToGroup"
+                case .removedUserFromGroup: return "removedUserFromGroup"
                 case .changedStartingDate: return "changedStartingDate"
                 case .changedEndingDate: return "changedEndingDate"
                 case .userSynced: return "userSynced"
@@ -79,10 +83,14 @@ struct TTGroupEdit: Codable, Hashable {
             switch editType {
             case "addedUserToGroup":
                 return .addedUserToGroup
+            case "removedUserFromGroup":
+                return .removedUserFromGroup
             case "changedStartingDate":
                 return .changedStartingDate
             case "changedEndingDate":
                 return .changedEndingDate
+            case "userSynced":
+                return .userSynced
             default:
                 return .none
             }

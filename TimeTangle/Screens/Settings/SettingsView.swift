@@ -253,7 +253,7 @@ struct SettingsProfileHeaderView: View {
     var body: some View {
         NavigationLink(destination: SettingsMyProfileView()) {
             HStack(spacing: 20) {
-                TTSwiftUIProfileImageView(user: FirebaseManager.shared.currentUser, image: profileImage, size: 100)
+                TTSwiftUIProfileImageView(user: FirebaseManager.shared.currentUser, image: profileImage, size: 120)
                 VStack(alignment: .leading) {
                     Text(name)
                         .multilineTextAlignment(.leading)

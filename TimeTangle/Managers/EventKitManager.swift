@@ -10,23 +10,74 @@ import EventKit
 import FirebaseFirestore
 import CalendarKit
 
+//MARK: - TTEventStoreError
+enum TTEventStoreError: Error {
+    case denied
+    case restricted
+    case unknown
+    case upgrade
+}
+
+extension TTEventStoreError: LocalizedError {
+    var errorDescription: String? {
+        switch self {
+        case .denied:
+            return NSLocalizedString("The app doesn't have permission to Calendar in Settings.", comment: "Access denied")
+         case .restricted:
+            return NSLocalizedString("This device doesn't allow access to Calendar.", comment: "Access restricted")
+        case .unknown:
+            return NSLocalizedString("An unknown error occured.", comment: "Unknown error")
+        case .upgrade:
+            let access = "The app has write-only access to Calendar in Settings."
+            let update = "Please grant it full access so the app can fetch and delete your events."
+            return NSLocalizedString("\(access) \(update)", comment: "Upgrade to full access")
+        }
+    }
+}
+
+
+//MARK: - EventKitManager
 class EventKitManager {
     static let shared = EventKitManager()
     var store = EKEventStore()
+    var authorizationStatus: EKAuthorizationStatus
     
     init() {
-        store.requestFullAccessToEvents { granted, error in
-            //            guard let _ = error, granted == false else {
-            //                //listen to calendar event changes
-            ////                NotificationCenter.default.addObserver(self, selector: Selector("storeChanged:"), name: .EKEventStoreChanged, object: self?.store)
-            //                return
-            //            }
+        authorizationStatus = EKEventStore.authorizationStatus(for: .event)
+    }
+    
+    func setupEventStore() async throws {
+        let response = try await verifyAuthorizationStatus()
+        authorizationStatus = EKEventStore.authorizationStatus(for: .event)
+    }
+    
+    private func verifyAuthorizationStatus() async throws -> Bool {
+        let status = EKEventStore.authorizationStatus(for: .event)
+        switch status {
+        case .notDetermined:
+            return try await requestFullAccess()
+        case .restricted:
+            throw TTEventStoreError.restricted
+        case .denied:
+            throw TTEventStoreError.denied
+        case .fullAccess:
+            return true
+        case .writeOnly:
+            throw TTEventStoreError.upgrade
+        @unknown default:
+            throw TTEventStoreError.unknown
+        }
+
+    }
+
+    private func requestFullAccess() async throws -> Bool {
+        if #available(iOS 17.0, *) {
+            return try await store.requestFullAccessToEvents()
+        } else {
+            // Fall back on earlier versions.
+            return try await store.requestAccess(to: .event)
         }
     }
-//
-//    @objc private func storeChanged() {
-//        updateUserTTEvents()
-//    }
     
     //Get the user events up to a certain date
     private func getCurrentEKEvents(from startDateBound: Date, to upperDateBound: Date) -> [EKEvent] {
@@ -53,6 +104,7 @@ class EventKitManager {
     func getUserTTEvents(from startDateBound: Date, to upperDateBound: Date) -> [TTEvent] {
         var ttEvents = [TTEvent]()
         let ekEvents = getCurrentEKEvents(from: startDateBound, to: upperDateBound)
+        print("EKEvents: \(ekEvents)")
         for ekEvent in ekEvents {
             if let convertedEKEventToTTEvent = convertEKEventToTTEvent(for: ekEvent) {
                 ttEvents.append(convertedEKEventToTTEvent)

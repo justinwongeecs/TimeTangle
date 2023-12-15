@@ -81,40 +81,30 @@ class GroupsVC: UIViewController {
             if groupModifications.count != 1 {
                 groups.removeAll()
             }
-      
+            
             for groupModification in groupModifications {
-                updateCurrentOccurrencesOfGroup(for: groupModification)
+                let modifiedGroup = groupModification.group
+                let removeIndex = groups.firstIndex(of: modifiedGroup)
+                
+                if groupModification.modificationType == .removed, let removeIndex = removeIndex {
+                    print("remove")
+                    groups.remove(at: removeIndex)
+                    groupsCache.removeValue(forKey: modifiedGroup.code)
+                    return
+                } else if groupModification.modificationType == .modified, let removeIndex = removeIndex {
+                    print("modified")
+                    groups[removeIndex] = modifiedGroup
+                } else if groupModification.modificationType == .added && !groups.contains(where: { $0.code == modifiedGroup.code }) {
+                    print("append")
+                    groups.append(modifiedGroup)
+                }
+                
+                groupsCache.removeValue(forKey: groupModification.group.code)
+                groupsCache.insert(groupModification.group, forKey: groupModification.group.code)
             }
+            
             updateGroupTableView()
         }
-    }
-    
-    private func updateCurrentOccurrencesOfGroup(for groupModification: TTGroupModification) {
-        let modifiedGroup = groupModification.group
-        let removeIndex = groups.firstIndex(of: modifiedGroup)
-        
-        if groupModification.modificationType == .removed, let removeIndex = removeIndex {
-            print("remove")
-            groups.remove(at: removeIndex)
-            groupsCache.removeValue(forKey: modifiedGroup.code)
-            return
-        } else if groupModification.modificationType == .modified, let removeIndex = removeIndex {
-            print("modified")
-            groups[removeIndex] = modifiedGroup
-
-            if var currentUpdatedGroupCodes = getUpdatedGroupCodesFromUserDefaults(), !currentUpdatedGroupCodes.contains(modifiedGroup.code) {
-                currentUpdatedGroupCodes.append(modifiedGroup.code)
-                saveUpdatedGroupCodesToUserDefaults(for: currentUpdatedGroupCodes)
-            } else {
-                saveUpdatedGroupCodesToUserDefaults(for: [modifiedGroup.code])
-            }
-        } else if groupModification.modificationType == .added && !groups.contains(where: { $0.code == modifiedGroup.code }) {
-            print("append")
-            groups.append(modifiedGroup)
-        }
-        
-        groupsCache.removeValue(forKey: groupModification.group.code)
-        groupsCache.insert(groupModification.group, forKey: groupModification.group.code)
     }
     
     @objc private func fetchGroups() {
@@ -162,14 +152,6 @@ class GroupsVC: UIViewController {
             self.groupsTable.reloadData()
         }
     }
-    
-    private func saveUpdatedGroupCodesToUserDefaults(for updatedGroupCodes: [String]) {
-        UserDefaults.standard.set(updatedGroupCodes, forKey: TTConstants.userDefaultsUpdatedGroupCodes)
-    }
-    
-    private func getUpdatedGroupCodesFromUserDefaults() -> [String]? {
-        return UserDefaults.standard.stringArray(forKey: TTConstants.userDefaultsUpdatedGroupCodes)
-    }
 }
 
 //MARK: - Delegates
@@ -200,13 +182,7 @@ extension GroupsVC: UITableViewDelegate, UITableViewDataSource {
         let cell = groupsTable.dequeueReusableCell(withIdentifier: GroupViewCell.reuseID) as! GroupViewCell
         let group = groups[indexPath.section]
         
-        var isGroupUpdated = false
-        
-        if let updatedGroupCodes = getUpdatedGroupCodesFromUserDefaults() {
-            isGroupUpdated = updatedGroupCodes.contains(group.code)
-        }
-        
-        cell.set(for: group, isUpdated: isGroupUpdated)
+        cell.set(for: group)
         
         return cell
     }
@@ -216,11 +192,6 @@ extension GroupsVC: UITableViewDelegate, UITableViewDataSource {
         let groupInfoVC = GroupDetailVC(group: selectedGroup, groupsUsersCache: groupUsersCache, nibName: "GroupDetailNib")
         selectedVCIndex = indexPath.section
     
-        if var currentUpdatedGroupCodes = getUpdatedGroupCodesFromUserDefaults(), let removeIndex = currentUpdatedGroupCodes.firstIndex(of: selectedGroup.code) {
-            currentUpdatedGroupCodes.remove(at: removeIndex)
-            saveUpdatedGroupCodesToUserDefaults(for: currentUpdatedGroupCodes)
-        }
-        
         updateGroupTableView()
         
         navigationController?.pushViewController(groupInfoVC, animated: true)

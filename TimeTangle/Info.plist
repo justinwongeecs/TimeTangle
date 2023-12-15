@@ -2,8 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>TimeTangle requires access to your Calendar events in order to add events to groups.</string>
 	<key>NSCalendarsUsageDescription</key>
-	<string>TimeTangle requires access to your Calendar events in order for app functionality</string>
+	<string>TimeTangle requires access to your Calendar events in order to add events to groups.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
