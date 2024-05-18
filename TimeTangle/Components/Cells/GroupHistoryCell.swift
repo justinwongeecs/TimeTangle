@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SwiftUI
 
 class GroupHistoryCell: UITableViewCell {
     static let reuseID = "GroupHistoryCell"
@@ -30,6 +31,25 @@ class GroupHistoryCell: UITableViewCell {
         self.authorUser = authorUser
         
         configureCell()
+        
+        authorUser.getProfilePictureUIImage { [weak self] image in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                let hostingController = UIHostingController(rootView: TTSwiftUIProfileImageView(user: authorUser, image: image, size: TTConstants.profileImageViewInCellHeightAndWidth * 1.3))
+                hostingController.view.backgroundColor = .clear
+                let profilePictureView = hostingController.view!
+                profilePictureView.translatesAutoresizingMaskIntoConstraints = false
+                self.authorImageView.subviews.forEach({ $0.removeFromSuperview() })
+                self.authorImageView.addSubview(profilePictureView)
+                
+                NSLayoutConstraint.activate([
+                    profilePictureView.topAnchor.constraint(equalTo: self.authorImageView.topAnchor),
+                    profilePictureView.leadingAnchor.constraint(equalTo: self.authorImageView.leadingAnchor),
+                    profilePictureView.trailingAnchor.constraint(equalTo: self.authorImageView.trailingAnchor),
+                    profilePictureView.bottomAnchor.constraint(equalTo: self.authorImageView.bottomAnchor)
+                ])
+            }
+        }
     }
     
     private func configureCell() {
@@ -104,8 +124,9 @@ class GroupHistoryCell: UITableViewCell {
             vMainContentStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -padding),
             vMainContentStackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -padding),
             
-            authorImageView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: padding),
-            authorImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
+            //TODO: - Check to see if these lines are neccessary or not? 
+//            authorImageView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: padding),
+//            authorImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
             authorImageView.widthAnchor.constraint(equalToConstant: TTConstants.profileImageViewInCellHeightAndWidth * 1.3),
             authorImageView.heightAnchor.constraint(equalToConstant: TTConstants.profileImageViewInCellHeightAndWidth * 1.3)
         ])

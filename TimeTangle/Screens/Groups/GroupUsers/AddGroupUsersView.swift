@@ -61,8 +61,7 @@ struct AddGroupUsersView: View {
                         dismiss()
                     }) {
                         Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 25))
-                            .foregroundStyle(.gray)
+                            .applyCloseButtonStyle()
                     }
                 }
                 
@@ -173,8 +172,7 @@ struct FriendSearchResultRowView: View {
     
     var body: some View {
         GroupPresetMemberView(member: filteredFriend, width: nil)
-            .listRowBackground(Color.clear)
-            .listRowSeparator(.hidden)
+     
             .onTapGesture {
                 withAnimation {
                     if !isTapped {

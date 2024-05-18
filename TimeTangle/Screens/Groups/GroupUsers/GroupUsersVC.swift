@@ -48,13 +48,13 @@ class GroupUsersVC: UIViewController {
                     case .success(let ttUser):
                         self.groupUsers.append(ttUser)
                         self.groupUsersCache.insert(ttUser, forKey: userID)
-
-                        DispatchQueue.main.async {
-                            self.usersTableView.reloadData()
-                        }
                     case .failure(let error):
                         self.presentTTAlert(title: "Cannot Fetch User", message: error.rawValue, buttonTitle: "OK")
                     }
+                }
+                
+                DispatchQueue.main.async {
+                    self.usersTableView.reloadData()
                 }
             }
         }

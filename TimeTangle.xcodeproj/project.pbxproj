@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		E80A7F842B2C41ED001F99BE /* GroupHistoryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E80A7F832B2C41ED001F99BE /* GroupHistoryCell.swift */; };
 		E80A7F862B2CD7C4001F99BE /* AddGroupUsersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E80A7F852B2CD7C4001F99BE /* AddGroupUsersView.swift */; };
+		E80A7F882B2FA6D7001F99BE /* GroupUserCalendarConfirmationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E80A7F872B2FA6D7001F99BE /* GroupUserCalendarConfirmationView.swift */; };
 		E8188FC52A149160005AA0BF /* UIView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8188FC42A149160005AA0BF /* UIView+Ext.swift */; };
 		E8188FC72A149EA8005AA0BF /* UIImage+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8188FC62A149EA8005AA0BF /* UIImage+Ext.swift */; };
 		E8188FC92A14C641005AA0BF /* UITableView+Ext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8188FC82A14C641005AA0BF /* UITableView+Ext.swift */; };
@@ -103,6 +104,7 @@
 /* Begin PBXFileReference section */
 		E80A7F832B2C41ED001F99BE /* GroupHistoryCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupHistoryCell.swift; sourceTree = "<group>"; };
 		E80A7F852B2CD7C4001F99BE /* AddGroupUsersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddGroupUsersView.swift; sourceTree = "<group>"; };
+		E80A7F872B2FA6D7001F99BE /* GroupUserCalendarConfirmationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupUserCalendarConfirmationView.swift; sourceTree = "<group>"; };
 		E8188FC42A149160005AA0BF /* UIView+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Ext.swift"; sourceTree = "<group>"; };
 		E8188FC62A149EA8005AA0BF /* UIImage+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+Ext.swift"; sourceTree = "<group>"; };
 		E8188FC82A14C641005AA0BF /* UITableView+Ext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITableView+Ext.swift"; sourceTree = "<group>"; };
@@ -473,6 +475,7 @@
 				E8B6BDB92A21D25F00DAFF04 /* GroupSettingsView.swift */,
 				E8DC69AC2B0DC5D700F3D36F /* GroupPresetsView.swift */,
 				E8EC873B2B1098980092084F /* GroupPresetZoomedView.swift */,
+				E80A7F872B2FA6D7001F99BE /* GroupUserCalendarConfirmationView.swift */,
 			);
 			path = Groups;
 			sourceTree = "<group>";
@@ -626,6 +629,7 @@
 				E8A6E03D2AF1A7C200A34599 /* StoreViewModel.swift in Sources */,
 				E8CEE2A12957956E000CD7FE /* AppDelegate.swift in Sources */,
 				E865A7F82A2007A700F105AA /* SettingsMyProfileView.swift in Sources */,
+				E80A7F882B2FA6D7001F99BE /* GroupUserCalendarConfirmationView.swift in Sources */,
 				E8D004A62963B02C00907A64 /* GroupUsersVC.swift in Sources */,
 				E893A26D2959859D004F7BC5 /* FriendsVC.swift in Sources */,
 				E873BCF3297910330015AE99 /* GroupOverviewVC.swift in Sources */,

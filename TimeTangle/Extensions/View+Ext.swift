@@ -85,6 +85,14 @@ struct NoResultsStyle: ViewModifier {
     }
 }
 
+struct CloseButtonStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .font(.system(size: 25))
+            .foregroundStyle(.gray)
+    }
+}
+
 //MARK: - View Extension
 extension View {
     func centered() -> some View {
@@ -121,5 +129,9 @@ extension View {
     
     func applyNoResultsStyle() -> some View {
         modifier(NoResultsStyle())
+    }
+    
+    func applyCloseButtonStyle() -> some View {
+        modifier(CloseButtonStyle())
     }
 }

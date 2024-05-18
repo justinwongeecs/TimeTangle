@@ -58,8 +58,7 @@ struct SubscriptionProPlanView: View {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: {dismiss()}) {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.gray.opacity(0.3))
-                            .font(.system(size: 25))
+                            .applyCloseButtonStyle()
                     }
                 }
             }

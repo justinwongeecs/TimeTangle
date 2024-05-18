@@ -13,6 +13,7 @@ struct TTEvent: FirestoreDataCompatible, Codable, Equatable, Hashable {
     var endDate: Date
     var isAllDay: Bool
     var createdBy: String
+    var eventIdentifier: String?
     
     var dictionary: [String: Any] {
         return [
@@ -20,7 +21,8 @@ struct TTEvent: FirestoreDataCompatible, Codable, Equatable, Hashable {
             "startDate": startDate,
             "endDate": endDate,
             "isAllDay": isAllDay,
-            "createdBy": createdBy
+            "createdBy": createdBy,
+            "eventIdentifier": eventIdentifier
         ]
     }
     

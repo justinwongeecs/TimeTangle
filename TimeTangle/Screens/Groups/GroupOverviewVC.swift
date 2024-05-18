@@ -322,10 +322,8 @@ class GroupOverviewCell: UITableViewCell {
         
         //TODO: Implement Ability for User to Choose if they want to display their event names
         let attrs = [NSAttributedString.Key.font : UIFont.boldSystemFont(ofSize: 15)]
-//        let boldString = NSMutableAttributedString(string: "\(event.name): ", attributes:attrs)
         
         let timeIntervalText = "\(timeFormatter.string(from: event.startDate)) - \(timeFormatter.string(from: event.endDate))"
-//        boldString.append(NSMutableAttributedString(string: timeIntervalText))
         groupNameAndTimeLabel.text = timeIntervalText
         
         //configure cell based on event.createdBy
@@ -356,6 +354,7 @@ class GroupOverviewCell: UITableViewCell {
                 switch result {
                 case .success(let ttUser):
                     self?.groupsUsersCache.insert(ttUser, forKey: id)
+                    self?.createdByUserLabel.text = ttUser.getFullName().uppercased()
                 case .failure(let error):
                     print(error.localizedDescription)
                 }

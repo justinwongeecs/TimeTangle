@@ -80,7 +80,7 @@ class EventKitManager {
     }
     
     //Get the user events up to a certain date
-    private func getCurrentEKEvents(from startDateBound: Date, to upperDateBound: Date) -> [EKEvent] {
+    func getCurrentEKEvents(from startDateBound: Date, to upperDateBound: Date) -> [EKEvent] {
         let calendar = Calendar.current
         //start date components (start of today)
         let startOfTodaysDate = calendar.startOfDay(for: startDateBound)
@@ -98,13 +98,19 @@ class EventKitManager {
     
     func convertEKEventToTTEvent(for event: EKEvent) -> TTEvent? {
         guard let currentUser = FirebaseManager.shared.currentUser else { return nil }
-        return TTEvent(name: event.title, startDate: event.startDate, endDate: event.endDate, isAllDay: event.isAllDay, createdBy: currentUser.id)
+        return TTEvent(name: event.title, startDate: event.startDate, endDate: event.endDate, isAllDay: event.isAllDay, createdBy: currentUser.id, eventIdentifier: event.eventIdentifier)
     }
     
-    func getUserTTEvents(from startDateBound: Date, to upperDateBound: Date) -> [TTEvent] {
+    func getUserTTEvents(from startDateBound: Date, to upperDateBound: Date, with userEKEvents: [EKEvent]? = nil) -> [TTEvent] {
         var ttEvents = [TTEvent]()
-        let ekEvents = getCurrentEKEvents(from: startDateBound, to: upperDateBound)
-        print("EKEvents: \(ekEvents)")
+        var ekEvents = [EKEvent]()
+        
+        if let userEKEvents = userEKEvents {
+            ekEvents = userEKEvents
+        } else {
+            ekEvents = getCurrentEKEvents(from: startDateBound, to: upperDateBound)
+        }
+       
         for ekEvent in ekEvents {
             if let convertedEKEventToTTEvent = convertEKEventToTTEvent(for: ekEvent) {
                 ttEvents.append(convertedEKEventToTTEvent)

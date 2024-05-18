@@ -81,8 +81,7 @@ struct GroupPresetsView: View {
                         dismiss()
                     }) {
                         Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 25))
-                            .foregroundStyle(.gray)
+                            .applyCloseButtonStyle()
                     }
                 }
                 
@@ -184,7 +183,7 @@ struct GroupPresetsEmptyView: View {
         }
     }
     
-    func animateEmoji() {
+    private func animateEmoji() {
         withAnimation(.easeInOut(duration: 1.0).repeatForever()) {
                 if self.isMovingUp {
                     self.emojiPosition += 50

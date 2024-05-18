@@ -8,6 +8,7 @@
 import UIKit
 import SwiftUI
 import CalendarKit
+import EventKit
 import FirebaseFirestore
 
 protocol GroupUpdateDelegate: AnyObject {
@@ -212,29 +213,52 @@ class GroupDetailVC: UIViewController {
             do {
                 try await ekManager.setupEventStore()
                 
-                let userEventsWithinGroupRangeSet = Set(ekManager.getUserTTEvents(from: group.startingDate, to: group.endingDate))
+                let userEKEventsWithinGroupRange = ekManager.getCurrentEKEvents(from: group.startingDate, to: group.endingDate)
+                let userEventsWithinGroupRangeSet = Set(ekManager.getUserTTEvents(from: group.startingDate, to: group.endingDate, with: userEKEventsWithinGroupRange))
                 let currGroupEventsSet = Set(group.events)
                 let unionGroupEvents = Array(currGroupEventsSet.union(userEventsWithinGroupRangeSet))
-
-                group.events = unionGroupEvents
-                print("Group Events: \(unionGroupEvents)")
-                updateGroupAggregateVC()
-            
-                let syncUserCalendarSaveOrCancelIsland = SaveOrCancelIsland(parentVC: self) { [weak self] in
-                    print("Save Calendar")
-                    self?.updateGroupEventsWithCurrentUserEvents(with: unionGroupEvents)
-                    self?.addGroupHistory(of: .userSynced)
-                }
-                syncUserCalendarSaveOrCancelIsland.delegate = self
-                view.addSubview(syncUserCalendarSaveOrCancelIsland)
                 
-                syncUserCalendarSaveOrCancelIsland.present()
+                
+                var userEKEventsHaventYetAddedToGroup = [EKEvent]()
+                let groupEventsEventIDs = group.events.map { $0.eventIdentifier ?? ""}
+                userEKEventsHaventYetAddedToGroup = userEKEventsWithinGroupRange.filter { !groupEventsEventIDs.contains($0.eventIdentifier) }
+                
+                //Show Confirmation Events View if there are events to confirm
+                if !userEKEventsWithinGroupRange.isEmpty {
+                    presentGroupUserCalendarConfirmationVC(ekEvents: userEKEventsHaventYetAddedToGroup)
+                } else {
+                    //Else present alert notifying the user there is no action needed/performed
+                    presentNoUserEventsToSyncAlert()
+                }
             } catch {
                 let ac = UIAlertController(title: "Calendar Authorization Error", message: error.localizedDescription, preferredStyle: .alert)
                 ac.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
                 present(ac, animated: true)
             }
         }
+    }
+    
+    private func presentGroupUserCalendarConfirmationVC(ekEvents: [EKEvent]) {
+        
+        let groupUserCalendarConfirmationVC = UIHostingController(rootView: GroupUserCalendarConfirmationView(events: ekEvents) { [weak self] confirmedEKEvents in
+            guard let self = self else { return }
+            
+            let confirmedTTEvents = confirmedEKEvents.compactMap{ EventKitManager.shared.convertEKEventToTTEvent(for: $0) }
+            let unionGroupEvents = Array(Set(confirmedTTEvents).union(Set(self.group.events)))
+            self.updateGroupEventsWithCurrentUserEvents(with: unionGroupEvents)
+            self.addGroupHistory(of: .userSynced)
+            self.group.events = unionGroupEvents
+            self.updateGroupAggregateVC()
+            dismiss(animated: true)
+        })
+        
+        present(groupUserCalendarConfirmationVC, animated: true)
+    }
+    
+    private func presentNoUserEventsToSyncAlert() {
+        let alert = UIAlertController(title: "No Events To Sync", message: "There are no events within the group's specified time frame to sync. Please choose different starting and or ending dates.", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .cancel, handler: nil))
+        present(alert, animated: true)
     }
     
     private func updateGroupEventsWithCurrentUserEvents(with currUserEvents: [TTEvent]) {
